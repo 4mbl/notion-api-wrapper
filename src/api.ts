@@ -27,7 +27,6 @@ export type PropOptions = {
   removeParent?: boolean;
   removeCustomProps?: string[];
   simplifyProps?: boolean;
-  fetchChildren?: boolean; // TODO
 };
 
 type QueryOptions = {
