@@ -15,16 +15,23 @@ export const notion = new Client({
   auth: process.env.NOTION_API_KEY,
 });
 
-export type PropRemoveOptions = {
+export type PropOptions = {
   removeUserIds?: boolean;
+  removePageTimestamps?: boolean;
   removeUrl?: boolean;
   removePublicUrl?: boolean;
-  customProps?: string[];
+  removeObjectType?: boolean;
+  removeId?: boolean;
+  removeCover?: boolean;
+  removeArchivedStatus?: boolean;
+  removeParent?: boolean;
+  removeCustomProps?: string[];
+  fetchChildren?: boolean; // TODO
 };
 
 type QueryOptions = {
   filter?: Filter[];
-  propRemoveOptions?: PropRemoveOptions;
+  propRemoveOptions?: PropOptions;
 };
 
 export async function queryDatabase(

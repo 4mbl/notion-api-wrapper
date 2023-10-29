@@ -1,17 +1,29 @@
-import { PropRemoveOptions } from './api';
+import { PropOptions } from './api';
 
-export function removeProps(data: any, options?: PropRemoveOptions) {
+export function removeProps(data: any, options?: PropOptions) {
   let propsToRemove: string[] = [];
   if (options?.removeUserIds)
     propsToRemove.push('created_by', 'last_edited_by');
   if (options?.removeUrl) propsToRemove.push('url');
   if (options?.removePublicUrl) propsToRemove.push('public_url');
-  if (options?.customProps) propsToRemove.push(...options.customProps);
+  if (options?.removePageTimestamps)
+    propsToRemove.push('created_time', 'last_edited_time');
+  if (options?.removeObjectType) propsToRemove.push('object');
+  if (options?.removeId) propsToRemove.push('id');
+  if (options?.removeCover) propsToRemove.push('cover');
+  if (options?.removeArchivedStatus) propsToRemove.push('archived');
+  if (options?.removeParent) propsToRemove.push('parent');
+
+  if (options?.removeCustomProps) {
+    for (const item of data ?? []) {
+      for (const prop of options.removeCustomProps ?? []) {
+        delete item.properties[prop];
+      }
+    }
+  }
 
   const removeFromObject = (obj: any) => {
-    for (const prop of propsToRemove) {
-      obj[prop] = null;
-    }
+    for (const prop of propsToRemove) delete obj[prop];
     return obj;
   };
 
