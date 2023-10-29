@@ -1,6 +1,6 @@
 {
   "name": "notion-api-wrapper",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "A simple wrapper for the Notion API",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -10,7 +10,7 @@
   },
   "scripts": {
     "build": "npm install && tsc",
-    "ci": "npm install && npm run build && npm run test",
+    "ci": "npm run build && npm run test",
     "test": "echo 'No tests yet'",
     "publish": "npm publish"
   },
