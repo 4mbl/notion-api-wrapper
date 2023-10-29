@@ -10,7 +10,6 @@
   },
   "scripts": {
     "build": "npm install && tsc",
-    "ci": "npm run build && npm run test",
     "test": "echo 'No tests yet'",
     "publish": "npm publish"
   },
