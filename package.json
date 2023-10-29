@@ -16,7 +16,7 @@
     "node-fetch": "^2.6.12",
     "tr46": "^4.1.1",
     "webidl-conversions": "^3.0.1",
-    "whatwg-url": "^5.0.0"
+    "whatwg-url": "^13.0.0"
   },
   "scripts": {
     "build": "tsc"
