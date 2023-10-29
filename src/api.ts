@@ -31,6 +31,8 @@ export type PropOptions = {
       }
     | undefined;
   simplifyProps?: boolean;
+  /** Makes the icon into an URL string no matter if it's an emoji or file. */
+  simpleIcon?: boolean;
 };
 
 type QueryOptions = {

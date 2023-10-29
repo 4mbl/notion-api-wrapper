@@ -1,8 +1,9 @@
-import { PropOptions } from './api';
+import { PropOptions, getIconUrl } from './api';
 
 export function processData(data: any, options?: PropOptions) {
   if (options?.remove) data = removeProps(data, options);
   if (options?.simplifyProps) data = simplifyProps(data, options);
+  if (options?.simpleIcon) data = simplifyIcons(data);
   return data;
 }
 
@@ -110,4 +111,12 @@ function simplifyProp(prop: any, options?: PropOptions) {
     default:
       return prop;
   }
+}
+
+function simplifyIcons(data: any): any {
+  for (const page of data) {
+    if (!page.icon) continue;
+    page.icon = getIconUrl(page).url;
+  }
+  return data;
 }
