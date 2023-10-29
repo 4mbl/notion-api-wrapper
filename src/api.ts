@@ -7,7 +7,7 @@ import {
   type PageObjectResponse,
   PartialDatabaseObjectResponse,
 } from '@notionhq/client/build/src/api-endpoints';
-import { removeProps as removeProps } from './util';
+import { removeProps as removeProps, simplifyProps } from './util';
 
 dotenv.config();
 
@@ -15,16 +15,23 @@ export const notion = new Client({
   auth: process.env.NOTION_API_KEY,
 });
 
-export type PropRemoveOptions = {
+export type PropOptions = {
   removeUserIds?: boolean;
+  removePageTimestamps?: boolean;
   removeUrl?: boolean;
   removePublicUrl?: boolean;
-  customProps?: string[];
+  removeObjectType?: boolean;
+  removeId?: boolean;
+  removeCover?: boolean;
+  removeArchivedStatus?: boolean;
+  removeParent?: boolean;
+  removeCustomProps?: string[];
+  simplifyProps?: boolean;
 };
 
 type QueryOptions = {
   filter?: Filter[];
-  propRemoveOptions?: PropRemoveOptions;
+  propRemoveOptions?: PropOptions;
 };
 
 export async function queryDatabase(
@@ -40,6 +47,9 @@ export async function queryDatabase(
   let data = await notion.databases.query(params);
   if (options?.propRemoveOptions) {
     data = removeProps(data, options.propRemoveOptions);
+  }
+  if (options?.propRemoveOptions?.simplifyProps) {
+    data = simplifyProps(data);
   }
   return data;
 }
