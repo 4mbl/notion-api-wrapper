@@ -9,7 +9,10 @@
     "dotenv": "^16.3.1"
   },
   "scripts": {
-    "build": "tsc"
+    "build": "tsc",
+    "ci": "npm run build && npm run test",
+    "test": "echo 'No tests yet'",
+    "publish": "npm publish"
   },
   "keywords": [
     "notion",
