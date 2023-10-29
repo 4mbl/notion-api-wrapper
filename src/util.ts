@@ -1,22 +1,28 @@
 import { PropOptions } from './api';
 
+export function processData(data: any, options?: PropOptions) {
+  if (options?.remove) data = removeProps(data, options);
+  if (options?.simplifyProps) data = simplifyProps(data, options);
+  return data;
+}
+
 export function removeProps(data: any, options?: PropOptions) {
   let propsToRemove: string[] = [];
-  if (options?.removeUserIds)
+  if (options?.remove?.userIds)
     propsToRemove.push('created_by', 'last_edited_by');
-  if (options?.removeUrl) propsToRemove.push('url');
-  if (options?.removePublicUrl) propsToRemove.push('public_url');
-  if (options?.removePageTimestamps)
+  if (options?.remove?.url) propsToRemove.push('url');
+  if (options?.remove?.publicUrl) propsToRemove.push('public_url');
+  if (options?.remove?.pageTimestamps)
     propsToRemove.push('created_time', 'last_edited_time');
-  if (options?.removeObjectType) propsToRemove.push('object');
-  if (options?.removeId) propsToRemove.push('id');
-  if (options?.removeCover) propsToRemove.push('cover');
-  if (options?.removeArchivedStatus) propsToRemove.push('archived');
-  if (options?.removeParent) propsToRemove.push('parent');
+  if (options?.remove?.objectType) propsToRemove.push('object');
+  if (options?.remove?.id) propsToRemove.push('id');
+  if (options?.remove?.cover) propsToRemove.push('cover');
+  if (options?.remove?.archivedStatus) propsToRemove.push('archived');
+  if (options?.remove?.parent) propsToRemove.push('parent');
 
-  if (options?.removeCustomProps) {
-    for (const item of data ?? []) {
-      for (const prop of options.removeCustomProps ?? []) {
+  if (options?.remove?.customProps) {
+    for (const item of data) {
+      for (const prop of options?.remove?.customProps) {
         delete item.properties[prop];
       }
     }
@@ -33,7 +39,7 @@ export function removeProps(data: any, options?: PropOptions) {
     data.results.forEach((item: any) => removeFromObject(item));
   }
 
-  return simplifyProps(data, options);
+  return data;
 }
 
 export function simplifyProps(data: any, options?: PropOptions) {
@@ -91,12 +97,12 @@ function simplifyProp(prop: any, options?: PropOptions) {
     case 'created_time':
       return prop.created_time;
     case 'created_by':
-      if (options?.removeUserIds) return null;
+      if (options?.remove?.userIds) return null;
       else return prop.created_by.id;
     case 'last_edited_time':
       return prop.last_edited_time;
     case 'last_edited_by':
-      if (options?.removeUserIds) return null;
+      if (options?.remove?.userIds) return null;
       else return prop.last_edited_by.id;
     case 'unique_id':
       return prop.unique_id.prefix + '-' + prop.unique_id.number;
