@@ -9,8 +9,7 @@
     "dotenv": "^16.3.1"
   },
   "scripts": {
-    "build": "npm install && tsc",
-    "test": "echo 'No tests yet'",
+    "build": "tsc",
     "publish": "npm publish"
   },
   "keywords": [
