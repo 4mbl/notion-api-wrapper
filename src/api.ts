@@ -95,33 +95,3 @@ export async function searchFromDatabase(
   });
   return processData(data.results, options?.propOptions);
 }
-
-function emojiToHex(emoji: string) {
-  const codePoints = Array.from(emoji).map((char) => char.codePointAt(0));
-  const hexCode = codePoints
-    .map((codePoint) => codePoint?.toString(16))
-    .join('');
-
-  return hexCode;
-}
-
-export function getIconUrl(page: PageObjectResponse | DatabaseObjectResponse) {
-  let iconUrl: string | undefined = undefined;
-  if (page.icon?.type === 'external') iconUrl = page.icon?.external.url;
-  else if (page.icon?.type === 'file') iconUrl = page.icon?.file.url;
-  else if (page.icon?.type === 'emoji') {
-    iconUrl = `https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/${emojiToHex(
-      page.icon.emoji
-    )}.png`;
-  }
-  return {
-    type: page.icon?.type,
-    url: iconUrl,
-  };
-}
-
-export function geDatabasetIdFromUrl(url: string): string | null {
-  const regex = /\/([^/?]+)\?/;
-  const match = url.match(regex);
-  return match?.[1] ? match[1] : null;
-}
