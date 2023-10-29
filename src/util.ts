@@ -33,10 +33,10 @@ export function removeProps(data: any, options?: PropOptions) {
     data.results.forEach((item: any) => removeFromObject(item));
   }
 
-  return data;
+  return simplifyProps(data, options);
 }
 
-export function simplifyProps(data: any) {
+export function simplifyProps(data: any, options?: PropOptions) {
   for (const item of data) {
     if (!item.properties) continue;
     for (const prop in item.properties) {
@@ -106,18 +106,19 @@ export function simplifyProps(data: any) {
           item[prop] = item.properties[prop].created_time;
           break;
         case 'created_by':
-          item[prop] = item.properties[prop].created_by.id;
+          if (options?.removeUserIds) delete item.properties[prop];
+          else item[prop] = item.properties[prop].created_by.id;
           break;
         case 'last_edited_time':
           item[prop] = item.properties[prop].last_edited_time;
           break;
         case 'last_edited_by':
-          item[prop] = item.properties[prop].last_edited_by.id;
+          if (options?.removeUserIds) delete item.properties[prop];
+          else item[prop] = item.properties[prop].last_edited_by.id;
           break;
         case 'unique_id':
-          item[prop] =
-            item.properties[prop].unique_id.prefix +
-            item.properties[prop].unique_id.number;
+          item[prop] = item.properties[prop].unique_id.prefix + '-';
+          item.properties[prop].unique_id.number;
           break;
 
         default:
