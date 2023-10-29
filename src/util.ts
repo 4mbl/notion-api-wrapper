@@ -40,94 +40,68 @@ export function simplifyProps(data: any, options?: PropOptions) {
   for (const item of data) {
     if (!item.properties) continue;
     for (const prop in item.properties) {
-      switch (item.properties[prop].type) {
-        case 'title':
-          item.title = item.properties[prop].title[0].plain_text;
-          break;
-        case 'rich_text':
-          item[prop] = item.properties[prop].rich_text[0]?.plain_text;
-          break;
-        case 'number':
-          item[prop] = item.properties[prop].number;
-          break;
-        case 'select':
-          item[prop] = item.properties[prop].select?.name;
-          break;
-        case 'multi_select':
-          item[prop] = item.properties[prop].multi_select?.map(
-            (option: any) => option.name
-          );
-          break;
-        case 'status':
-          item[prop] = item.properties[prop].status.name;
-          break;
-        case 'date':
-          item[prop] = {
-            start: item.properties[prop].date?.start,
-            end: item.properties[prop].date?.end,
-          };
-          break;
-        case 'people':
-          item[prop] = item.properties[prop].people?.map(
-            (person: any) => person.id
-          );
-          break;
-        case 'files':
-          item[prop] = item.properties[prop].files?.map(
-            (file: any) => file.file.url
-          );
-          break;
-        case 'checkbox':
-          item[prop] = item.properties[prop].checkbox;
-          break;
-        case 'url':
-          item[prop] = item.properties[prop].url;
-          break;
-        case 'email':
-          item[prop] = item.properties[prop].email;
-          break;
-        case 'phone_number':
-          item[prop] = item.properties[prop].phone_number;
-          break;
-        case 'formula':
-          item[prop] = item.properties[prop].formula?.string;
-          break;
-        case 'relation':
-          item[prop] = item.properties[prop].relation?.map(
-            (relation: any) => relation.id
-          );
-          break;
-        case 'rollup':
-          item[prop] = item.properties[prop].rollup?.array?.map(
-            (relation: any) => relation.id
-          );
-          break;
-        case 'created_time':
-          item[prop] = item.properties[prop].created_time;
-          break;
-        case 'created_by':
-          if (options?.removeUserIds) delete item.properties[prop];
-          else item[prop] = item.properties[prop].created_by.id;
-          break;
-        case 'last_edited_time':
-          item[prop] = item.properties[prop].last_edited_time;
-          break;
-        case 'last_edited_by':
-          if (options?.removeUserIds) delete item.properties[prop];
-          else item[prop] = item.properties[prop].last_edited_by.id;
-          break;
-        case 'unique_id':
-          item[prop] = item.properties[prop].unique_id.prefix + '-';
-          item.properties[prop].unique_id.number;
-          break;
-
-        default:
-          continue;
-      }
-
+      item[prop] = simplifyProp(item.properties[prop], options);
       delete item.properties[prop];
       if (Object.keys(item.properties).length === 0) delete item.properties;
     }
   }
   return data;
+}
+
+function simplifyProp(prop: any, options?: PropOptions) {
+  switch (prop.type) {
+    case 'title':
+      return prop.title[0].plain_text;
+    case 'rich_text':
+      return prop.rich_text[0]?.plain_text;
+    case 'number':
+      return prop.number;
+    case 'select':
+      return prop.select?.name;
+    case 'multi_select':
+      return prop.multi_select?.map((option: any) => option.name);
+    case 'status':
+      return prop.status.name;
+    case 'date':
+      return {
+        start: prop.date?.start,
+        end: prop.date?.end,
+      };
+    case 'people':
+      return prop.people?.map((person: any) => person.id);
+    case 'files':
+      return prop.files?.map((file: any) => file.file.url);
+    case 'checkbox':
+      return prop.checkbox;
+    case 'url':
+      return prop.url;
+    case 'email':
+      return prop.email;
+    case 'phone_number':
+      return prop.phone_number;
+    case 'formula':
+      return prop.formula?.string;
+    case 'relation':
+      return prop.relation?.map((relation: any) => relation.id);
+    case 'rollup':
+      const rollups = prop.rollup?.array?.map((item: any) =>
+        simplifyProp(item, options)
+      );
+      return rollups.flat(Infinity);
+    case 'created_time':
+      return prop.created_time;
+    case 'created_by':
+      if (options?.removeUserIds) return null;
+      else return prop.created_by.id;
+    case 'last_edited_time':
+      return prop.last_edited_time;
+    case 'last_edited_by':
+      if (options?.removeUserIds) return null;
+      else return prop.last_edited_by.id;
+    case 'unique_id':
+      return prop.unique_id.prefix + '-' + prop.unique_id.number;
+
+    default:
+      return prop;
+  }
 }
