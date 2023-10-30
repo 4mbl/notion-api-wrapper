@@ -153,4 +153,8 @@ export type Filter =
   | {
       property?: string;
       status?: StatusFilter;
+    }
+  | {
+      property?: string;
+      title?: RichTextFilter;
     };
