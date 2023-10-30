@@ -49,8 +49,11 @@ export async function queryDatabase(
     database_id: id,
     start_cursor: nextCursor,
   };
-  if (options) params = { ...params, ...options.filter };
-  const data = await notion.databases.query(params);
+
+  const data = await notion.databases.query({
+    ...params,
+    filter: options?.filter as any,
+  });
   return processData(data.results, options?.propOptions);
 }
 
