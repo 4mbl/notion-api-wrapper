@@ -22,7 +22,7 @@ export class FilterBuilder {
     }
 
     return {
-      [operator]: this.filters,
+      [operator.toLowerCase()]: this.filters,
     };
   }
 }
