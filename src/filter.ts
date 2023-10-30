@@ -95,6 +95,12 @@ export interface RichTextFilter {
   starts_with?: string;
 }
 
+export interface RollupFilter {
+  any?: Object;
+  every?: Object;
+  none?: Object;
+}
+
 export interface SelectFilter {
   equals?: string;
   does_not_equal?: string;
@@ -107,6 +113,15 @@ export interface StatusFilter {
   does_not_equal?: string;
   is_empty?: true;
   is_not_empty?: true;
+}
+
+export interface IdFilter {
+  does_not_equal?: number;
+  equals?: number;
+  greater_than?: number;
+  greater_than_or_equal_to?: number;
+  less_than?: number;
+  less_than_or_equal_to?: number;
 }
 
 export type Filter =
@@ -148,9 +163,26 @@ export type Filter =
     }
   | {
       property?: string;
+      rollup?: RollupFilter;
+    }
+  | {
+      property?: string;
       select?: SelectFilter;
     }
   | {
       property?: string;
       status?: StatusFilter;
+    }
+  | {
+      property?: string;
+      title?: RichTextFilter;
+    }
+  | {
+      timestamp?: 'created_time' | 'last_edited_time';
+      created_time?: DateFilter;
+      last_edited_time?: DateFilter;
+    }
+  | {
+      property?: string;
+      unique_id?: IdFilter;
     };
