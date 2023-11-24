@@ -9,6 +9,7 @@
     "dotenv": "^16.3.1"
   },
   "scripts": {
+    "preinstall": "npx -y only-allow pnpm",
     "build": "tsc",
     "publish": "npm publish"
   },
