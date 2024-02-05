@@ -136,8 +136,8 @@ export function emojiToHex(emoji: string) {
 
 export function getIconUrl(page: PageObjectResponse | DatabaseObjectResponse) {
   let iconUrl: string | undefined = undefined;
-  if (page.icon?.type === 'external') iconUrl = page.icon?.external.url;
-  else if (page.icon?.type === 'file') iconUrl = page.icon?.file.url;
+  if (page.icon?.type === 'external') iconUrl = page.icon?.external?.url;
+  else if (page.icon?.type === 'file') iconUrl = page.icon?.file?.url;
   else if (page.icon?.type === 'emoji') {
     iconUrl = `https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/${emojiToHex(
       page.icon.emoji
