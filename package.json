@@ -15,8 +15,7 @@
   ],
   "scripts": {
     "preinstall": "npx -y only-allow pnpm",
-    "build": "tsc",
-    "publish": "npm publish"
+    "build": "tsc"
   },
   "dependencies": {
     "@notionhq/client": "^2.2.14",
