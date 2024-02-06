@@ -81,7 +81,9 @@ function simplifyProp(prop: any, options?: PropOptions) {
     case 'people':
       return prop.people?.map((person: any) => person.id);
     case 'files':
-      return prop.files?.map((file: any) => file.file.url ?? file.external.url);
+      return prop.files?.map(
+        (file: any) => file?.file?.url ?? file?.external?.url
+      );
     case 'checkbox':
       return prop.checkbox;
     case 'url':
