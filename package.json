@@ -4,25 +4,25 @@
   "description": "A simple wrapper for the Notion API",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
-  "dependencies": {
-    "@notionhq/client": "^2.2.14",
-    "dotenv": "^16.3.1"
-  },
+  "author": "4mbl",
+  "license": "MIT",
+  "keywords": [
+    "notion",
+    "api"
+  ],
+  "files": [
+    "dist/*"
+  ],
   "scripts": {
     "preinstall": "npx -y only-allow pnpm",
     "build": "tsc",
     "publish": "npm publish"
   },
-  "keywords": [
-    "notion",
-    "api"
-  ],
-  "author": "4mbl",
-  "license": "MIT",
+  "dependencies": {
+    "@notionhq/client": "^2.2.14",
+    "dotenv": "^16.3.1"
+  },
   "devDependencies": {
     "typescript": "^5.3.3"
-  },
-  "files": [
-    "dist/*"
-  ]
+  }
 }
