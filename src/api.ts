@@ -54,7 +54,10 @@ export async function queryDatabase(
     ...params,
     filter: options?.filter as any,
   });
-  return processData(data.results, options?.propOptions);
+  return {
+    data: processData(data.results, options?.propOptions),
+    cursor: data.next_cursor,
+  };
 }
 
 export async function queryDatabaseFull(id: string, options?: QueryOptions) {
@@ -68,9 +71,9 @@ export async function queryDatabaseFull(id: string, options?: QueryOptions) {
 
   do {
     const response = await queryDatabase(id, nextCursor, options);
-    nextCursor = response.next_cursor ?? undefined;
-    allResults.push(...response);
-  } while (nextCursor !== undefined && nextCursor !== null);
+    nextCursor = response.cursor ?? undefined;
+    allResults.push(...response.data);
+  } while (nextCursor);
   return allResults;
 }
 
