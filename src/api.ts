@@ -24,6 +24,7 @@ export type PropOptions = {
         publicUrl?: boolean;
         objectType?: boolean;
         id?: boolean;
+        icon?: boolean;
         cover?: boolean;
         archivedStatus?: boolean;
         parent?: boolean;
