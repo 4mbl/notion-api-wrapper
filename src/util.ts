@@ -21,6 +21,7 @@ export function removeProps(data: any, options?: PropOptions) {
     propsToRemove.push('created_time', 'last_edited_time');
   if (options?.remove?.objectType) propsToRemove.push('object');
   if (options?.remove?.id) propsToRemove.push('id');
+  if (options?.remove?.icon) propsToRemove.push('icon');
   if (options?.remove?.cover) propsToRemove.push('cover');
   if (options?.remove?.archivedStatus) propsToRemove.push('archived');
   if (options?.remove?.parent) propsToRemove.push('parent');
