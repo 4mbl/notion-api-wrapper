@@ -2,17 +2,19 @@
 
 ## Example
 
-1. Create new integration at https://www.notion.so/my-integrations
+1. Create new integration at <https://www.notion.so/my-integrations>
 
 2. Give the integration permissions to read a database
 
 3. Add the integration token to your `.env` file
+
 ```env
 NOTION_API_KEY="secret_0000000000000000000000000000000000000000000"
 NOTION_DATABASE_ID="00000000000000000000000000000000"
 ```
 
 4. Query the database, for example:
+
 ```ts
 const databaseId = process.env.NOTION_DATABASE_ID ?? "";
 if (!databaseId) throw new Error("Invalid database id");
@@ -22,6 +24,7 @@ console.log(await data)
 
 ---
 You can also use the `FilterBuilder` to create filters that will be used in the query. For example:
+
 ```ts
 const filterA: Filter = {
   property: 'Done',
