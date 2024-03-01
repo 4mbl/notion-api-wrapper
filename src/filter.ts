@@ -27,39 +27,39 @@ export class FilterBuilder {
   }
 }
 
-export interface CheckboxFilter {
+export type CheckboxFilter = {
   equals?: boolean;
   does_not_equal?: boolean;
-}
+};
 
-export interface DateFilter {
+export type DateFilter = {
   after?: string;
   before?: string;
   equals?: string;
   is_empty?: true;
   is_not_empty?: true;
-}
+};
 
-export interface FilesFilter {
+export type FilesFilter = {
   is_empty?: true;
   is_not_empty?: true;
-}
+};
 
-export interface FormulaFilter {
+export type FormulaFilter = {
   checkbox?: CheckboxFilter;
   date?: DateFilter;
   number?: NumberFilter;
   rich_text?: RichTextFilter;
-}
+};
 
-export interface MultiSelectFilter {
+export type MultiSelectFilter = {
   contains?: string;
   does_not_contain?: string;
   is_empty?: true;
   is_not_empty?: true;
-}
+};
 
-export interface NumberFilter {
+export type NumberFilter = {
   equals?: number;
   does_not_equal?: number;
   greater_than?: number;
@@ -68,23 +68,23 @@ export interface NumberFilter {
   is_not_empty?: true;
   less_than?: number;
   less_than_or_equal_to?: number;
-}
+};
 
-export interface PeopleFilter {
+export type PeopleFilter = {
   contains?: string;
   does_not_contain?: string;
   is_empty?: true;
   is_not_empty?: true;
-}
+};
 
-export interface RelationFilter {
+export type RelationFilter = {
   contains?: string;
   does_not_contain?: string;
   is_empty?: true;
   is_not_empty?: true;
-}
+};
 
-export interface RichTextFilter {
+export type RichTextFilter = {
   contains?: string;
   does_not_contain?: string;
   does_not_equal?: string;
@@ -93,36 +93,36 @@ export interface RichTextFilter {
   is_empty?: true;
   is_not_empty?: true;
   starts_with?: string;
-}
+};
 
-export interface RollupFilter {
+export type RollupFilter = {
   any?: Object;
   every?: Object;
   none?: Object;
-}
+};
 
-export interface SelectFilter {
+export type SelectFilter = {
   equals?: string;
   does_not_equal?: string;
   is_empty?: true;
   is_not_empty?: true;
-}
+};
 
-export interface StatusFilter {
+export type StatusFilter = {
   equals?: string;
   does_not_equal?: string;
   is_empty?: true;
   is_not_empty?: true;
-}
+};
 
-export interface IdFilter {
+export type IdFilter = {
   does_not_equal?: number;
   equals?: number;
   greater_than?: number;
   greater_than_or_equal_to?: number;
   less_than?: number;
   less_than_or_equal_to?: number;
-}
+};
 
 export type Filter =
   | {
