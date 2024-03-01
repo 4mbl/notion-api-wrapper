@@ -7,6 +7,7 @@ import {
   PartialDatabaseObjectResponse,
 } from '@notionhq/client/build/src/api-endpoints';
 import { processQueryData, removeProps, simplifyProps } from './util';
+import { BuiltFilter } from './filter';
 
 dotenv.config();
 
@@ -34,7 +35,7 @@ export type PropOptions = {
 };
 
 export type QueryOptions = {
-  filter?: any;
+  filter?: BuiltFilter;
   propOptions?: PropOptions;
 };
 
