@@ -73,7 +73,7 @@ export function removeProps(
 export function simplifyProps(data: any, options?: PropOptions) {
   if (!data) return [];
   if (!options?.simplifyProps && !options?.simpleIcon) return data;
-  for (const page of data) {
+  for (const page of data.results) {
     if (options?.simpleIcon && page.icon) {
       const iconUrl = getIconUrl(page.icon).url;
       if (!iconUrl) return { ...page, icon: null };
