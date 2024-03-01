@@ -17,7 +17,9 @@ export const notion = new Client({
 
 export type PropOptions = {
   remove?: {
+    /** Removes created by and last edited by user ids from the page(s). */
     userIds?: boolean;
+    /** Removes created time and last edited time from the page(s). */
     pageTimestamps?: boolean;
     url?: boolean;
     publicUrl?: boolean;
@@ -25,10 +27,11 @@ export type PropOptions = {
     id?: boolean;
     icon?: boolean;
     cover?: boolean;
-    archivedStatus?: boolean;
+    archived?: boolean;
     parent?: boolean;
     customProps?: string[];
   };
+  /** Moves nested properties to the top level of the page(s). */
   simplifyProps?: boolean;
   /** Makes the icon into an URL string no matter if it's an emoji or file. */
   simpleIcon?: boolean;
