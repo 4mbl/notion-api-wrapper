@@ -16,22 +16,21 @@ export const notion = new Client({
 });
 
 export type PropOptions = {
-  remove:
-    | {
-        userIds?: boolean;
-        pageTimestamps?: boolean;
-        url?: boolean;
-        publicUrl?: boolean;
-        objectType?: boolean;
-        id?: boolean;
-        icon?: boolean;
-        cover?: boolean;
-        archivedStatus?: boolean;
-        parent?: boolean;
-        customProps?: string[];
-      }
-    | undefined;
-  keep: string[] | undefined;
+  remove?: {
+    userIds?: boolean;
+    pageTimestamps?: boolean;
+    url?: boolean;
+    publicUrl?: boolean;
+    objectType?: boolean;
+    id?: boolean;
+    icon?: boolean;
+    cover?: boolean;
+    archivedStatus?: boolean;
+    parent?: boolean;
+    customProps?: string[];
+  };
+  /** Allows only explicitly listed props to be kept. */
+  keep?: string[];
   simplifyProps?: boolean;
   /** Makes the icon into an URL string no matter if it's an emoji or file. */
   simpleIcon?: boolean;
