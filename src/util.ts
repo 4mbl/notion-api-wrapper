@@ -30,6 +30,7 @@ export function removeProps(data: any, options?: PropOptions) {
       if (options?.keep && options?.keep?.length > 0) {
         item._properties = item.properties;
         delete item.properties;
+        item.properties = {};
         for (const keeper of options.keep) {
           item.properties[keeper] = item._properties[keeper];
         }
