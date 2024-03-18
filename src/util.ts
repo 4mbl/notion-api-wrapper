@@ -25,11 +25,20 @@ export function removeProps(data: any, options?: PropOptions) {
   if (options?.remove?.cover) propsToRemove.push('cover');
   if (options?.remove?.archivedStatus) propsToRemove.push('archived');
   if (options?.remove?.parent) propsToRemove.push('parent');
-
-  if (options?.remove?.customProps) {
+  if (options?.keep || options?.remove?.customProps) {
     for (const item of data) {
-      for (const prop of options?.remove?.customProps) {
-        delete item.properties[prop];
+      if (options?.keep && options?.keep?.length > 0) {
+        item._properties = item.properties;
+        delete item.properties;
+        for (const keeper of options.keep) {
+          item.properties[keeper] = item._properties[keeper];
+        }
+        delete item._properties;
+      }
+      if (options?.remove?.customProps) {
+        for (const prop of options?.remove?.customProps) {
+          delete item.properties[prop];
+        }
       }
     }
   }
