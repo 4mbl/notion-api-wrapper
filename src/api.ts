@@ -31,6 +31,8 @@ export type PropOptions = {
     parent?: boolean;
     customProps?: string[];
   };
+  /** Allows only explicitly listed props to be kept. */
+  keep?: string[];
   /** Moves nested properties to the top level of the page(s). */
   simplifyProps?: boolean;
   /** Makes the icon into an URL string no matter if it's an emoji or file. */

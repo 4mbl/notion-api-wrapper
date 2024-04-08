@@ -1,6 +1,9 @@
 import {
   DatabaseObjectResponse,
   QueryDatabaseResponse,
+  PageObjectResponse,
+  TextRichTextItemResponse,
+  RichTextItemResponse,
 } from '@notionhq/client/build/src/api-endpoints';
 import { PropOptions } from './api';
 import {
@@ -40,9 +43,22 @@ export function removeProps(
   if (options?.remove?.archived) removeMetadata.push('archived');
   if (options?.remove?.parent) removeMetadata.push('parent');
 
-  if (options?.remove?.customProps) {
-    for (const prop of options?.remove?.customProps) {
-      removeProps.push(prop);
+  if (options?.keep || options?.remove?.customProps) {
+    for (const item of data) {
+      if (options?.keep && options?.keep?.length > 0) {
+        item._properties = item.properties;
+        delete item.properties;
+        item.properties = {};
+        for (const keeper of options.keep) {
+          item.properties[keeper] = item._properties[keeper];
+        }
+        delete item._properties;
+      }
+      if (options?.remove?.customProps) {
+        for (const prop of options?.remove?.customProps) {
+          delete item.properties[prop];
+        }
+      }
     }
   }
 
@@ -97,9 +113,13 @@ function simplifyProp(
 ): SimpleDatabaseProperty {
   switch (prop.type) {
     case 'title':
-      return prop.title[0].plain_text;
+      return prop.title
+        .map((text: RichTextItemResponse) => text.plain_text)
+        .join('');
     case 'rich_text':
-      return prop.rich_text[0]?.plain_text;
+      return prop.rich_text
+        .map((text: RichTextItemResponse) => text.plain_text)
+        .join('');
     case 'number':
       return prop.number;
     case 'select':
