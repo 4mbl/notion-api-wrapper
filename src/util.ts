@@ -184,7 +184,7 @@ function simplifyProp(
   }
 }
 
-export function emojiToHex(emoji: string) {
+function emojiToHex(emoji: string) {
   const codePoints = Array.from(emoji).map((char) => char.codePointAt(0));
   const hexCode = codePoints
     .map((codePoint) => codePoint?.toString(16))
