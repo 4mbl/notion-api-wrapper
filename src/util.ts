@@ -1,8 +1,6 @@
 import {
   DatabaseObjectResponse,
   QueryDatabaseResponse,
-  PageObjectResponse,
-  TextRichTextItemResponse,
   RichTextItemResponse,
 } from '@notionhq/client/build/src/api-endpoints';
 import { PropOptions } from './api';
@@ -24,7 +22,7 @@ export function processQueryData(
 }
 
 export function removeProps(
-  data: QueryDatabaseResponse | DatabaseObjectResponse,
+  data: any,
   options?: PropOptions
 ): QueryDatabaseResponse | DatabaseObjectResponse {
   let removeMetadata: string[] = [];
@@ -71,7 +69,7 @@ export function removeProps(
 
     return {
       ...data,
-      results: data.results.map((page) => removeMetadataFromPage(page)),
+      results: data.results.map((page: any) => removeMetadataFromPage(page)),
     };
   } else if (data.object === 'database') {
     const removeMetadataFromPage = (obj: any) => {
