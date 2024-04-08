@@ -1,31 +1,46 @@
 import {
   DatabaseObjectResponse,
-  PageObjectResponse,
-  TextRichTextItemResponse,
+  QueryDatabaseResponse,
+  RichTextItemResponse,
 } from '@notionhq/client/build/src/api-endpoints';
 import { PropOptions } from './api';
+import {
+  SimpleDatabaseProperty,
+  VerboseDatabaseProperty,
+  SimpleDatabasePage,
+} from './apiTypes';
 
-export function processData(data: any, options?: PropOptions) {
-  if (options?.remove) data = removeProps(data, options);
+export function processQueryData(
+  data: QueryDatabaseResponse,
+  options?: PropOptions
+) {
+  if (options?.remove) {
+    data = removeProps(data, options) as QueryDatabaseResponse;
+  }
   if (options?.simplifyProps) data = simplifyProps(data, options);
-  if (options?.simpleIcon) data = simplifyIcons(data);
   return data;
 }
 
-export function removeProps(data: any, options?: PropOptions) {
-  let propsToRemove: string[] = [];
+export function removeProps(
+  data: any,
+  options?: PropOptions
+): QueryDatabaseResponse | DatabaseObjectResponse {
+  let removeMetadata: string[] = [];
+  let removeProps: string[] = [];
+
   if (options?.remove?.userIds)
-    propsToRemove.push('created_by', 'last_edited_by');
-  if (options?.remove?.url) propsToRemove.push('url');
-  if (options?.remove?.publicUrl) propsToRemove.push('public_url');
+    removeMetadata.push('created_by', 'last_edited_by');
+  if (options?.remove?.url) removeMetadata.push('url');
+  if (options?.remove?.publicUrl) removeMetadata.push('public_url');
   if (options?.remove?.pageTimestamps)
-    propsToRemove.push('created_time', 'last_edited_time');
-  if (options?.remove?.objectType) propsToRemove.push('object');
-  if (options?.remove?.id) propsToRemove.push('id');
-  if (options?.remove?.icon) propsToRemove.push('icon');
-  if (options?.remove?.cover) propsToRemove.push('cover');
-  if (options?.remove?.archivedStatus) propsToRemove.push('archived');
-  if (options?.remove?.parent) propsToRemove.push('parent');
+    removeMetadata.push('created_time', 'last_edited_time');
+  if (options?.remove?.objectType) removeMetadata.push('object');
+  if (options?.remove?.id) removeMetadata.push('id');
+  if (options?.remove?.icon) removeMetadata.push('icon');
+  if (options?.remove?.cover) removeMetadata.push('cover');
+  if (options?.remove?.archived) removeMetadata.push('archived');
+  if (options?.remove?.parent) removeMetadata.push('parent');
+
   if (options?.keep || options?.remove?.customProps) {
     for (const item of data) {
       if (options?.keep && options?.keep?.length > 0) {
@@ -45,55 +60,74 @@ export function removeProps(data: any, options?: PropOptions) {
     }
   }
 
-  const removeFromObject = (obj: any) => {
-    for (const prop of propsToRemove) delete obj[prop];
-    return obj;
-  };
+  if (data.object === 'list') {
+    const removeMetadataFromPage = (obj: any) => {
+      for (const prop of removeMetadata) delete obj[prop];
+      for (const prop of removeProps) delete obj.properties[prop];
+      return obj;
+    };
 
-  if (Array.isArray(data)) {
-    data.forEach((item) => removeFromObject(item));
-  } else if (typeof data === 'object') {
-    data.results.forEach((item: any) => removeFromObject(item));
+    return {
+      ...data,
+      results: data.results.map((page: any) => removeMetadataFromPage(page)),
+    };
+  } else if (data.object === 'database') {
+    const removeMetadataFromPage = (obj: any) => {
+      for (const prop of removeMetadata) delete obj[prop];
+      for (const prop of removeProps) delete obj.properties[prop];
+      return obj;
+    };
+
+    return removeMetadataFromPage(data);
   }
 
   return data;
 }
 
 export function simplifyProps(data: any, options?: PropOptions) {
-  for (const item of data) {
-    if (!item.properties) continue;
-    for (const prop in item.properties) {
-      item[prop] = simplifyProp(item.properties[prop], options);
-      delete item.properties[prop];
-      if (Object.keys(item.properties).length === 0) delete item.properties;
+  if (!data) return [];
+  if (!options?.simplifyProps && !options?.simpleIcon) return data;
+  for (const page of data.results) {
+    if (options?.simpleIcon && page.icon) {
+      const iconUrl = getIconUrl(page.icon).url;
+      if (!iconUrl) return { ...page, icon: null };
+      page.icon = iconUrl;
+    }
+
+    if (options.simplifyProps && page.properties) {
+      for (const prop in page.properties) {
+        page[prop] = simplifyProp(page.properties[prop], options);
+        delete page.properties[prop];
+      }
+      if (Object.keys(page.properties).length === 0) delete page.properties;
     }
   }
-  return data;
+  return data as SimpleDatabasePage[];
 }
 
-function simplifyProp(prop: any, options?: PropOptions) {
+function simplifyProp(
+  prop: VerboseDatabaseProperty,
+  options?: PropOptions
+): SimpleDatabaseProperty {
   switch (prop.type) {
     case 'title':
       return prop.title
-        .map((text: TextRichTextItemResponse) => text.plain_text)
+        .map((text: RichTextItemResponse) => text.plain_text)
         .join('');
     case 'rich_text':
       return prop.rich_text
-        .map((text: TextRichTextItemResponse) => text.plain_text)
+        .map((text: RichTextItemResponse) => text.plain_text)
         .join('');
     case 'number':
       return prop.number;
     case 'select':
-      return prop.select?.name;
+      return prop.select?.name ?? null;
     case 'multi_select':
       return prop.multi_select?.map((option: any) => option.name);
     case 'status':
-      return prop.status.name;
+      return prop.status?.name ?? null;
     case 'date':
-      return {
-        start: prop.date?.start,
-        end: prop.date?.end,
-      };
+      return prop.date?.start ?? null;
     case 'people':
       return prop.people?.map((person: any) => person.id);
     case 'files':
@@ -109,14 +143,27 @@ function simplifyProp(prop: any, options?: PropOptions) {
     case 'phone_number':
       return prop.phone_number;
     case 'formula':
-      return prop.formula?.string;
+      if (prop.formula.type === 'string') return prop.formula.string;
+      if (prop.formula.type === 'number') return prop.formula.number;
+      if (prop.formula.type === 'boolean') return prop.formula.boolean;
+      if (prop.formula.type === 'date') return prop.formula.date?.start ?? null;
+      return prop.formula;
     case 'relation':
       return prop.relation?.map((relation: any) => relation.id);
     case 'rollup':
-      const rollups = prop.rollup?.array?.map((item: any) =>
-        simplifyProp(item, options)
-      );
-      return rollups.flat(Infinity);
+      if (prop.rollup.type === 'array') {
+        const rollup = prop.rollup.array;
+        const simpleRollup = rollup?.map((item: any) =>
+          simplifyProp(item, options)
+        );
+        const flattenRollup = simpleRollup.flat();
+        return flattenRollup;
+      } else if (prop.rollup.type === 'date') {
+        return prop.rollup.date?.start ?? null;
+      } else if (prop.rollup.type === 'number') {
+        return prop.rollup.number;
+      }
+      return prop.rollup;
     case 'created_time':
       return prop.created_time;
     case 'created_by':
@@ -129,21 +176,15 @@ function simplifyProp(prop: any, options?: PropOptions) {
       else return prop.last_edited_by.id;
     case 'unique_id':
       return prop.unique_id.prefix + '-' + prop.unique_id.number;
+    case 'verification':
+      return prop.verification?.state as string;
 
     default:
       return prop;
   }
 }
 
-function simplifyIcons(data: any): any {
-  for (const page of data) {
-    if (!page.icon) continue;
-    page.icon = getIconUrl(page).url;
-  }
-  return data;
-}
-
-export function emojiToHex(emoji: string) {
+function emojiToHex(emoji: string) {
   const codePoints = Array.from(emoji).map((char) => char.codePointAt(0));
   const hexCode = codePoints
     .map((codePoint) => codePoint?.toString(16))
@@ -152,17 +193,17 @@ export function emojiToHex(emoji: string) {
   return hexCode;
 }
 
-export function getIconUrl(page: PageObjectResponse | DatabaseObjectResponse) {
+export function getIconUrl(icon: DatabaseObjectResponse['icon']) {
   let iconUrl: string | undefined = undefined;
-  if (page.icon?.type === 'external') iconUrl = page.icon?.external?.url;
-  else if (page.icon?.type === 'file') iconUrl = page.icon?.file?.url;
-  else if (page.icon?.type === 'emoji') {
+  if (icon?.type === 'external') iconUrl = icon?.external?.url;
+  else if (icon?.type === 'file') iconUrl = icon?.file?.url;
+  else if (icon?.type === 'emoji') {
     iconUrl = `https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/${emojiToHex(
-      page.icon.emoji
+      icon.emoji
     )}.png`;
   }
   return {
-    type: page.icon?.type,
+    type: icon?.type,
     url: iconUrl,
   };
 }

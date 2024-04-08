@@ -1,3 +1,7 @@
+import { QueryDatabaseParameters } from '@notionhq/client/build/src/api-endpoints';
+
+export type BuiltFilter = QueryDatabaseParameters['filter'];
+
 export class FilterBuilder {
   filters: Filter[];
 
@@ -10,7 +14,7 @@ export class FilterBuilder {
     return this;
   }
 
-  build(operator: 'AND' | 'OR'): Filter {
+  build(operator: 'AND' | 'OR'): BuiltFilter {
     if (this.filters.length === 0) {
       throw new Error('No filters added.');
     }
@@ -23,166 +27,165 @@ export class FilterBuilder {
 
     return {
       [operator.toLowerCase()]: this.filters,
-    };
+    } as BuiltFilter;
   }
 }
 
-export interface CheckboxFilter {
-  equals?: boolean;
-  does_not_equal?: boolean;
-}
+/* PARTIAL FILTERS */
 
-export interface DateFilter {
-  after?: string;
-  before?: string;
-  equals?: string;
-  is_empty?: true;
-  is_not_empty?: true;
-}
+type EmptyObject = Record<string, never>;
 
-export interface FilesFilter {
-  is_empty?: true;
-  is_not_empty?: true;
-}
+type ExistencePropertyFilter = { is_empty: true } | { is_not_empty: true };
 
-export interface FormulaFilter {
-  checkbox?: CheckboxFilter;
-  date?: DateFilter;
-  number?: NumberFilter;
-  rich_text?: RichTextFilter;
-}
+type StringContainmentFilter =
+  | { contains: string }
+  | { does_not_contain: string };
 
-export interface MultiSelectFilter {
-  contains?: string;
-  does_not_contain?: string;
-  is_empty?: true;
-  is_not_empty?: true;
-}
+type TextPropertyFilter =
+  | StringContainmentFilter
+  | { equals: string }
+  | { does_not_equal: string }
+  | { starts_with: string }
+  | { ends_with: string };
 
-export interface NumberFilter {
-  equals?: number;
-  does_not_equal?: number;
-  greater_than?: number;
-  greater_than_or_equal_to?: number;
-  is_empty?: true;
-  is_not_empty?: true;
-  less_than?: number;
-  less_than_or_equal_to?: number;
-}
+type RollupSubfilterPropertyFilter =
+  | { rich_text: TextPropertyFilter }
+  | { number: NumberFilter }
+  | { checkbox: CheckboxFilter }
+  | { select: SelectFilter }
+  | { multi_select: MultiSelectFilter }
+  | { relation: RelationFilter }
+  | { date: DateFilter }
+  | { people: PeopleFilter }
+  | { files: ExistencePropertyFilter }
+  | { status: StatusFilter };
 
-export interface PeopleFilter {
-  contains?: string;
-  does_not_contain?: string;
-  is_empty?: true;
-  is_not_empty?: true;
-}
+/* PROPERTY FILTERS */
 
-export interface RelationFilter {
-  contains?: string;
-  does_not_contain?: string;
-  is_empty?: true;
-  is_not_empty?: true;
-}
+export type CheckboxFilter = { equals: boolean } | { does_not_equal: boolean };
 
-export interface RichTextFilter {
-  contains?: string;
-  does_not_contain?: string;
-  does_not_equal?: string;
-  ends_with?: string;
-  equals?: string;
-  is_empty?: true;
-  is_not_empty?: true;
-  starts_with?: string;
-}
+export type DateFilter =
+  | { equals: string }
+  | { before: string }
+  | { after: string }
+  | { on_or_before: string }
+  | { on_or_after: string }
+  | { this_week: EmptyObject }
+  | { past_week: EmptyObject }
+  | { past_month: EmptyObject }
+  | { past_year: EmptyObject }
+  | { next_week: EmptyObject }
+  | { next_month: EmptyObject }
+  | { next_year: EmptyObject }
+  | ExistencePropertyFilter;
 
-export interface RollupFilter {
-  any?: Object;
-  every?: Object;
-  none?: Object;
-}
+export type FilesFilter = ExistencePropertyFilter;
 
-export interface SelectFilter {
-  equals?: string;
-  does_not_equal?: string;
-  is_empty?: true;
-  is_not_empty?: true;
-}
+export type FormulaFilter =
+  | { checkbox: CheckboxFilter }
+  | { date: DateFilter }
+  | { number: NumberFilter }
+  | { string: TextPropertyFilter };
 
-export interface StatusFilter {
-  equals?: string;
-  does_not_equal?: string;
-  is_empty?: true;
-  is_not_empty?: true;
-}
+export type MultiSelectFilter =
+  | StringContainmentFilter
+  | ExistencePropertyFilter;
 
-export interface IdFilter {
-  does_not_equal?: number;
-  equals?: number;
-  greater_than?: number;
-  greater_than_or_equal_to?: number;
-  less_than?: number;
-  less_than_or_equal_to?: number;
-}
+export type NumberFilter =
+  | ({ equals: number } | { does_not_equal: number })
+  | ({ greater_than: number } | { greater_than_or_equal_to: number })
+  | ({ less_than: number } | { less_than_or_equal_to: number })
+  | ExistencePropertyFilter;
+
+export type PeopleFilter = StringContainmentFilter | ExistencePropertyFilter;
+
+type RelationFilter = StringContainmentFilter;
+
+export type RollupFilter =
+  | { any: RollupSubfilterPropertyFilter }
+  | { none: RollupSubfilterPropertyFilter }
+  | { every: RollupSubfilterPropertyFilter }
+  | { date: DateFilter }
+  | { number: NumberFilter };
+
+export type RichTextFilter = TextPropertyFilter | ExistencePropertyFilter;
+
+export type SelectFilter =
+  | { equals: string }
+  | { does_not_equal: string }
+  | ExistencePropertyFilter;
+
+export type StatusFilter =
+  | { equals: string }
+  | { does_not_equal: string }
+  | ExistencePropertyFilter;
+
+export type IdFilter = NumberFilter;
 
 export type Filter =
-  | {
-      property?: string;
-      checkbox?: CheckboxFilter;
-    }
-  | {
-      property?: string;
-      date?: DateFilter;
-    }
-  | {
-      property?: string;
-      files?: FilesFilter;
-    }
-  | {
-      property?: string;
-      formula?: FormulaFilter;
-    }
-  | {
-      property?: string;
-      multi_select?: MultiSelectFilter;
-    }
-  | {
-      property?: string;
-      number?: NumberFilter;
-    }
-  | {
-      property?: string;
-      people?: PeopleFilter;
-    }
-  | {
-      property?: string;
-      relation?: RelationFilter;
-    }
-  | {
-      property?: string;
-      rich_text?: RichTextFilter;
-    }
-  | {
-      property?: string;
-      rollup?: RollupFilter;
-    }
-  | {
-      property?: string;
-      select?: SelectFilter;
-    }
-  | {
-      property?: string;
-      status?: StatusFilter;
-    }
-  | {
-      property?: string;
-      title?: RichTextFilter;
-    }
-  | {
-      timestamp?: 'created_time' | 'last_edited_time';
-      created_time?: DateFilter;
-      last_edited_time?: DateFilter;
-    }
-  | {
-      property?: string;
-      unique_id?: IdFilter;
-    };
+  | ({ property: string } & (
+      | {
+          type?: 'checkbox' | undefined;
+          checkbox: CheckboxFilter;
+        }
+      | {
+          type?: 'date' | undefined;
+          date: DateFilter;
+        }
+      | {
+          type?: 'files' | undefined;
+          files: FilesFilter;
+        }
+      | {
+          type?: 'formula' | undefined;
+          formula: FormulaFilter;
+        }
+      | {
+          type?: 'multi_select' | undefined;
+          multi_select: MultiSelectFilter;
+        }
+      | {
+          type?: 'number' | undefined;
+          number: NumberFilter;
+        }
+      | {
+          type?: 'people' | undefined;
+          people: PeopleFilter;
+        }
+      | {
+          type?: 'relation' | undefined;
+          relation: RelationFilter;
+        }
+      | {
+          type?: 'rich_text' | undefined;
+          rich_text: RichTextFilter;
+        }
+      | {
+          type?: 'rollup' | undefined;
+          rollup: RollupFilter;
+        }
+      | {
+          type?: 'select' | undefined;
+          select: SelectFilter;
+        }
+      | {
+          type?: 'status' | undefined;
+          status: StatusFilter;
+        }
+      | {
+          type?: 'unique_id' | undefined;
+          unique_id: IdFilter;
+        }
+    ))
+  | (
+      | {
+          created_time: DateFilter;
+          timestamp: 'created_time';
+          type?: 'created_time';
+        }
+      | {
+          last_edited_time: DateFilter;
+          timestamp: 'last_edited_time';
+          type?: 'last_edited_time';
+        }
+    );
