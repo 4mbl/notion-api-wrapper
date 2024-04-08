@@ -1,6 +1,7 @@
 import {
   DatabaseObjectResponse,
   PageObjectResponse,
+  TextRichTextItemResponse,
 } from '@notionhq/client/build/src/api-endpoints';
 import { PropOptions } from './api';
 
@@ -73,9 +74,13 @@ export function simplifyProps(data: any, options?: PropOptions) {
 function simplifyProp(prop: any, options?: PropOptions) {
   switch (prop.type) {
     case 'title':
-      return prop.title[0].plain_text;
+      return prop.title
+        .map((text: TextRichTextItemResponse) => text.plain_text)
+        .join('');
     case 'rich_text':
-      return prop.rich_text[0]?.plain_text;
+      return prop.rich_text
+        .map((text: TextRichTextItemResponse) => text.plain_text)
+        .join('');
     case 'number':
       return prop.number;
     case 'select':
