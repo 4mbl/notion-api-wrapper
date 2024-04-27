@@ -15,6 +15,7 @@ export type SimpleDatabasePage = {
   archived?: boolean;
   url?: string;
   publicUrl?: string;
+  in_trash?: boolean;
 } & SimpleDatabaseProperties;
 
 export type SimpleDatabaseProperties = {

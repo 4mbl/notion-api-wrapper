@@ -29,6 +29,7 @@ export type PropOptions = {
     cover?: boolean;
     archived?: boolean;
     parent?: boolean;
+    inTrash?: boolean;
     customProps?: string[];
   };
   /** Allows only explicitly listed props to be kept. */
