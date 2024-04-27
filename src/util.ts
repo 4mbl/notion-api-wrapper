@@ -181,7 +181,7 @@ function simplifyProp(
       return prop.verification?.state as string;
 
     default:
-      return prop;
+      return prop.id;
   }
 }
 
