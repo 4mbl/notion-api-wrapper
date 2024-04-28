@@ -43,7 +43,7 @@ export function removeProps(
   if (options?.remove?.inTrash) removeMetadata.push('in_trash');
 
   if (options?.keep || options?.remove?.customProps) {
-    for (const item of data) {
+    for (const item of data.results) {
       if (options?.keep && options?.keep?.length > 0) {
         item._properties = item.properties;
         delete item.properties;

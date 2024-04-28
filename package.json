@@ -1,6 +1,6 @@
 {
   "name": "notion-api-wrapper",
-  "version": "4.1.2",
+  "version": "4.1.3",
   "description": "A simple wrapper for the Notion API",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
