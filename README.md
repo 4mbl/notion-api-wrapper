@@ -11,6 +11,7 @@
   * [Pagination](#pagination)
   * [Database Search](#database-search)
   * [Database Metadata](#database-metadata)
+  * [Database Iterator](#database-iterator)
 
 ## Installation
 
@@ -150,4 +151,43 @@ You can get database metadata with the `getDatabaseColumns` function. This suppo
 
 ```ts
 const columns = await getDatabaseColumns(process.env.NOTION_DATABASE_ID);
+```
+
+### Database Iterator
+
+This package also provides a `DatabaseIterator` class that can be used to iterate over the database in a paginated way.
+
+The option `batchSize` controls the number of records that will be fetched at once from Notion and `yieldSize` controls the number of records that will be yielded at a time to the caller. By default both are set to 100.
+
+```ts
+const db = new DatabaseIterator(process.env.NOTION_DATABASE_ID, { batchSize: 10, yieldSize: 2 });
+
+for await (const chunk of db) {
+  const titles = chunk
+    .map((c) =>
+        c.properties.Name.type === 'title'
+          ? c.properties.Name.title[0].plain_text
+          : undefined
+      )
+      .filter((text) => text !== undefined);
+
+console.log(titles);
+}
+```
+
+You can also pass a custom response type to the iterator.
+
+```ts
+
+type CustomType = PageObjectResponse & {
+  properties: { Name: { title: { plain_text: string }[] } };
+};
+
+const dbWithCustomType = new DatabaseIterator<CustomType>(
+  process.env.NOTION_DATABASE_ID, { batchSize: 10, yieldSize: 2 }
+);
+
+for await (const chunk of dbWithCustomType) {
+  console.log(chunk.map((c) => c.properties.Name.title[0].plain_text));
+}
 ```
