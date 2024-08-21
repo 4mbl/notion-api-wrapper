@@ -6,6 +6,7 @@
 * [Getting Started](#getting-started)
   * [Querying Database](#querying-database)
   * [Filtering Results](#filtering-results)
+  * [Sorting Results](#sorting-results)
   * [Field and Prop Options](#field-and-prop-options)
 * [Advanced Usage](#advanced-usage)
   * [Pagination](#pagination)
@@ -81,6 +82,19 @@ const myFilter: Filter = new FilterBuilder()
 
 const data = queryDatabaseFull(process.env.NOTION_DATABASE_ID, {
     filter: myFilter,
+});
+```
+
+### Sorting Results
+
+You can also sort the results by specifying the `sort` option.
+
+```ts
+const data = queryDatabaseFull(process.env.NOTION_DATABASE_ID, {
+  sort: {
+    direction: 'ascending',
+    property: 'Name',
+  },
 });
 ```
 
