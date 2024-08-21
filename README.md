@@ -83,7 +83,7 @@ const myFilter: Filter = new FilterBuilder()
   )
   .build('AND');
 
-const data = queryDatabaseFull(process.env.NOTION_DATABASE_ID, {
+const data = await queryDatabaseFull(process.env.NOTION_DATABASE_ID, {
     filter: myFilter,
 });
 ```
@@ -93,7 +93,7 @@ const data = queryDatabaseFull(process.env.NOTION_DATABASE_ID, {
 You can also sort the results by specifying the `sort` option.
 
 ```ts
-const data = queryDatabaseFull(process.env.NOTION_DATABASE_ID, {
+const data = await queryDatabaseFull(process.env.NOTION_DATABASE_ID, {
   sort: {
     direction: 'ascending',
     property: 'Name',
@@ -106,7 +106,7 @@ const data = queryDatabaseFull(process.env.NOTION_DATABASE_ID, {
 There is also options to remove built-in fields and props from the results. Here is a kitchen sink example of that.
 
 ```ts
-const data = queryDatabaseFull(process.env.NOTION_DATABASE_ID, {
+const data = await queryDatabaseFull(process.env.NOTION_DATABASE_ID, {
   remove: {
     userIds: true,
     pageTimestamps: true,
@@ -127,17 +127,21 @@ const data = queryDatabaseFull(process.env.NOTION_DATABASE_ID, {
 You can also remove all props except certain ones by using the `keep` option.
 
 ```ts
-const data = queryDatabaseFull(process.env.NOTION_DATABASE_ID, {
-  keep: ['Name', 'Tags', 'Done'],
+const data = await queryDatabaseFull(process.env.NOTION_DATABASE_ID, {
+  propOptions: {
+    keep: ['Name', 'Tags', 'Done'],
+  }
 });
 ```
 
 Notion API responses can be quite verbose, so there is also options to simplify the results.
 
 ```ts
-const data = queryDatabaseFull(process.env.NOTION_DATABASE_ID, {
-  simplifyProps: true,
-  simpleIcon: true,
+const data = await queryDatabaseFull(process.env.NOTION_DATABASE_ID, {
+  propOptions: {
+    simplifyProps: true,
+    simpleIcon: true,
+  }
 });
 ```
 
@@ -148,8 +152,8 @@ const data = queryDatabaseFull(process.env.NOTION_DATABASE_ID, {
 There is also a function to query the database in a paginated way. A single query returns at most 100 records.
 
 ```ts
-const { data, nextCursor } = queryDatabase(process.env.NOTION_DATABASE_ID);
-const { data2 } = queryDatabase(process.env.NOTION_DATABASE_ID, nextCursor);
+const { data, nextCursor } = await queryDatabase(process.env.NOTION_DATABASE_ID);
+const { data2 } = await queryDatabase(process.env.NOTION_DATABASE_ID, nextCursor);
 ```
 
 ### Database Search
@@ -157,7 +161,7 @@ const { data2 } = queryDatabase(process.env.NOTION_DATABASE_ID, nextCursor);
 You can search the database with the `searchFromDatabase` function. This supports some of the same options as the query functions.
 
 ```ts
-const data = searchFromDatabase(process.env.NOTION_DATABASE_ID, 'kiwi')
+const data = await searchFromDatabase(process.env.NOTION_DATABASE_ID, 'kiwi')
 ```
 
 By default the search uses the `Name` property, but you can specify a different property with a third argument. The search looks for excact matches, but you can also use the `contains` option to search for partial matches.
