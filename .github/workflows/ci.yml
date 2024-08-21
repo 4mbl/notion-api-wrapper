@@ -1,0 +1,45 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+
+  pull_request:
+    types: [opened, synchronize]
+    branches: [main]
+
+  workflow_dispatch:
+
+  schedule:
+    - cron: '0 0 * * 3' # weekly on wednesdays at 00:00
+
+env:
+  NODE_VERSION: '20'
+
+jobs:
+  ci:
+    timeout-minutes: 10
+    name: CI
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+      - name: Setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+      - name: Install
+        run: pnpm install
+      - name: Format
+        run: pnpm run format:check
+      - name: Lint
+        run: pnpm run lint
+      - name: Build
+        run: pnpm run build
+      - name: Test
+        run: pnpm run test
+        env:
+          TESTING_API_KEY: ${{secrets.TESTING_API_KEY}}

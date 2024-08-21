@@ -58,7 +58,7 @@ export async function queryDatabase(
   /** Notion database id. */
   id: string,
   nextCursor?: string,
-  options?: QueryOptions
+  options?: QueryOptions,
 ) {
   const apiKey = options?.notionToken ?? process.env.NOTION_API_KEY;
   if (!apiKey) throw new Error(NO_API_KEY_ERROR);
@@ -93,7 +93,7 @@ export async function queryDatabase(
 export async function queryDatabaseFull(
   /** Notion database id. */
   id: string,
-  options?: QueryOptions
+  options?: QueryOptions,
 ) {
   let nextCursor: string | undefined = undefined;
   const allResults: Array<
@@ -125,7 +125,7 @@ export async function getDatabaseColumns(id: string, options?: QueryOptions) {
   }).then((res) => res.json());
 
   return removeProps(
-    simplifyProps(data, options?.propOptions)
+    simplifyProps(data, options?.propOptions),
   ) as DatabaseObjectResponse;
 }
 
@@ -134,7 +134,7 @@ export async function searchFromDatabase(
   id: string,
   value: string,
   property = 'Name',
-  options?: QueryOptions
+  options?: QueryOptions,
 ) {
   const apiKey = options?.notionToken ?? process.env.NOTION_API_KEY;
   if (!apiKey) throw new Error(NO_API_KEY_ERROR);

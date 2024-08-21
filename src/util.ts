@@ -12,9 +12,9 @@ import {
 
 export function processQueryData(
   data: QueryDatabaseResponse,
-  options?: PropOptions
+  options?: PropOptions,
 ) {
-  if (options?.remove) {
+  if (options?.remove || options?.keep) {
     data = removeProps(data, options) as QueryDatabaseResponse;
   }
   if (options?.simplifyProps) data = simplifyProps(data, options);
@@ -22,11 +22,12 @@ export function processQueryData(
 }
 
 export function removeProps(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   data: any,
-  options?: PropOptions
+  options?: PropOptions,
 ): QueryDatabaseResponse | DatabaseObjectResponse {
-  let removeMetadata: string[] = [];
-  let removeProps: string[] = [];
+  const removeMetadata: string[] = [];
+  const removeProps: string[] = [];
 
   if (options?.remove?.userIds)
     removeMetadata.push('created_by', 'last_edited_by');
@@ -54,7 +55,7 @@ export function removeProps(
         delete item._properties;
       }
       if (options?.remove?.customProps) {
-        for (const prop of options?.remove?.customProps) {
+        for (const prop of options.remove.customProps) {
           delete item.properties[prop];
         }
       }
@@ -62,6 +63,7 @@ export function removeProps(
   }
 
   if (data.object === 'list') {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const removeMetadataFromPage = (obj: any) => {
       for (const prop of removeMetadata) delete obj[prop];
       for (const prop of removeProps) delete obj.properties[prop];
@@ -70,9 +72,11 @@ export function removeProps(
 
     return {
       ...data,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       results: data.results.map((page: any) => removeMetadataFromPage(page)),
     };
   } else if (data.object === 'database') {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const removeMetadataFromPage = (obj: any) => {
       for (const prop of removeMetadata) delete obj[prop];
       for (const prop of removeProps) delete obj.properties[prop];
@@ -85,6 +89,7 @@ export function removeProps(
   return data;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function simplifyProps(data: any, options?: PropOptions) {
   if (!data) return [];
   if (!options?.simplifyProps && !options?.simpleIcon) return data;
@@ -108,7 +113,7 @@ export function simplifyProps(data: any, options?: PropOptions) {
 
 function simplifyProp(
   prop: VerboseDatabaseProperty,
-  options?: PropOptions
+  options?: PropOptions,
 ): SimpleDatabaseProperty {
   switch (prop.type) {
     case 'title':
@@ -124,16 +129,20 @@ function simplifyProp(
     case 'select':
       return prop.select?.name ?? null;
     case 'multi_select':
-      return prop.multi_select?.map((option: any) => option.name);
+      return prop.multi_select?.map((option) => option.name);
     case 'status':
       return prop.status?.name ?? null;
     case 'date':
       return prop.date?.start ?? null;
     case 'people':
-      return prop.people?.map((person: any) => person.id);
+      return prop.people?.map((person) => person.id);
     case 'files':
-      return prop.files?.map(
-        (file: any) => file?.file?.url ?? file?.external?.url
+      return prop.files?.map((file) =>
+        file.type === 'file'
+          ? file.file.url
+          : file.type === 'external'
+            ? file.external.url
+            : null,
       );
     case 'checkbox':
       return prop.checkbox;
@@ -150,12 +159,12 @@ function simplifyProp(
       if (prop.formula.type === 'date') return prop.formula.date?.start ?? null;
       return prop.formula;
     case 'relation':
-      return prop.relation?.map((relation: any) => relation.id);
+      return prop.relation?.map((relation) => relation.id);
     case 'rollup':
       if (prop.rollup.type === 'array') {
         const rollup = prop.rollup.array;
-        const simpleRollup = rollup?.map((item: any) =>
-          simplifyProp(item, options)
+        const simpleRollup = rollup?.map((item) =>
+          simplifyProp({ ...item, id: prop.id }, options),
         );
         const flattenRollup = simpleRollup.flat();
         return flattenRollup;
@@ -200,7 +209,7 @@ export function getIconUrl(icon: DatabaseObjectResponse['icon']) {
   else if (icon?.type === 'file') iconUrl = icon?.file?.url;
   else if (icon?.type === 'emoji') {
     iconUrl = `https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/${emojiToHex(
-      icon.emoji
+      icon.emoji,
     )}.png`;
   }
   return {

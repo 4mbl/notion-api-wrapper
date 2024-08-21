@@ -14,17 +14,26 @@
     "dist/*"
   ],
   "scripts": {
-    "preinstall": "npx -y only-allow pnpm",
     "build": "tsc",
+    "test": "vitest",
+    "lint": "eslint",
+    "format:write": "prettier --write ./src/**/*.ts",
+    "format:check": "prettier --check ./src/**/*.ts",
     "bump:patch": "npm version patch --no-git-tag-version",
     "bump:minor": "npm version minor --no-git-tag-version",
     "bump:major": "npm version major --no-git-tag-version"
   },
-  "dependencies": {},
   "devDependencies": {
+    "@eslint/js": "^9.9.0",
     "@notionhq/client": "^2.2.15",
     "@types/node": "^22.4.2",
-    "typescript": "^5.4.5"
+    "dotenv": "^16.4.5",
+    "eslint": "^9.9.0",
+    "globals": "^15.9.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5",
+    "typescript-eslint": "^8.2.0",
+    "vitest": "^2.0.5"
   },
-  "packageManager": "pnpm@9.4.0"
+  "packageManager": "pnpm@9.7.1"
 }
