@@ -17,15 +17,20 @@
     "preinstall": "npx -y only-allow pnpm",
     "build": "tsc",
     "test": "vitest",
+    "lint": "eslint",
     "bump:patch": "npm version patch --no-git-tag-version",
     "bump:minor": "npm version minor --no-git-tag-version",
     "bump:major": "npm version major --no-git-tag-version"
   },
   "devDependencies": {
+    "@eslint/js": "^9.9.0",
     "@notionhq/client": "^2.2.15",
     "@types/node": "^22.4.2",
     "dotenv": "^16.4.5",
+    "eslint": "^9.9.0",
+    "globals": "^15.9.0",
     "typescript": "^5.4.5",
+    "typescript-eslint": "^8.2.0",
     "vitest": "^2.0.5"
   },
   "packageManager": "pnpm@9.4.0"
