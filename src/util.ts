@@ -14,7 +14,7 @@ export function processQueryData(
   data: QueryDatabaseResponse,
   options?: PropOptions
 ) {
-  if (options?.remove) {
+  if (options?.remove || options?.keep) {
     data = removeProps(data, options) as QueryDatabaseResponse;
   }
   if (options?.simplifyProps) data = simplifyProps(data, options);
