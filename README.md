@@ -184,8 +184,6 @@ for await (const chunk of db) {
           : undefined
       )
       .filter((text) => text !== undefined);
-
-console.log(titles);
 }
 ```
 
@@ -202,6 +200,6 @@ const dbWithCustomType = new DatabaseIterator<CustomType>(
 );
 
 for await (const chunk of dbWithCustomType) {
-  console.log(chunk.map((c) => c.properties.Name.title[0].plain_text));
+  const titles = chunk.map((c) => c.properties.Name.title[0].plain_text))
 }
 ```
