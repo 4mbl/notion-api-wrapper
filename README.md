@@ -30,14 +30,9 @@ _Or your favorite package manager, in which case you probably know the command._
 
 2. Give the integration permissions to read the database you want to query. You can do this in the database page: `⋯` → `Connection To` → `<Integration Name>`.
 
-3. Create `.env` file in your project root directory with your credentials.
+3. Make the secret key available as an environment variable under the name `NOTION_API_KEY`. You may also pass it as a parameter to the query functions. You should also store the database ID in an environment variable but this is not mandatory. The examples below assume that you have done so.
 
-    ```env
-    NOTION_API_KEY="secret_0000000000000000000000000000000000000000000"
-    NOTION_DATABASE_ID="00000000000000000000000000000000"
-    ```
-
-    Database ID is the alphanumeric string in the URL after the workspace name. For instance, in the URL: `https://www.notion.so/workspace/00000000000000000000000000000000?v=1111111111111111111111111111111`, the database ID is `00000000000000000000000000000000`. While it's not mandatory to store it in the .env file, the following examples assume that you have done so.
+    You can find the database ID in the URL of the database page. For instance, in the URL: `https://www.notion.so/<workspace>/00000000000000000000000000000000?v=1111111111111111111111111111111`, the database ID is `00000000000000000000000000000000`.
 
 4. Query the database.
 
@@ -45,6 +40,14 @@ _Or your favorite package manager, in which case you probably know the command._
     const data = await queryDatabaseFull(process.env.NOTION_DATABASE_ID);
     const json = JSON.stringify(data, null, 2);
     console.log(json)
+    ```
+
+    If you want to pass the secret key as a parameter, you can do so by passing the `notionToken` option.
+
+    ```ts
+    const data = await queryDatabaseFull(process.env.NOTION_DATABASE_ID, {
+      notionToken: process.env.NOTION_API_KEY,
+    });
     ```
 
 ### Filtering Results

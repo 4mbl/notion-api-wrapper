@@ -1,19 +1,17 @@
-import { Client } from '@notionhq/client';
-import dotenv from 'dotenv';
-import {
+import type {
   PartialPageObjectResponse,
-  type DatabaseObjectResponse,
-  type PageObjectResponse,
+  DatabaseObjectResponse,
+  PageObjectResponse,
   PartialDatabaseObjectResponse,
 } from '@notionhq/client/build/src/api-endpoints';
 import { processQueryData, removeProps, simplifyProps } from './util';
 import { BuiltFilter } from './filter';
 
-dotenv.config();
+const NOTION_VERSION = '2022-06-28' as const;
+export const DEFAULT_BATCH_SIZE = 100;
 
-export const notion = new Client({
-  auth: process.env.NOTION_API_KEY,
-});
+const NO_API_KEY_ERROR =
+  'Notion API key not found. Please set the `NOTION_API_KEY` environment variable and make sure is is accessible by this process.' as const;
 
 export type PropOptions = {
   remove?: {
@@ -56,25 +54,35 @@ export type QueryOptions = {
   includeArchived?: boolean;
 };
 
-export const DEFAULT_BATCH_SIZE = 100;
-
 export async function queryDatabase(
+  /** Notion database id. */
   id: string,
   nextCursor?: string,
   options?: QueryOptions
 ) {
-  const data = await notion.databases.query({
-    database_id: id,
+  const apiKey = options?.notionToken ?? process.env.NOTION_API_KEY;
+  if (!apiKey) throw new Error(NO_API_KEY_ERROR);
+
+  const body = {
     start_cursor: nextCursor,
     filter: options?.filter,
     sorts:
       options?.sort &&
       (Array.isArray(options?.sort) ? options?.sort : [options?.sort]),
     page_size: options?.batchSize ?? DEFAULT_BATCH_SIZE,
-    auth: options?.notionToken,
     in_trash: options?.includeTrashed,
     archived: options?.includeArchived,
-  });
+  };
+
+  const data = await fetch(`https://api.notion.com/v1/databases/${id}/query`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${apiKey}`,
+      'Notion-Version': NOTION_VERSION,
+    },
+    body: JSON.stringify(body),
+  }).then((res) => res.json());
 
   return {
     data: processQueryData(data, options?.propOptions),
@@ -82,7 +90,11 @@ export async function queryDatabase(
   };
 }
 
-export async function queryDatabaseFull(id: string, options?: QueryOptions) {
+export async function queryDatabaseFull(
+  /** Notion database id. */
+  id: string,
+  options?: QueryOptions
+) {
   let nextCursor: string | undefined = undefined;
   const allResults: Array<
     | PageObjectResponse
@@ -100,27 +112,49 @@ export async function queryDatabaseFull(id: string, options?: QueryOptions) {
 }
 
 export async function getDatabaseColumns(id: string, options?: QueryOptions) {
-  const data = await notion.databases.retrieve({
-    database_id: id,
-  });
+  const apiKey = options?.notionToken ?? process.env.NOTION_API_KEY;
+  if (!apiKey) throw new Error(NO_API_KEY_ERROR);
 
-  return removeProps(simplifyProps(data, options?.propOptions));
+  const data = await fetch(`https://api.notion.com/v1/databases/${id}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${apiKey}`,
+      'Notion-Version': NOTION_VERSION,
+    },
+  }).then((res) => res.json());
+
+  return removeProps(
+    simplifyProps(data, options?.propOptions)
+  ) as DatabaseObjectResponse;
 }
 
 export async function searchFromDatabase(
-  databaseId: string,
+  /** Notion database id. */
+  id: string,
   value: string,
   property = 'Name',
   options?: QueryOptions
 ) {
-  const data = await notion.databases.query({
-    database_id: databaseId,
-    filter: {
-      property: property,
-      rich_text: {
-        equals: value,
-      },
+  const apiKey = options?.notionToken ?? process.env.NOTION_API_KEY;
+  if (!apiKey) throw new Error(NO_API_KEY_ERROR);
+
+  const data = await fetch(`https://api.notion.com/v1/databases/${id}/query`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${apiKey}`,
+      'Notion-Version': NOTION_VERSION,
     },
-  });
+    body: JSON.stringify({
+      filter: {
+        property: property,
+        rich_text: {
+          equals: value,
+        },
+      },
+    }),
+  }).then((res) => res.json());
+
   return processQueryData(data, options?.propOptions);
 }
