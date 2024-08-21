@@ -1,6 +1,6 @@
 import { PageObjectResponse } from '@notionhq/client/build/src/api-endpoints';
 
-export type VerboseDatabaseProperty = PageObjectResponse['properties'][0];
+export type VerboseDatabaseProperty = PageObjectResponse['properties'][number];
 
 export type SimpleDatabasePage = {
   object: 'page';
