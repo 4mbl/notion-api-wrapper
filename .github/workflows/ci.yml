@@ -41,3 +41,5 @@ jobs:
         run: pnpm run build
       - name: Test
         run: pnpm run test
+        env:
+          NODE_AUTH_TOKEN: ${{secrets.TESTING_API_KEY}}
