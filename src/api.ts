@@ -48,7 +48,7 @@ export type SortOption = {
 export type QueryOptions = {
   filter?: BuiltFilter;
   propOptions?: PropOptions;
-  sorts?: SortOption | SortOption[];
+  sort?: SortOption | SortOption[];
   /** How many items to fetch at a time. Defaults to 100. */
   batchSize?: number;
   notionToken?: string;
@@ -68,8 +68,8 @@ export async function queryDatabase(
     start_cursor: nextCursor,
     filter: options?.filter,
     sorts:
-      options?.sorts &&
-      (Array.isArray(options?.sorts) ? options?.sorts : [options?.sorts]),
+      options?.sort &&
+      (Array.isArray(options?.sort) ? options?.sort : [options?.sort]),
     page_size: options?.batchSize ?? DEFAULT_BATCH_SIZE,
     auth: options?.notionToken,
     in_trash: options?.includeTrashed,

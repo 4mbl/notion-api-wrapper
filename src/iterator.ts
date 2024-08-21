@@ -70,10 +70,10 @@ export class DatabaseIterator<T extends PageObjectResponse>
     }
 
     const queryOptions = this._queryOptions;
-    if (!queryOptions.sorts) {
+    if (!queryOptions.sort) {
       const primaryProperty = await this.getPrimaryPropertyId();
       if (primaryProperty) {
-        queryOptions.sorts = {
+        queryOptions.sort = {
           direction: 'ascending',
           property: primaryProperty,
         };
