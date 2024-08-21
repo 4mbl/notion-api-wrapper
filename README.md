@@ -158,13 +158,17 @@ const { data2 } = await queryDatabase(process.env.NOTION_DATABASE_ID, nextCursor
 
 ### Database Search
 
-You can search the database with the `searchFromDatabase` function. This supports some of the same options as the query functions.
+You can easily search a database for a matching page by using the `searchFromDatabase` function.
 
 ```ts
-const data = await searchFromDatabase(process.env.NOTION_DATABASE_ID, 'kiwi')
+const data = await searchFromDatabase(process.env.NOTION_DATABASE_ID, { query: 'kiwi' });
 ```
 
-By default the search uses the `Name` property, but you can specify a different property with a third argument. The search looks for excact matches, but you can also use the `contains` option to search for partial matches.
+By default the search uses the `Name` property, but you can specify a different property. By default the search looks for excact matches, but you can modify this behavior too.
+
+```ts
+const data = await searchFromDatabase(process.env.NOTION_DATABASE_ID, { query: 'vegetab', property: 'Category', matchBy: 'startsWith' })
+```
 
 ### Database Metadata
 

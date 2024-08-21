@@ -52,13 +52,13 @@ test('queryDatabase with sort', async () => {
     },
   });
   expect(
-    (resp.data.results[0] as any).properties.Name.title[0].plain_text
+    (resp.data.results[0] as any).properties.Name.title[0].plain_text,
   ).toBe('One');
   expect(
-    (resp.data.results[3] as any).properties.Name.title[0].plain_text
+    (resp.data.results[3] as any).properties.Name.title[0].plain_text,
   ).toBe('Four');
   expect(
-    (resp.data.results[6] as any).properties.Name.title[0].plain_text
+    (resp.data.results[6] as any).properties.Name.title[0].plain_text,
   ).toBe('Seven');
 });
 
@@ -207,9 +207,8 @@ test('queryDatabase with pagination', async () => {
 test('searchFromDatabase', async () => {
   const resp = await searchFromDatabase(
     TESTING_DATABASE_ID,
-    'Thirteen',
-    undefined,
-    { notionToken: TESTING_API_KEY }
+    { query: 'Thirteen' },
+    { notionToken: TESTING_API_KEY },
   );
 
   const match = resp.results[0] as any;
@@ -219,11 +218,10 @@ test('searchFromDatabase', async () => {
 test('searchFromDatabase with custom prop', async () => {
   const resp = await searchFromDatabase(
     TESTING_DATABASE_ID,
-    '14th page',
-    'Description',
+    { query: '14th page', property: 'Description' },
     {
       notionToken: TESTING_API_KEY,
-    }
+    },
   );
 
   const match = resp.results[0] as any;

@@ -129,13 +129,44 @@ export async function getDatabaseColumns(id: string, options?: QueryOptions) {
   ) as DatabaseObjectResponse;
 }
 
+type SearchOptions = {
+  /** The value to search for. */
+  query: string;
+  /** The property to search in. */
+  property?: string;
+  /** The match type to use. */
+  match?: MatchType;
+};
+type MatchType =
+  | 'equals'
+  | 'contains'
+  | 'startsWith'
+  | 'endsWith'
+  | 'notEquals'
+  | 'notContains';
 export async function searchFromDatabase(
   /** Notion database id. */
   id: string,
-  value: string,
-  property = 'Name',
+  search: SearchOptions,
   options?: QueryOptions,
 ) {
+  const convertMatchType = (matchType: MatchType) => {
+    switch (matchType) {
+      case 'equals':
+        return 'equals';
+      case 'contains':
+        return 'contains';
+      case 'startsWith':
+        return 'starts_with';
+      case 'endsWith':
+        return 'ends_with';
+      case 'notEquals':
+        return 'does_not_equal';
+      case 'notContains':
+        return 'does_not_contain';
+    }
+  };
+
   const apiKey = options?.notionToken ?? process.env.NOTION_API_KEY;
   if (!apiKey) throw new Error(NO_API_KEY_ERROR);
 
@@ -148,9 +179,9 @@ export async function searchFromDatabase(
     },
     body: JSON.stringify({
       filter: {
-        property: property,
+        property: search?.property ?? 'Name',
         rich_text: {
-          equals: value,
+          [convertMatchType(search?.match ?? 'equals')]: search.query,
         },
       },
     }),
