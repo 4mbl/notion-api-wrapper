@@ -16,15 +16,17 @@
   "scripts": {
     "preinstall": "npx -y only-allow pnpm",
     "build": "tsc",
+    "test": "vitest",
     "bump:patch": "npm version patch --no-git-tag-version",
     "bump:minor": "npm version minor --no-git-tag-version",
     "bump:major": "npm version major --no-git-tag-version"
   },
-  "dependencies": {},
   "devDependencies": {
     "@notionhq/client": "^2.2.15",
     "@types/node": "^22.4.2",
-    "typescript": "^5.4.5"
+    "dotenv": "^16.4.5",
+    "typescript": "^5.4.5",
+    "vitest": "^2.0.5"
   },
   "packageManager": "pnpm@9.4.0"
 }
