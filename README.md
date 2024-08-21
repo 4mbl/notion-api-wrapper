@@ -1,6 +1,6 @@
 # Notion API Wrapper
 
-> Making Notion API a bit easier to use.
+> Zero dependency Notion API client.
 
 * [Installation](#installation)
 * [Getting Started](#getting-started)
