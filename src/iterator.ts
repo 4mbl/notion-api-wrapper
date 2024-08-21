@@ -88,7 +88,7 @@ export class DatabaseIterator<T extends PageObjectResponse>
     const response = await queryDatabase(
       this._databaseId,
       this._cursor,
-      queryOptions
+      queryOptions,
     );
     this._cursor = response.cursor;
     if (!response.data.has_more) this._moreToFetch = false;
@@ -110,7 +110,7 @@ export class DatabaseIterator<T extends PageObjectResponse>
       ...columnsObj[key],
     }));
     const primary = columnsArray.find(
-      (col: { type: string }) => col.type === 'title'
+      (col: { type: string }) => col.type === 'title',
     );
     this._primaryProperty = primary?.id;
     return this._primaryProperty;

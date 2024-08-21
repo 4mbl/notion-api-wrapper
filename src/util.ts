@@ -12,7 +12,7 @@ import {
 
 export function processQueryData(
   data: QueryDatabaseResponse,
-  options?: PropOptions
+  options?: PropOptions,
 ) {
   if (options?.remove || options?.keep) {
     data = removeProps(data, options) as QueryDatabaseResponse;
@@ -24,7 +24,7 @@ export function processQueryData(
 export function removeProps(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   data: any,
-  options?: PropOptions
+  options?: PropOptions,
 ): QueryDatabaseResponse | DatabaseObjectResponse {
   const removeMetadata: string[] = [];
   const removeProps: string[] = [];
@@ -113,7 +113,7 @@ export function simplifyProps(data: any, options?: PropOptions) {
 
 function simplifyProp(
   prop: VerboseDatabaseProperty,
-  options?: PropOptions
+  options?: PropOptions,
 ): SimpleDatabaseProperty {
   switch (prop.type) {
     case 'title':
@@ -141,8 +141,8 @@ function simplifyProp(
         file.type === 'file'
           ? file.file.url
           : file.type === 'external'
-          ? file.external.url
-          : null
+            ? file.external.url
+            : null,
       );
     case 'checkbox':
       return prop.checkbox;
@@ -164,7 +164,7 @@ function simplifyProp(
       if (prop.rollup.type === 'array') {
         const rollup = prop.rollup.array;
         const simpleRollup = rollup?.map((item) =>
-          simplifyProp({ ...item, id: prop.id }, options)
+          simplifyProp({ ...item, id: prop.id }, options),
         );
         const flattenRollup = simpleRollup.flat();
         return flattenRollup;
@@ -209,7 +209,7 @@ export function getIconUrl(icon: DatabaseObjectResponse['icon']) {
   else if (icon?.type === 'file') iconUrl = icon?.file?.url;
   else if (icon?.type === 'emoji') {
     iconUrl = `https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/${emojiToHex(
-      icon.emoji
+      icon.emoji,
     )}.png`;
   }
   return {
