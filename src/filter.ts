@@ -1,4 +1,4 @@
-import { QueryDatabaseParameters } from '@notionhq/client/build/src/api-endpoints';
+import type { QueryDatabaseParameters } from '@notionhq/client/build/src/api-endpoints';
 
 export type BuiltFilter = QueryDatabaseParameters['filter'];
 

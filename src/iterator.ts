@@ -1,8 +1,13 @@
-import {
+import type {
   GetDatabaseResponse,
   PageObjectResponse,
 } from '@notionhq/client/build/src/api-endpoints';
-import { DEFAULT_BATCH_SIZE, notion, queryDatabase, QueryOptions } from './api';
+import {
+  DEFAULT_BATCH_SIZE,
+  getDatabaseColumns,
+  queryDatabase,
+  QueryOptions,
+} from './api';
 
 type IteratorOptions = QueryOptions & {
   /** How many items to yield at a time. Defaults to `batchSize` or `100` if not set. */
@@ -91,11 +96,9 @@ export class DatabaseIterator<T extends PageObjectResponse>
   }
 
   async getColumns() {
-    this._columns = notion.databases
-      .retrieve({
-        database_id: this._databaseId,
-      })
-      .then((data) => data.properties);
+    this._columns = getDatabaseColumns(this._databaseId, {
+      notionToken: this._queryOptions.notionToken,
+    }).then((data) => data.properties);
   }
 
   async getPrimaryPropertyId() {
