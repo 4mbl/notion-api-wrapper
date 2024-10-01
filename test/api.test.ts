@@ -10,24 +10,32 @@ import { DatabaseIterator, FilterBuilder } from '../src';
 dotenv.config();
 
 const TESTING_API_KEY = process.env.TESTING_API_KEY;
-process.env.NOTION_API_KEY = undefined;
 
 const TESTING_DATABASE_ID = '16004341ec564e0397bd75cbf6be6f91';
 
-test('queryDatabase', async () => {
+test('queryDatabase with notionToken', async () => {
+  const prevNotionApiKey = process.env.NOTION_API_KEY;
+  process.env.NOTION_API_KEY = undefined;
+
   const resp = await queryDatabase(TESTING_DATABASE_ID, undefined, {
     notionToken: TESTING_API_KEY,
     batchSize: 10,
   });
   expect(resp.data.results).toHaveLength(10);
+
+  process.env.NOTION_API_KEY = prevNotionApiKey;
 });
 
-test('queryDatabaseFull', async () => {
-  const resp = await queryDatabaseFull(TESTING_DATABASE_ID, {
-    notionToken: TESTING_API_KEY,
+test('queryDatabase with environment variable', async () => {
+  const prevNotionApiKey = process.env.NOTION_API_KEY;
+  process.env.NOTION_API_KEY = process.env.TESTING_API_KEY;
+
+  const resp = await queryDatabase(TESTING_DATABASE_ID, undefined, {
     batchSize: 10,
   });
-  expect(resp).toHaveLength(20);
+  expect(resp.data.results).toHaveLength(10);
+
+  process.env.NOTION_API_KEY = prevNotionApiKey;
 });
 
 test('queryDatabase with filter', async () => {
@@ -204,6 +212,14 @@ test('queryDatabase with pagination', async () => {
   expect(resp2.data.results).toHaveLength(10);
 });
 
+test('queryDatabaseFull', async () => {
+  const resp = await queryDatabaseFull(TESTING_DATABASE_ID, {
+    notionToken: TESTING_API_KEY,
+    batchSize: 10,
+  });
+  expect(resp).toHaveLength(20);
+});
+
 test('searchFromDatabase', async () => {
   const resp = await searchFromDatabase(
     TESTING_DATABASE_ID,
@@ -242,7 +258,7 @@ test('getDatabaseColumns', async () => {
   expect(resp.properties.Description).toBeDefined();
 });
 
-test('DataBaseIterator', async () => {
+test('DatabaseIterator', async () => {
   const db = new DatabaseIterator(TESTING_DATABASE_ID, {
     notionToken: TESTING_API_KEY,
     batchSize: 10,
