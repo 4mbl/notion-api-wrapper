@@ -1,4 +1,7 @@
-import type { PageObjectResponse } from '@notionhq/client/build/src/api-endpoints';
+import type {
+  DatabaseObjectResponse,
+  PageObjectResponse,
+} from '@notionhq/client/build/src/api-endpoints';
 
 export type VerboseDatabaseProperty = PageObjectResponse['properties'][number];
 
@@ -28,3 +31,9 @@ export type SimpleDatabaseProperty =
   | null
   | boolean
   | (string | number | null | boolean)[];
+
+/** Represents a Notion API compatible emoji character. */
+export type EmojiRequest = Extract<
+  DatabaseObjectResponse['icon'],
+  { type: 'emoji'; emoji: string }
+>['emoji'];
