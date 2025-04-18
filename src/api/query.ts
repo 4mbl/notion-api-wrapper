@@ -4,14 +4,12 @@ import type {
   PageObjectResponse,
   PartialDatabaseObjectResponse,
 } from '@notionhq/client/build/src/api-endpoints';
-import { processQueryData, removeProps, simplifyProps } from './util';
-import { BuiltFilter } from './filter';
+import { processQueryData, removeProps, simplifyProps } from '../util';
+import { BuiltFilter } from '../filter-builder';
+import { NO_API_KEY_ERROR } from '../internal/errors';
+import { NOTION_VERSION } from '../constants';
 
-const NOTION_VERSION = '2022-06-28' as const;
 export const DEFAULT_BATCH_SIZE = 100;
-
-const NO_API_KEY_ERROR =
-  'Notion API key not found. Please set the `NOTION_API_KEY` environment variable and make sure is is accessible by this process.' as const;
 
 export type PropOptions = {
   remove?: {
@@ -49,9 +47,11 @@ export type QueryOptions = {
   sort?: SortOption | SortOption[];
   /** How many items to fetch at a time. Defaults to 100. */
   batchSize?: number;
-  notionToken?: string;
   includeTrashed?: boolean;
   includeArchived?: boolean;
+
+  notionToken?: string;
+  notionVersion?: string;
 };
 
 export async function queryDatabase(
@@ -79,7 +79,7 @@ export async function queryDatabase(
     headers: {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${apiKey}`,
-      'Notion-Version': NOTION_VERSION,
+      'Notion-Version': options?.notionVersion ?? NOTION_VERSION,
     },
     body: JSON.stringify(body),
   }).then((res) => res.json());
@@ -120,7 +120,7 @@ export async function getDatabaseColumns(id: string, options?: QueryOptions) {
     headers: {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${apiKey}`,
-      'Notion-Version': NOTION_VERSION,
+      'Notion-Version': options?.notionVersion ?? NOTION_VERSION,
     },
   }).then((res) => res.json());
 
@@ -175,7 +175,7 @@ export async function searchFromDatabase(
     headers: {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${apiKey}`,
-      'Notion-Version': NOTION_VERSION,
+      'Notion-Version': options?.notionVersion ?? NOTION_VERSION,
     },
     body: JSON.stringify({
       filter: {

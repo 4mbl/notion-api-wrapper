@@ -3,12 +3,12 @@ import type {
   QueryDatabaseResponse,
   RichTextItemResponse,
 } from '@notionhq/client/build/src/api-endpoints';
-import { PropOptions } from './api';
+import { PropOptions } from './api/query';
 import {
   SimpleDatabaseProperty,
   VerboseDatabaseProperty,
   SimpleDatabasePage,
-} from './apiTypes';
+} from './api/types';
 
 export function processQueryData(
   data: QueryDatabaseResponse,
@@ -218,7 +218,7 @@ export function getIconUrl(icon: DatabaseObjectResponse['icon']) {
   };
 }
 
-export function geDatabasetIdFromUrl(url: string): string | null {
+export function geDatabasetIdFromUrl(url: string) {
   const regex = /\/([^/?]+)\?/;
   const match = url.match(regex);
   return match?.[1] ? match[1] : null;
