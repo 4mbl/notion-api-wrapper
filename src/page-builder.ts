@@ -1,7 +1,11 @@
 import { NOTION_VERSION } from './constants';
 import { NO_API_KEY_ERROR } from './internal/errors';
 
-import { EmojiRequest, SimpleDatabaseProperty } from './api/types';
+import {
+  EmojiRequest,
+  SimpleDatabaseProperty,
+  TimeZoneRequest,
+} from './api/types';
 import {
   isArrayOfStrings,
   isBoolean,
@@ -10,11 +14,13 @@ import {
   isString,
   isUrl,
 } from './validation';
+import { CreatePageParameters } from '@notionhq/client/build/src/api-endpoints';
 
 // More descriptive type names for anyone using the library.
 
 /** A Notion API compatible emoji character. */
 type Emoji = EmojiRequest;
+type TimeZone = TimeZoneRequest;
 /** Property id or name. Using the id is recommended to allow the end user to change the name of the property. */
 type PropertyKey = string;
 type PropertyValue = SimpleDatabaseProperty;
@@ -36,7 +42,7 @@ type PropertyType =
 
 export class PageBuilder {
   /** Notion page id of the parent database. */
-  data: any;
+  data: CreatePageParameters;
   notionToken: string;
   notionVersion: string;
 
@@ -81,7 +87,7 @@ export class PageBuilder {
     } else if (isEmoji(icon)) {
       this.data.icon = {
         type: 'emoji',
-        emoji: icon,
+        emoji: icon as EmojiRequest,
       };
     } else {
       throw new Error(
@@ -183,7 +189,7 @@ export class PageBuilder {
   date(
     key: PropertyKey,
     value: string | [string] | [string, string],
-    timezone?: string,
+    timezone?: TimeZone,
   ) {
     const start = Array.isArray(value) ? value[0] : value;
 
@@ -194,10 +200,11 @@ export class PageBuilder {
           ? value[0]
           : value;
     this.data.properties[key] = {
+      type: 'date',
       date: {
         start: start,
         end: end,
-        time_zone: timezone,
+        time_zone: timezone ?? null,
       },
     };
   }

@@ -1,5 +1,6 @@
 import type {
   DatabaseObjectResponse,
+  DatePropertyItemObjectResponse,
   PageObjectResponse,
 } from '@notionhq/client/build/src/api-endpoints';
 
@@ -37,3 +38,10 @@ export type EmojiRequest = Extract<
   DatabaseObjectResponse['icon'],
   { type: 'emoji'; emoji: string }
 >['emoji'];
+
+export type TimeZoneRequest =
+  NonNullable<DatePropertyItemObjectResponse['date']> extends {
+    time_zone: infer T;
+  }
+    ? T
+    : never;
