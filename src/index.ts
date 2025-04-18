@@ -1,3 +1,4 @@
+export * from './api/delete';
 export * from './api/query';
 export * from './api/types';
 export * from './filter-builder';
