@@ -8,6 +8,7 @@ import { processQueryData, removeProps, simplifyProps } from '../util';
 import { BuiltFilter } from '../filter-builder';
 import { NO_API_KEY_ERROR } from '../internal/errors';
 import { NOTION_VERSION } from '../constants';
+import { isObjectId } from '../validation';
 
 export const DEFAULT_BATCH_SIZE = 100;
 
@@ -60,6 +61,8 @@ export async function queryDatabase(
   nextCursor?: string,
   options?: QueryOptions,
 ) {
+  if (!isObjectId(id)) throw new Error('Invalid database id');
+
   const apiKey = options?.notionToken ?? process.env.NOTION_API_KEY;
   if (!apiKey) throw new Error(NO_API_KEY_ERROR);
 
@@ -95,6 +98,8 @@ export async function queryDatabaseFull(
   id: string,
   options?: QueryOptions,
 ) {
+  if (!isObjectId(id)) throw new Error('Invalid database id');
+
   let nextCursor: string | undefined = undefined;
   const allResults: Array<
     | PageObjectResponse
@@ -150,6 +155,8 @@ export async function searchFromDatabase(
   search: SearchOptions,
   options?: QueryOptions,
 ) {
+  if (!isObjectId(id)) throw new Error('Invalid database id');
+
   const convertMatchType = (matchType: MatchType) => {
     switch (matchType) {
       case 'equals':

@@ -1,5 +1,6 @@
 import { NOTION_VERSION } from '../constants';
 import { NO_API_KEY_ERROR } from '../internal/errors';
+import { isObjectId } from '../validation';
 
 export async function trashPage(
   pageId: string,
@@ -8,6 +9,8 @@ export async function trashPage(
     notionVersion?: string;
   },
 ) {
+  if (!isObjectId(pageId)) throw new Error('Invalid page id');
+
   const apiKey = options?.notionToken ?? process.env.NOTION_API_KEY;
   if (!apiKey) throw new Error(NO_API_KEY_ERROR);
 

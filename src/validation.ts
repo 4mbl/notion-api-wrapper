@@ -32,3 +32,9 @@ export function isEmoji(input: SimpleDatabaseProperty) {
 export function isArrayOfStrings(input: SimpleDatabaseProperty) {
   return Array.isArray(input) && input.every((item) => isString(item));
 }
+
+/** Validate a page or database id */
+export function isObjectId(id: string) {
+  const regex = /^[0-9a-f]{32}$/;
+  return regex.test(id.replace(/-/g, ''));
+}

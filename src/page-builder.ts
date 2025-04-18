@@ -11,6 +11,7 @@ import {
   isBoolean,
   isEmoji,
   isNumber,
+  isObjectId,
   isString,
   isUrl,
 } from './validation';
@@ -50,6 +51,8 @@ export class PageBuilder {
     parentId: string,
     options?: { notionToken?: string; notionVersion?: string },
   ) {
+    if (!isObjectId(parentId)) throw new Error('Invalid parent id');
+
     const apiKey = options?.notionToken ?? process.env.NOTION_API_KEY;
     if (!apiKey) throw new Error(NO_API_KEY_ERROR);
     this.notionToken = apiKey;
