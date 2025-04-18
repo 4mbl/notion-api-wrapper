@@ -7,7 +7,7 @@ import {
   getDatabaseColumns,
   queryDatabase,
   QueryOptions,
-} from './api';
+} from './api/query';
 
 type IteratorOptions = QueryOptions & {
   /** How many items to yield at a time. Defaults to `batchSize` or `100` if not set. */

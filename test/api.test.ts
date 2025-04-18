@@ -4,7 +4,7 @@ import {
   queryDatabase,
   queryDatabaseFull,
   searchFromDatabase,
-} from '../src/api';
+} from '../src/api/query';
 import dotenv from 'dotenv';
 import { DatabaseIterator, FilterBuilder } from '../src';
 dotenv.config();

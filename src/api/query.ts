@@ -4,8 +4,8 @@ import type {
   PageObjectResponse,
   PartialDatabaseObjectResponse,
 } from '@notionhq/client/build/src/api-endpoints';
-import { processQueryData, removeProps, simplifyProps } from './util';
-import { BuiltFilter } from './filter';
+import { processQueryData, removeProps, simplifyProps } from '../util';
+import { BuiltFilter } from '../filter-builder';
 
 const NOTION_VERSION = '2022-06-28' as const;
 export const DEFAULT_BATCH_SIZE = 100;
