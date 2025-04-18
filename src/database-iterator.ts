@@ -8,6 +8,7 @@ import {
   queryDatabase,
   QueryOptions,
 } from './api/query';
+import { isObjectId } from './validation';
 
 type IteratorOptions = QueryOptions & {
   /** How many items to yield at a time. Defaults to `batchSize` or `100` if not set. */
@@ -27,6 +28,8 @@ export class DatabaseIterator<T extends PageObjectResponse>
   private _cachedResults: Array<T> = [];
 
   constructor(databaseId: string, options?: IteratorOptions) {
+    if (!isObjectId(databaseId)) throw new Error('Invalid database id');
+
     this._cursor = undefined;
     this._databaseId = databaseId;
     const opts = options ?? {};
