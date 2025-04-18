@@ -13,6 +13,7 @@
   * [Database Search](#database-search)
   * [Database Metadata](#database-metadata)
   * [Database Iterator](#database-iterator)
+  * [Database Builder](#database-builder)
 
 ## Installation
 
@@ -213,4 +214,38 @@ const dbWithCustomType = new DatabaseIterator<CustomType>(
 for await (const chunk of dbWithCustomType) {
   const titles = chunk.map((c) => c.properties.Name.title[0].plain_text))
 }
+```
+
+### Database Builder
+
+This package also provides a `PageBuilder` class that can be used to create pages in a database.
+
+```ts
+import { PageBuilder } from 'notion-api-wrapper';
+
+const builder = new PageBuilder(process.env.NOTION_DATABASE_ID, {
+  notionToken: process.env.NOTION_API_KEY,
+});
+
+builder.cover("https://example.com/image.png");
+
+builder.icon("🎁");
+// icon supports emoji characters and urls to images:
+// builder.icon("https://example.com/image.png");
+
+builder.title('Test Page with all data - separate methods');
+builder.richText('Rich Text', 'Test Rich Text');
+builder.checkbox('Checkbox', true);
+builder.date('Date', '2025-01-01');
+builder.files('Files & Media', 'https://example.com/image.png');
+builder.multiSelect('Multi-Select', ['Option 1', 'Option 2']);
+builder.number('Number', 42);
+builder.people('People', process.env.PERSON_ID);
+builder.phoneNumber('Phone Number', '+1 (555) 555-5555');
+builder.relation('Relation', process.env.RELATION_PAGE_ID);
+builder.select('Select', 'Option A');
+builder.status('Status', 'Done');
+builder.url('URL', 'https://example.com');
+
+const page = await builder.create();
 ```
