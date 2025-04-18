@@ -77,6 +77,7 @@ export class PageBuilder {
         url,
       },
     };
+    return this;
   }
 
   icon(icon: string | Emoji) {
@@ -97,6 +98,7 @@ export class PageBuilder {
         'Icon must be a string or an emoji. If you want to use an image, use the URL.',
       );
     }
+    return this;
   }
 
   // PROPERTIES //
@@ -169,6 +171,7 @@ export class PageBuilder {
         },
       ],
     };
+    return this;
   }
 
   richText(key: PropertyKey, value: string) {
@@ -181,12 +184,14 @@ export class PageBuilder {
         },
       ],
     };
+    return this;
   }
 
   checkbox(key: PropertyKey, value: boolean) {
     this.data.properties[key] = {
       checkbox: value,
     };
+    return this;
   }
 
   date(
@@ -210,6 +215,7 @@ export class PageBuilder {
         time_zone: timezone ?? null,
       },
     };
+    return this;
   }
 
   files(key: PropertyKey, value: string | string[]) {
@@ -222,6 +228,7 @@ export class PageBuilder {
         },
       })),
     };
+    return this;
   }
 
   multiSelect(key: PropertyKey, value: string | string[]) {
@@ -231,12 +238,14 @@ export class PageBuilder {
         name: v,
       })),
     };
+    return this;
   }
 
   number(key: PropertyKey, value: number) {
     this.data.properties[key] = {
       number: value,
     };
+    return this;
   }
 
   people(key: PropertyKey, value: string | string[]) {
@@ -246,12 +255,14 @@ export class PageBuilder {
         id: v,
       })),
     };
+    return this;
   }
 
   phoneNumber(key: PropertyKey, value: string) {
     this.data.properties[key] = {
       phone_number: value,
     };
+    return this;
   }
 
   relation(key: PropertyKey, value: string | string[]) {
@@ -261,6 +272,7 @@ export class PageBuilder {
         id: v,
       })),
     };
+    return this;
   }
 
   select(key: PropertyKey, value: string) {
@@ -269,6 +281,7 @@ export class PageBuilder {
         name: value,
       },
     };
+    return this;
   }
 
   status(key: PropertyKey, value: string) {
@@ -277,6 +290,7 @@ export class PageBuilder {
         name: value,
       },
     };
+    return this;
   }
 
   url(key: PropertyKey, value: string) {
@@ -285,6 +299,7 @@ export class PageBuilder {
     this.data.properties[key] = {
       url: value,
     };
+    return this;
   }
 
   /** Sends the API request to create the page using the data provided via the builder methods. */
