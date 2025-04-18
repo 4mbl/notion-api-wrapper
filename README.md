@@ -7,7 +7,7 @@
   * [Querying Database](#querying-database)
   * [Filtering Results](#filtering-results)
   * [Sorting Results](#sorting-results)
-  * [Field and Prop Options](#field-and-prop-options)
+  * [Field and Property Options](#field-and-property-options)
 * [Advanced Usage](#advanced-usage)
   * [Pagination](#pagination)
   * [Database Search](#database-search)
@@ -101,9 +101,9 @@ const data = await queryDatabaseFull(process.env.NOTION_DATABASE_ID, {
 });
 ```
 
-### Field and Prop Options
+### Field and Property Options
 
-There is also options to remove built-in fields and props from the results. Here is a kitchen sink example of that.
+There is also options to remove built-in fields and properties from the results. Here is a kitchen sink example of that.
 
 ```ts
 const data = await queryDatabaseFull(process.env.NOTION_DATABASE_ID, {
@@ -124,7 +124,7 @@ const data = await queryDatabaseFull(process.env.NOTION_DATABASE_ID, {
 });
 ```
 
-You can also remove all props except certain ones by using the `keep` option.
+You can also remove all properties except certain ones by using the `keep` option.
 
 ```ts
 const data = await queryDatabaseFull(process.env.NOTION_DATABASE_ID, {
