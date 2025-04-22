@@ -1,4 +1,11 @@
-import { afterAll, expect, test } from 'vitest';
+import {
+  afterAll,
+  afterEach,
+  beforeAll,
+  beforeEach,
+  expect,
+  test,
+} from 'vitest';
 import dotenv from 'dotenv';
 import { PageBuilder, queryDatabaseFull, trashPage } from '../src';
 dotenv.config();
@@ -15,9 +22,6 @@ const SAMPLE_IMAGE_URL =
   'https://upload.wikimedia.org/wikipedia/commons/9/9f/Ara_macao_-Fort_Worth_Zoo-8.jpg';
 
 test('PageBuilder with minimal data', async () => {
-  const prevNotionApiKey = process.env.NOTION_API_KEY;
-  process.env.NOTION_API_KEY = undefined;
-
   const builder = new PageBuilder(BUILER_TESTING_DATABASE_ID, {
     notionToken: TESTING_API_KEY,
   });
@@ -42,14 +46,9 @@ test('PageBuilder with minimal data', async () => {
 
   // cleanup
   trashPage(page.id, { notionToken: TESTING_API_KEY });
-
-  process.env.NOTION_API_KEY = prevNotionApiKey;
 });
 
 test('PageBuilder with complete data - seperate methods', async () => {
-  const prevNotionApiKey = process.env.NOTION_API_KEY;
-  process.env.NOTION_API_KEY = undefined;
-
   const builder = new PageBuilder(BUILER_TESTING_DATABASE_ID, {
     notionToken: TESTING_API_KEY,
   });
@@ -106,14 +105,9 @@ test('PageBuilder with complete data - seperate methods', async () => {
 
   // cleanup
   trashPage(page.id, { notionToken: TESTING_API_KEY });
-
-  process.env.NOTION_API_KEY = prevNotionApiKey;
 });
 
 test('PageBuilder with complete data - using the `property` method', async () => {
-  const prevNotionApiKey = process.env.NOTION_API_KEY;
-  process.env.NOTION_API_KEY = undefined;
-
   const builder = new PageBuilder(BUILER_TESTING_DATABASE_ID, {
     notionToken: TESTING_API_KEY,
   });
@@ -174,14 +168,9 @@ test('PageBuilder with complete data - using the `property` method', async () =>
 
   // cleanup
   trashPage(page.id, { notionToken: TESTING_API_KEY });
-
-  process.env.NOTION_API_KEY = prevNotionApiKey;
 });
 
 test('PageBuilder with complete data - alternative data', async () => {
-  const prevNotionApiKey = process.env.NOTION_API_KEY;
-  process.env.NOTION_API_KEY = undefined;
-
   const builder = new PageBuilder(BUILER_TESTING_DATABASE_ID, {
     notionToken: TESTING_API_KEY,
   });
@@ -220,16 +209,23 @@ test('PageBuilder with complete data - alternative data', async () => {
   expect(p['Date'].date.end).toEqual('2025-02-01T00:00:00.000-05:00');
   expect(p['Multi-Select'].multi_select[0].name).toEqual('Option 1');
   expect(p['Multi-Select'].multi_select[1].name).toEqual('Option 2');
-
-  process.env.NOTION_API_KEY = prevNotionApiKey;
 });
 
-// Cleanup old pages
-afterAll(async () => {
-  const data = await queryDatabaseFull(BUILER_TESTING_DATABASE_ID, {
-    notionToken: TESTING_API_KEY,
-  });
+/* Require the notion token to be passed explicitly to avoid using the wrong token accidentally */
+const initialEnvVars: Record<string, string | undefined> = {};
+beforeEach(() => {
+  initialEnvVars['NOTION_API_KEY'] = process.env.NOTION_API_KEY;
+  process.env.NOTION_API_KEY = undefined;
+});
+afterEach(() => {
+  process.env.NOTION_API_KEY = initialEnvVars['NOTION_API_KEY'];
+});
 
+afterAll(async () => {
+  await cleanupOldPages();
+});
+
+async function cleanupOldPages() {
   const today = new Date();
   const cutoff = new Date(
     today.getFullYear(),
@@ -237,8 +233,11 @@ afterAll(async () => {
     today.getDate() - 7,
   );
 
+  const data = await queryDatabaseFull(BUILER_TESTING_DATABASE_ID, {
+    notionToken: TESTING_API_KEY,
+  });
+
   const promises = data.map(async (page) => {
-    console.log({ page });
     if (
       !(page as any).properties.Name.title[0].text.content.includes(
         '[[ DO NOT DELETE ]]',
@@ -249,4 +248,4 @@ afterAll(async () => {
     }
   });
   await Promise.all(promises);
-});
+}

@@ -7,35 +7,38 @@ import {
 } from '../src/api/query';
 import dotenv from 'dotenv';
 import { DatabaseIterator, FilterBuilder } from '../src';
+import { afterEach, beforeEach } from 'node:test';
 dotenv.config();
 
 const TESTING_API_KEY = process.env.TESTING_API_KEY;
 
 const TESTING_DATABASE_ID = '16004341ec564e0397bd75cbf6be6f91';
 
-test('queryDatabase with notionToken', async () => {
-  const prevNotionApiKey = process.env.NOTION_API_KEY;
+/* Require the notion token to be passed explicitly to avoid using the wrong token accidentally */
+const initialEnvVars: Record<string, string | undefined> = {};
+beforeEach(() => {
+  initialEnvVars['NOTION_API_KEY'] = process.env.NOTION_API_KEY;
   process.env.NOTION_API_KEY = undefined;
+});
+afterEach(() => {
+  process.env.NOTION_API_KEY = initialEnvVars['NOTION_API_KEY'];
+});
 
+test('queryDatabase with notionToken', async () => {
   const resp = await queryDatabase(TESTING_DATABASE_ID, undefined, {
     notionToken: TESTING_API_KEY,
     batchSize: 10,
   });
   expect(resp.data.results).toHaveLength(10);
-
-  process.env.NOTION_API_KEY = prevNotionApiKey;
 });
 
 test('queryDatabase with environment variable', async () => {
-  const prevNotionApiKey = process.env.NOTION_API_KEY;
-  process.env.NOTION_API_KEY = process.env.TESTING_API_KEY;
-
+  // NOTE: this is the only test that uses the env variable and not explicit token argument
+  process.env.NOTION_API_KEY = TESTING_API_KEY;
   const resp = await queryDatabase(TESTING_DATABASE_ID, undefined, {
     batchSize: 10,
   });
   expect(resp.data.results).toHaveLength(10);
-
-  process.env.NOTION_API_KEY = prevNotionApiKey;
 });
 
 test('queryDatabase with filter', async () => {
