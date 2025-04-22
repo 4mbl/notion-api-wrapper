@@ -1,11 +1,4 @@
-import {
-  afterAll,
-  afterEach,
-  beforeAll,
-  beforeEach,
-  expect,
-  test,
-} from 'vitest';
+import { afterAll, afterEach, beforeEach, expect, test } from 'vitest';
 import dotenv from 'dotenv';
 import { PageBuilder, queryDatabaseFull, trashPage } from '../src';
 dotenv.config();
