@@ -1,14 +1,16 @@
+import { processQueryData, removeProps, simplifyProps } from '../util.js';
+import type { BuiltFilter } from '../filter-builder.js';
+import { NO_API_KEY_ERROR } from '../internal/errors.js';
+import { NOTION_VERSION } from '../constants.js';
+import { isObjectId } from '../validation.js';
 import type {
-  PartialPageObjectResponse,
   DatabaseObjectResponse,
+  GetDatabaseResponse,
   PageObjectResponse,
   PartialDatabaseObjectResponse,
-} from '@notionhq/client/build/src/api-endpoints';
-import { processQueryData, removeProps, simplifyProps } from '../util';
-import { BuiltFilter } from '../filter-builder';
-import { NO_API_KEY_ERROR } from '../internal/errors';
-import { NOTION_VERSION } from '../constants';
-import { isObjectId } from '../validation';
+  PartialPageObjectResponse,
+  QueryDatabaseResponse,
+} from '../notion-types.js';
 
 export const DEFAULT_BATCH_SIZE = 100;
 
@@ -58,7 +60,7 @@ export type QueryOptions = {
 export async function queryDatabase(
   /** Notion database id. */
   id: string,
-  nextCursor?: string,
+  nextCursor?: string | null,
   options?: QueryOptions,
 ) {
   if (!isObjectId(id)) throw new Error('Invalid database id');
@@ -77,7 +79,7 @@ export async function queryDatabase(
     archived: options?.includeArchived,
   };
 
-  const data = await fetch(`https://api.notion.com/v1/databases/${id}/query`, {
+  const data = (await fetch(`https://api.notion.com/v1/databases/${id}/query`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -85,7 +87,7 @@ export async function queryDatabase(
       'Notion-Version': options?.notionVersion ?? NOTION_VERSION,
     },
     body: JSON.stringify(body),
-  }).then((res) => res.json());
+  }).then((res) => res.json())) as QueryDatabaseResponse;
 
   return {
     data: processQueryData(data, options?.propOptions),
@@ -120,14 +122,14 @@ export async function getDatabaseColumns(id: string, options?: QueryOptions) {
   const apiKey = options?.notionToken ?? process.env.NOTION_API_KEY;
   if (!apiKey) throw new Error(NO_API_KEY_ERROR);
 
-  const data = await fetch(`https://api.notion.com/v1/databases/${id}`, {
+  const data = (await fetch(`https://api.notion.com/v1/databases/${id}`, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${apiKey}`,
       'Notion-Version': options?.notionVersion ?? NOTION_VERSION,
     },
-  }).then((res) => res.json());
+  }).then((res) => res.json())) as GetDatabaseResponse;
 
   return removeProps(
     simplifyProps(data, options?.propOptions),
@@ -177,7 +179,7 @@ export async function searchFromDatabase(
   const apiKey = options?.notionToken ?? process.env.NOTION_API_KEY;
   if (!apiKey) throw new Error(NO_API_KEY_ERROR);
 
-  const data = await fetch(`https://api.notion.com/v1/databases/${id}/query`, {
+  const data = (await fetch(`https://api.notion.com/v1/databases/${id}/query`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -192,7 +194,7 @@ export async function searchFromDatabase(
         },
       },
     }),
-  }).then((res) => res.json());
+  }).then((res) => res.json())) as QueryDatabaseResponse;
 
   return processQueryData(data, options?.propOptions);
 }

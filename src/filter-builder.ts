@@ -1,4 +1,4 @@
-import type { QueryDatabaseParameters } from '@notionhq/client/build/src/api-endpoints';
+import type { QueryDatabaseParameters } from './notion-types.js';
 
 export type BuiltFilter = QueryDatabaseParameters['filter'];
 
@@ -20,9 +20,7 @@ export class FilterBuilder {
     }
 
     if (this.filters.length === 1) {
-      return {
-        ...this.filters[0],
-      };
+      return this.filters[0];
     }
 
     return {

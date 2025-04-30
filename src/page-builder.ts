@@ -1,11 +1,11 @@
-import { NOTION_VERSION } from './constants';
-import { NO_API_KEY_ERROR } from './internal/errors';
+import { NOTION_VERSION } from './constants.js';
+import { NO_API_KEY_ERROR } from './internal/errors.js';
 
-import {
+import type {
   EmojiRequest,
   SimpleDatabaseProperty,
   TimeZoneRequest,
-} from './api/types';
+} from './api/types.js';
 import {
   isArrayOfStrings,
   isBoolean,
@@ -14,8 +14,8 @@ import {
   isObjectId,
   isString,
   isUrl,
-} from './validation';
-import { CreatePageParameters } from '@notionhq/client/build/src/api-endpoints';
+} from './validation.js';
+import type { CreatePageParameters } from './notion-types.js';
 
 // More descriptive type names for anyone using the library.
 
