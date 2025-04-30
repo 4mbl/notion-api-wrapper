@@ -1,4 +1,4 @@
-import { SimpleDatabaseProperty } from './api/types';
+import type { SimpleDatabaseProperty } from './api/types.js';
 
 export function isUrl(input: string) {
   if (!input) return false;

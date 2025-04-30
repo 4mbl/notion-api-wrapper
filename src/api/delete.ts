@@ -1,6 +1,6 @@
-import { NOTION_VERSION } from '../constants';
-import { NO_API_KEY_ERROR } from '../internal/errors';
-import { isObjectId } from '../validation';
+import { NOTION_VERSION } from '../constants.js';
+import { NO_API_KEY_ERROR } from '../internal/errors.js';
+import { isObjectId } from '../validation.js';
 
 export async function trashPage(
   pageId: string,

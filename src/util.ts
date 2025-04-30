@@ -1,14 +1,14 @@
+import type { PropOptions } from './api/query.js';
+import type {
+  SimpleDatabaseProperty,
+  VerboseDatabaseProperty,
+  SimpleDatabasePage,
+} from './api/types.js';
 import type {
   DatabaseObjectResponse,
   QueryDatabaseResponse,
   RichTextItemResponse,
-} from '@notionhq/client/build/src/api-endpoints';
-import { PropOptions } from './api/query';
-import {
-  SimpleDatabaseProperty,
-  VerboseDatabaseProperty,
-  SimpleDatabasePage,
-} from './api/types';
+} from './notion-types.js';
 
 export function processQueryData(
   data: QueryDatabaseResponse,
@@ -129,19 +129,19 @@ function simplifyProp(
     case 'select':
       return prop.select?.name ?? null;
     case 'multi_select':
-      return prop.multi_select?.map((option) => option.name);
+      return prop.multi_select?.map((option: { name: string }) => option.name);
     case 'status':
       return prop.status?.name ?? null;
     case 'date':
       return prop.date?.start ?? null;
     case 'people':
-      return prop.people?.map((person) => person.id);
+      return prop.people?.map((person: { id: string }) => person.id);
     case 'files':
-      return prop.files?.map((file) =>
-        file.type === 'file'
-          ? file.file.url
-          : file.type === 'external'
-            ? file.external.url
+      return prop.files?.map((value) =>
+        value.type === 'file'
+          ? value.file.url
+          : value.type === 'external'
+            ? value.external.url
             : null,
       );
     case 'checkbox':
@@ -159,7 +159,7 @@ function simplifyProp(
       if (prop.formula.type === 'date') return prop.formula.date?.start ?? null;
       return prop.formula;
     case 'relation':
-      return prop.relation?.map((relation) => relation.id);
+      return prop.relation?.map((relation: { id: string }) => relation.id);
     case 'rollup':
       if (prop.rollup.type === 'array') {
         const rollup = prop.rollup.array;

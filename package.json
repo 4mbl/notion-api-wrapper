@@ -2,6 +2,7 @@
   "name": "notion-api-wrapper",
   "version": "5.0.3",
   "description": "Zero dependency Notion API client.",
+  "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "author": "4mbl",

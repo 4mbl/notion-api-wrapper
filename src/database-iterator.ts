@@ -1,14 +1,14 @@
-import type {
-  GetDatabaseResponse,
-  PageObjectResponse,
-} from '@notionhq/client/build/src/api-endpoints';
 import {
   DEFAULT_BATCH_SIZE,
   getDatabaseColumns,
   queryDatabase,
-  QueryOptions,
-} from './api/query';
-import { isObjectId } from './validation';
+  type QueryOptions,
+} from './api/query.js';
+import type {
+  GetDatabaseResponse,
+  PageObjectResponse,
+} from './notion-types.js';
+import { isObjectId } from './validation.js';
 
 type IteratorOptions = QueryOptions & {
   /** How many items to yield at a time. Defaults to `batchSize` or `100` if not set. */
@@ -111,10 +111,8 @@ export class DatabaseIterator<T extends PageObjectResponse>
     const columnsObj = await this._columns;
     const columnsArray = Object.keys(columnsObj).map((key) => ({
       ...columnsObj[key],
-    }));
-    const primary = columnsArray.find(
-      (col: { type: string }) => col.type === 'title',
-    );
+    })) as GetDatabaseResponse['properties'][string][];
+    const primary = columnsArray.find((col) => col.type === 'title');
     this._primaryProperty = primary?.id;
     return this._primaryProperty;
   }
