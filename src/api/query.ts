@@ -60,7 +60,7 @@ export type QueryOptions = {
 export async function queryDatabase(
   /** Notion database id. */
   id: string,
-  nextCursor?: string,
+  nextCursor?: string | null,
   options?: QueryOptions,
 ) {
   if (!isObjectId(id)) throw new Error('Invalid database id');
