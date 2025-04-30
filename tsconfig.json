@@ -1,13 +1,37 @@
 {
-  "include": ["src/**/*"],
+  "$schema": "https://json.schemastore.org/tsconfig",
   "compilerOptions": {
-    "target": "es2016",
-    "module": "commonjs",
-    "declaration": true,
+    /* Base Options */
+    "lib": ["es2022"],
+    "module": "NodeNext",
+    "allowJs": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "moduleDetection": "force",
+
+    /* Output */
+    "target": "es2022",
     "outDir": "./dist",
+    "sourceMap": true,
+    "declarationMap": true,
+    "declaration": true,
     "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
+    "verbatimModuleSyntax": true,
+
+    /* Linting */
     "strict": true,
-    "skipLibCheck": true
-  }
+    "checkJs": true,
+    "erasableSyntaxOnly": true,
+    "forceConsistentCasingInFileNames": true,
+    "allowSyntheticDefaultImports": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitAny": true,
+    "noImplicitOverride": true,
+    "noImplicitReturns": false,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noUncheckedIndexedAccess": true
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules"]
 }
