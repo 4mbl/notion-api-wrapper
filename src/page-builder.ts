@@ -320,9 +320,10 @@ export class PageBuilder {
 
   /** Creates a new page in the parent database with the data provided via the builder methods. */
   async create() {
-    const data = (await createPage(this.data)) as
-      | PageObjectResponse
-      | PartialPageObjectResponse;
+    const data = await createPage(this.data, {
+      notionToken: this.notionToken,
+      notionVersion: this.notionVersion,
+    });
 
     if (!data.id) {
       throw new NotionError('No page ID returned from Notion API.');
@@ -338,7 +339,10 @@ export class PageBuilder {
 
   /** Fetches data of an existing page and updates this object with the property state. */
   async fetch(pageId: string) {
-    const data = await getPage(pageId);
+    const data = await getPage(pageId, {
+      notionToken: this.notionToken,
+      notionVersion: this.notionVersion,
+    });
 
     if (!data.id) {
       throw new NotionError('No page ID returned from Notion API.');
