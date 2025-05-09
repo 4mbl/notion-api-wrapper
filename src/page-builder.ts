@@ -196,22 +196,14 @@ export class PageBuilder {
 
   date(
     key: PropertyKey,
-    value: string | [string] | [string, string],
+    value: string | [string, string],
     timezone?: TimeZone,
   ) {
-    const start = Array.isArray(value) ? value[0] : value;
-
-    const end =
-      Array.isArray(value) && value.length > 1
-        ? value[1]
-        : Array.isArray(value)
-          ? value[0]
-          : value;
     this.data.properties[key] = {
       type: 'date',
       date: {
-        start: start,
-        end: end,
+        start: Array.isArray(value) ? value[0] : value,
+        end: Array.isArray(value) && value.length === 2 ? value[1] : undefined,
         time_zone: timezone ?? null,
       },
     };
