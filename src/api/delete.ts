@@ -1,5 +1,10 @@
 import { NOTION_VERSION } from '../constants.js';
-import { NO_API_KEY_ERROR } from '../internal/errors.js';
+import {
+  E,
+  AuthenticationError,
+  NotionError,
+  NotionRateLimitError,
+} from '../internal/errors.js';
 import { isObjectId } from '../validation.js';
 
 export async function trashPage(
@@ -9,10 +14,13 @@ export async function trashPage(
     notionVersion?: string;
   },
 ) {
-  if (!isObjectId(pageId)) throw new Error('Invalid page id');
+  if (!isObjectId(pageId))
+    throw new Error(
+      'Invalid page id. Should be 32 characters long with optional dashes.',
+    );
 
   const apiKey = options?.notionToken ?? process.env.NOTION_API_KEY;
-  if (!apiKey) throw new Error(NO_API_KEY_ERROR);
+  if (!apiKey) throw new AuthenticationError(E.NO_API_KEY);
 
   const response = await fetch(`https://api.notion.com/v1/pages/${pageId}`, {
     method: 'PATCH',
@@ -24,8 +32,12 @@ export async function trashPage(
     body: JSON.stringify({ in_trash: true }),
   });
 
+  if (response.status === 429) {
+    throw new NotionRateLimitError(E.RATE_LIMIT);
+  }
+
   if (!response.ok) {
-    throw new Error(
+    throw new NotionError(
       `Failed to trash page: ${response.status} ${response.statusText}`,
     );
   }

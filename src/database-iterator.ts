@@ -4,6 +4,7 @@ import {
   queryDatabase,
   type QueryOptions,
 } from './api/query.js';
+import { E, ParameterValidationError } from './internal/errors.js';
 import type {
   GetDatabaseResponse,
   PageObjectResponse,
@@ -28,7 +29,8 @@ export class DatabaseIterator<T extends PageObjectResponse>
   private _cachedResults: Array<T> = [];
 
   constructor(databaseId: string, options?: IteratorOptions) {
-    if (!isObjectId(databaseId)) throw new Error('Invalid database id');
+    if (!isObjectId(databaseId))
+      throw new ParameterValidationError(E.INVALID_DATABASE_ID);
 
     this._cursor = undefined;
     this._databaseId = databaseId;
