@@ -2,7 +2,7 @@ import type {
   DatabaseObjectResponse,
   DatePropertyItemObjectResponse,
   PageObjectResponse,
-} from '../notion-types.js';
+} from './notion-types.js';
 
 export type VerboseDatabaseProperty = PageObjectResponse['properties'][number];
 

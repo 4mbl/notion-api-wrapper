@@ -3,7 +3,7 @@ import type {
   SimpleDatabaseProperty,
   VerboseDatabaseProperty,
   SimpleDatabasePage,
-} from './api/types.js';
+} from './naw-types.js';
 import type {
   DatabaseObjectResponse,
   QueryDatabaseResponse,

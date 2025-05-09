@@ -11,7 +11,7 @@ import type {
   EmojiRequest,
   SimpleDatabaseProperty,
   TimeZoneRequest,
-} from './api/types.js';
+} from './naw-types.js';
 import {
   isArrayOfStrings,
   isBoolean,
