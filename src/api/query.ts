@@ -1,6 +1,12 @@
 import { processQueryData, removeProps, simplifyProps } from '../util.js';
 import type { BuiltFilter } from '../filter-builder.js';
-import { NO_API_KEY_ERROR } from '../internal/errors.js';
+import {
+  E,
+  AuthenticationError,
+  NotionError,
+  NotionRateLimitError,
+  ParameterValidationError,
+} from '../internal/errors.js';
 import { NOTION_VERSION } from '../constants.js';
 import { isObjectId } from '../validation.js';
 import type {
@@ -63,10 +69,11 @@ export async function queryDatabase(
   nextCursor?: string | null,
   options?: QueryOptions,
 ) {
-  if (!isObjectId(id)) throw new Error('Invalid database id');
+  if (!isObjectId(id))
+    throw new ParameterValidationError(E.INVALID_DATABASE_ID);
 
   const apiKey = options?.notionToken ?? process.env.NOTION_API_KEY;
-  if (!apiKey) throw new Error(NO_API_KEY_ERROR);
+  if (!apiKey) throw new AuthenticationError(E.NO_API_KEY);
 
   const body = {
     start_cursor: nextCursor,
@@ -79,15 +86,30 @@ export async function queryDatabase(
     archived: options?.includeArchived,
   };
 
-  const data = (await fetch(`https://api.notion.com/v1/databases/${id}/query`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${apiKey}`,
-      'Notion-Version': options?.notionVersion ?? NOTION_VERSION,
+  const response = await fetch(
+    `https://api.notion.com/v1/databases/${id}/query`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${apiKey}`,
+        'Notion-Version': options?.notionVersion ?? NOTION_VERSION,
+      },
+      body: JSON.stringify(body),
     },
-    body: JSON.stringify(body),
-  }).then((res) => res.json())) as QueryDatabaseResponse;
+  );
+
+  if (response.status === 429) {
+    throw new NotionRateLimitError(E.RATE_LIMIT);
+  }
+
+  if (!response.ok) {
+    throw new Error(
+      `Failed to query database: ${response.status} ${response.statusText}`,
+    );
+  }
+
+  const data = (await response.json()) as QueryDatabaseResponse;
 
   return {
     data: processQueryData(data, options?.propOptions),
@@ -100,7 +122,8 @@ export async function queryDatabaseFull(
   id: string,
   options?: QueryOptions,
 ) {
-  if (!isObjectId(id)) throw new Error('Invalid database id');
+  if (!isObjectId(id))
+    throw new ParameterValidationError(E.INVALID_DATABASE_ID);
 
   let nextCursor: string | undefined = undefined;
   const allResults: Array<
@@ -120,16 +143,26 @@ export async function queryDatabaseFull(
 
 export async function getDatabaseColumns(id: string, options?: QueryOptions) {
   const apiKey = options?.notionToken ?? process.env.NOTION_API_KEY;
-  if (!apiKey) throw new Error(NO_API_KEY_ERROR);
+  if (!apiKey) throw new AuthenticationError(E.NO_API_KEY);
 
-  const data = (await fetch(`https://api.notion.com/v1/databases/${id}`, {
+  const response = await fetch(`https://api.notion.com/v1/databases/${id}`, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${apiKey}`,
       'Notion-Version': options?.notionVersion ?? NOTION_VERSION,
     },
-  }).then((res) => res.json())) as GetDatabaseResponse;
+  });
+
+  if (response.status === 429) throw new NotionRateLimitError(E.RATE_LIMIT);
+
+  if (!response.ok) {
+    throw new NotionError(
+      `Failed to get database columns: ${response.status} ${response.statusText}`,
+    );
+  }
+
+  const data = (await response.json()) as GetDatabaseResponse;
 
   return removeProps(
     simplifyProps(data, options?.propOptions),
@@ -157,7 +190,8 @@ export async function searchFromDatabase(
   search: SearchOptions,
   options?: QueryOptions,
 ) {
-  if (!isObjectId(id)) throw new Error('Invalid database id');
+  if (!isObjectId(id))
+    throw new ParameterValidationError(E.INVALID_DATABASE_ID);
 
   const convertMatchType = (matchType: MatchType) => {
     switch (matchType) {
@@ -177,24 +211,39 @@ export async function searchFromDatabase(
   };
 
   const apiKey = options?.notionToken ?? process.env.NOTION_API_KEY;
-  if (!apiKey) throw new Error(NO_API_KEY_ERROR);
+  if (!apiKey) throw new AuthenticationError(E.NO_API_KEY);
 
-  const data = (await fetch(`https://api.notion.com/v1/databases/${id}/query`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${apiKey}`,
-      'Notion-Version': options?.notionVersion ?? NOTION_VERSION,
-    },
-    body: JSON.stringify({
-      filter: {
-        property: search?.property ?? 'Name',
-        rich_text: {
-          [convertMatchType(search?.match ?? 'equals')]: search.query,
-        },
+  const response = await fetch(
+    `https://api.notion.com/v1/databases/${id}/query`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${apiKey}`,
+        'Notion-Version': options?.notionVersion ?? NOTION_VERSION,
       },
-    }),
-  }).then((res) => res.json())) as QueryDatabaseResponse;
+      body: JSON.stringify({
+        filter: {
+          property: search?.property ?? 'Name',
+          rich_text: {
+            [convertMatchType(search?.match ?? 'equals')]: search.query,
+          },
+        },
+      }),
+    },
+  );
+
+  if (response.status === 429) {
+    throw new NotionRateLimitError(E.RATE_LIMIT);
+  }
+
+  if (!response.ok) {
+    throw new NotionError(
+      `Failed to search from database: ${response.status} ${response.statusText}`,
+    );
+  }
+
+  const data = (await response.json()) as QueryDatabaseResponse;
 
   return processQueryData(data, options?.propOptions);
 }

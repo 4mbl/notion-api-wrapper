@@ -1,4 +1,4 @@
-import type { SimpleDatabaseProperty } from './api/types.js';
+import type { SimpleDatabaseProperty } from './naw-types.js';
 
 export function isUrl(input: string) {
   if (!input) return false;

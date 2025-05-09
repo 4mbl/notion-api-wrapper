@@ -3,7 +3,7 @@ import type {
   SimpleDatabaseProperty,
   VerboseDatabaseProperty,
   SimpleDatabasePage,
-} from './api/types.js';
+} from './naw-types.js';
 import type {
   DatabaseObjectResponse,
   QueryDatabaseResponse,
@@ -14,9 +14,9 @@ export function processQueryData(
   data: QueryDatabaseResponse,
   options?: PropOptions,
 ) {
-  if (options?.remove || options?.keep) {
+  if (options?.remove || options?.keep)
     data = removeProps(data, options) as QueryDatabaseResponse;
-  }
+
   if (options?.simplifyProps) data = simplifyProps(data, options);
   return data;
 }

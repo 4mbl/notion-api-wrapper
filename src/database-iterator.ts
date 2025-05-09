@@ -4,6 +4,7 @@ import {
   queryDatabase,
   type QueryOptions,
 } from './api/query.js';
+import { E, NotionError, ParameterValidationError } from './internal/errors.js';
 import type {
   GetDatabaseResponse,
   PageObjectResponse,
@@ -23,12 +24,13 @@ export class DatabaseIterator<T extends PageObjectResponse>
   private _databaseId: string;
   private _queryOptions: QueryOptions;
   private _primaryProperty: string | undefined;
-  private _columns: Promise<GetDatabaseResponse['properties']> | undefined;
+  private _columns: GetDatabaseResponse['properties'] | undefined;
   private _yieldSize: number;
   private _cachedResults: Array<T> = [];
 
   constructor(databaseId: string, options?: IteratorOptions) {
-    if (!isObjectId(databaseId)) throw new Error('Invalid database id');
+    if (!isObjectId(databaseId))
+      throw new ParameterValidationError(E.INVALID_DATABASE_ID);
 
     this._cursor = undefined;
     this._databaseId = databaseId;
@@ -99,16 +101,21 @@ export class DatabaseIterator<T extends PageObjectResponse>
   }
 
   async getColumns() {
-    this._columns = getDatabaseColumns(this._databaseId, {
-      notionToken: this._queryOptions.notionToken,
-    }).then((data) => data.properties);
+    try {
+      const data = await getDatabaseColumns(this._databaseId, {
+        notionToken: this._queryOptions.notionToken,
+      });
+      this._columns = data.properties;
+    } catch (e) {
+      throw new NotionError(`Error fetching columns: ${(e as Error).message}`);
+    }
   }
 
   async getPrimaryPropertyId() {
     if (this._primaryProperty) return this._primaryProperty;
     if (!this._columns) await this.getColumns();
     if (!this._columns) return undefined;
-    const columnsObj = await this._columns;
+    const columnsObj = this._columns;
     const columnsArray = Object.keys(columnsObj).map((key) => ({
       ...columnsObj[key],
     })) as GetDatabaseResponse['properties'][string][];

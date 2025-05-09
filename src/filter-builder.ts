@@ -14,9 +14,9 @@ export class FilterBuilder {
     return this;
   }
 
-  build(operator: 'AND' | 'OR'): BuiltFilter {
+  build(operator: 'AND' | 'OR'): BuiltFilter | EmptyObject {
     if (this.filters.length === 0) {
-      throw new Error('No filters added.');
+      return {} as BuiltFilter;
     }
 
     if (this.filters.length === 1) {

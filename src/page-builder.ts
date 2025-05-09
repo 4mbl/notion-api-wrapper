@@ -1,11 +1,17 @@
 import { NOTION_VERSION } from './constants.js';
-import { NO_API_KEY_ERROR } from './internal/errors.js';
+import {
+  E,
+  AuthenticationError,
+  NotionError,
+  NotionRateLimitError,
+  ParameterValidationError,
+} from './internal/errors.js';
 
 import type {
   EmojiRequest,
   SimpleDatabaseProperty,
   TimeZoneRequest,
-} from './api/types.js';
+} from './naw-types.js';
 import {
   isArrayOfStrings,
   isBoolean,
@@ -51,10 +57,11 @@ export class PageBuilder {
     parentId: string,
     options?: { notionToken?: string; notionVersion?: string },
   ) {
-    if (!isObjectId(parentId)) throw new Error('Invalid parent id');
+    if (!isObjectId(parentId))
+      throw new ParameterValidationError(E.INVALID_PARENT_ID);
 
     const apiKey = options?.notionToken ?? process.env.NOTION_API_KEY;
-    if (!apiKey) throw new Error(NO_API_KEY_ERROR);
+    if (!apiKey) throw new AuthenticationError(E.NO_API_KEY);
     this.notionToken = apiKey;
 
     this.notionVersion = options?.notionVersion ?? NOTION_VERSION;
@@ -94,7 +101,7 @@ export class PageBuilder {
         emoji: icon as EmojiRequest,
       };
     } else {
-      throw new Error(
+      throw new ParameterValidationError(
         'Icon must be a string or an emoji. If you want to use an image, use the URL.',
       );
     }
@@ -106,13 +113,16 @@ export class PageBuilder {
   property(type: PropertyType, key: PropertyKey, value: PropertyValue) {
     switch (type) {
       case 'title':
-        if (!isString(value)) throw new Error('Invalid value.');
+        if (!isString(value))
+          throw new ParameterValidationError(E.INVALID_VALUE);
         return this.title(value);
       case 'rich_text':
-        if (!isString(value)) throw new Error('Invalid value.');
+        if (!isString(value))
+          throw new ParameterValidationError(E.INVALID_VALUE);
         return this.richText(key, value);
       case 'checkbox':
-        if (!isBoolean(value)) throw new Error('Invalid value.');
+        if (!isBoolean(value))
+          throw new ParameterValidationError(E.INVALID_VALUE);
         return this.checkbox(key, value);
       case 'date':
         if (
@@ -122,42 +132,49 @@ export class PageBuilder {
           || (Array.isArray(value) && value.length === 2 && !isString(value[0]) && !isString(value[1]))
           || (Array.isArray(value) && value.length > 2)
         ) {
-          throw new Error('Invalid value.');
+          throw new ParameterValidationError(E.INVALID_VALUE);
         }
         return this.date(key, value);
       case 'files':
         if (!isString(value) && !isArrayOfStrings(value))
-          throw new Error('Invalid value.');
+          throw new ParameterValidationError(E.INVALID_VALUE);
         return this.files(key, value);
       case 'multi_select':
         if (!isString(value) && !isArrayOfStrings(value))
-          throw new Error('Invalid value.');
+          throw new ParameterValidationError(E.INVALID_VALUE);
         return this.multiSelect(key, value);
       case 'number':
-        if (!isNumber(value)) throw new Error('Invalid value.');
+        if (!isNumber(value))
+          throw new ParameterValidationError(E.INVALID_VALUE);
         return this.number(key, value);
       case 'people':
         if (!isString(value) && !isArrayOfStrings(value))
-          throw new Error('Invalid value.');
+          throw new ParameterValidationError(E.INVALID_VALUE);
         return this.people(key, value);
       case 'phone_number':
-        if (!isString(value)) throw new Error('Invalid value.');
+        if (!isString(value))
+          throw new ParameterValidationError(E.INVALID_VALUE);
         return this.phoneNumber(key, value);
       case 'relation':
         if (!isString(value) && !isArrayOfStrings(value))
-          throw new Error('Invalid value.');
+          throw new ParameterValidationError(E.INVALID_VALUE);
         return this.relation(key, value);
       case 'select':
-        if (!isString(value)) throw new Error('Invalid value.');
+        if (!isString(value))
+          throw new ParameterValidationError(E.INVALID_VALUE);
         return this.select(key, value);
       case 'status':
-        if (!isString(value)) throw new Error('Invalid value.');
+        if (!isString(value))
+          throw new ParameterValidationError(E.INVALID_VALUE);
         return this.status(key, value);
       case 'url':
-        if (!isString(value)) throw new Error('Invalid value.');
+        if (!isString(value))
+          throw new ParameterValidationError(E.INVALID_VALUE);
         return this.url(key, value);
       default:
-        throw new Error(`Unsupported property type: ${type}`);
+        throw new ParameterValidationError(
+          `Unsupported property type: ${type}`,
+        );
     }
   }
 
@@ -286,7 +303,7 @@ export class PageBuilder {
   }
 
   url(key: PropertyKey, value: string) {
-    if (!isUrl(value)) throw new Error('Invalid URL.');
+    if (!isUrl(value)) throw new ParameterValidationError('Invalid URL.');
 
     this.data.properties[key] = {
       url: value,
@@ -307,16 +324,15 @@ export class PageBuilder {
     });
 
     if (response.status === 429) {
-      throw new Error('Too many requests. Please try again later.');
+      throw new NotionRateLimitError(E.RATE_LIMIT);
     }
 
     if (!response.ok) {
-      throw new Error(
-        `Error creating page: ${response.status} ${response.statusText} ${await response.text()}`,
+      throw new NotionError(
+        `Error creating page: ${response.status} ${response.statusText}`,
       );
     }
 
-    const data = await response.json();
-    return data;
+    return response.json();
   }
 }
