@@ -27,6 +27,8 @@ import type {
   PartialPageObjectResponse,
 } from './notion-types.js';
 import { trashPage } from './api/delete.js';
+import { updatePage } from './api/update.js';
+import { getPage } from './api/get.js';
 
 // More descriptive type names for anyone using the library.
 
@@ -356,31 +358,8 @@ export class PageBuilder {
 
   /** Fetches data of an existing page and updates this object with the property state. */
   async fetch(pageId: string) {
-    if (!isObjectId(pageId))
-      throw new ParameterValidationError(E.INVALID_PAGE_ID);
+    const data = await getPage(pageId);
 
-    const response = await fetch(`https://api.notion.com/v1/pages/${pageId}`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${this.notionToken}`,
-        'Notion-Version': this.notionVersion,
-      },
-    });
-
-    if (response.status === 429) {
-      throw new NotionRateLimitError(E.RATE_LIMIT);
-    }
-
-    if (!response.ok) {
-      throw new NotionError(
-        `Error fetching page: ${response.status} ${response.statusText}`,
-      );
-    }
-
-    const data = (await response.json()) as
-      | PageObjectResponse
-      | PartialPageObjectResponse;
     if (!data.id) {
       throw new NotionError('No page ID returned from Notion API.');
     }
@@ -392,34 +371,14 @@ export class PageBuilder {
 
   /** Updates an existing page with the data provided via the builder methods. */
   async update(pageId: string) {
-    if (!isObjectId(pageId))
-      throw new ParameterValidationError(E.INVALID_PAGE_ID);
-
-    const response = await fetch(`https://api.notion.com/v1/pages/${pageId}`, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${this.notionToken}`,
-        'Notion-Version': this.notionVersion,
-      },
-      body: JSON.stringify(this.data),
+    const data = await updatePage(pageId, this.data, {
+      notionToken: this.notionToken,
+      notionVersion: this.notionVersion,
     });
-
-    if (response.status === 429) {
-      throw new NotionRateLimitError(E.RATE_LIMIT);
-    }
-
-    if (!response.ok) {
-      throw new NotionError(
-        `Error updating page: ${response.status} ${response.statusText}`,
-      );
-    }
-
-    const data = await response.json();
 
     this._updateMetadata(data as PageObjectResponse);
 
-    return data as PageObjectResponse | PartialPageObjectResponse;
+    return data;
   }
 
   /** Trashes the page with the given ID. */

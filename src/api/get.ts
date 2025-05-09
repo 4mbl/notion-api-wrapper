@@ -12,7 +12,7 @@ import type {
 } from '../notion-types.js';
 import { isObjectId } from '../validation.js';
 
-export async function trashPage(
+export async function getPage(
   pageId: string,
   options?: {
     notionToken?: string;
@@ -26,13 +26,12 @@ export async function trashPage(
   if (!apiKey) throw new AuthenticationError(E.NO_API_KEY);
 
   const response = await fetch(`https://api.notion.com/v1/pages/${pageId}`, {
-    method: 'PATCH',
+    method: 'GET',
     headers: {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${apiKey}`,
       'Notion-Version': options?.notionVersion ?? NOTION_VERSION,
     },
-    body: JSON.stringify({ in_trash: true }),
   });
 
   if (response.status === 429) {
@@ -41,7 +40,7 @@ export async function trashPage(
 
   if (!response.ok) {
     throw new NotionError(
-      `Failed to trash page: ${response.status} ${response.statusText}`,
+      `Error fetching page: ${response.status} ${response.statusText}`,
     );
   }
 

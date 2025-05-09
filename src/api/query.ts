@@ -104,7 +104,7 @@ export async function queryDatabase(
   }
 
   if (!response.ok) {
-    throw new Error(
+    throw new NotionError(
       `Failed to query database: ${response.status} ${response.statusText}`,
     );
   }
