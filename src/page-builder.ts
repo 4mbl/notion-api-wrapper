@@ -3,7 +3,6 @@ import {
   E,
   AuthenticationError,
   NotionError,
-  NotionRateLimitError,
   ParameterValidationError,
 } from './internal/errors.js';
 
@@ -21,7 +20,15 @@ import {
   isString,
   isUrl,
 } from './validation.js';
-import type { CreatePageParameters } from './notion-types.js';
+import type {
+  CreatePageParameters,
+  PageObjectResponse,
+  PartialPageObjectResponse,
+} from './notion-types.js';
+import { trashPage } from './api/delete.js';
+import { updatePage } from './api/update.js';
+import { getPage } from './api/get.js';
+import { createPage } from './api/create.js';
 
 // More descriptive type names for anyone using the library.
 
@@ -49,7 +56,7 @@ type PropertyType =
 
 export class PageBuilder {
   /** Notion page id of the parent database. */
-  data: CreatePageParameters;
+  private data: CreatePageParameters;
   notionToken: string;
   notionVersion: string;
 
@@ -311,28 +318,88 @@ export class PageBuilder {
     return this;
   }
 
-  /** Sends the API request to create the page using the data provided via the builder methods. */
+  /** Creates a new page in the parent database with the data provided via the builder methods. */
   async create() {
-    const response = await fetch(`https://api.notion.com/v1/pages`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${this.notionToken}`,
-        'Notion-Version': this.notionVersion,
-      },
-      body: JSON.stringify(this.data),
+    const data = await createPage(this.data, {
+      notionToken: this.notionToken,
+      notionVersion: this.notionVersion,
     });
 
-    if (response.status === 429) {
-      throw new NotionRateLimitError(E.RATE_LIMIT);
+    if (!data.id) {
+      throw new NotionError('No page ID returned from Notion API.');
     }
 
-    if (!response.ok) {
-      throw new NotionError(
-        `Error creating page: ${response.status} ${response.statusText}`,
-      );
+    this._updateMetadata(data as PageObjectResponse);
+
+    // don't return the page object if it is a partial response
+    if (this._isPartialPageObjectResponse(data)) return undefined;
+
+    return data as PageObjectResponse;
+  }
+
+  /** Fetches data of an existing page and updates this object with the property state. */
+  async fetch(pageId: string) {
+    const data = await getPage(pageId, {
+      notionToken: this.notionToken,
+      notionVersion: this.notionVersion,
+    });
+
+    if (!data.id) {
+      throw new NotionError('No page ID returned from Notion API.');
     }
 
-    return response.json();
+    this._updateMetadata(data as PageObjectResponse);
+
+    return data;
+  }
+
+  /** Updates an existing page with the data provided via the builder methods. */
+  async update(pageId: string) {
+    const data = await updatePage(pageId, this.data, {
+      notionToken: this.notionToken,
+      notionVersion: this.notionVersion,
+    });
+
+    this._updateMetadata(data as PageObjectResponse);
+
+    return data;
+  }
+
+  /** Trashes the page with the given ID. */
+  async trash(pageId: string) {
+    const data = await trashPage(pageId, {
+      notionToken: this.notionToken,
+      notionVersion: this.notionVersion,
+    });
+
+    this._clearMetadata();
+
+    return data;
+  }
+
+  private _isPartialPageObjectResponse(
+    data: PageObjectResponse | PartialPageObjectResponse,
+  ) {
+    return !(data as PageObjectResponse).created_time;
+  }
+
+  private _updateMetadata(metadata: PageObjectResponse) {
+    if (this._isPartialPageObjectResponse(metadata)) return;
+
+    this.data.properties = metadata.properties;
+
+    if (metadata.icon?.type !== 'file') {
+      this.data.icon = metadata.icon;
+    }
+
+    if (metadata.cover?.type !== 'file') {
+      this.data.cover = metadata.cover;
+    }
+  }
+
+  private _clearMetadata() {
+    this.data.properties = {};
+    this.data.icon = undefined;
+    this.data.cover = undefined;
   }
 }

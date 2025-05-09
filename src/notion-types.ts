@@ -9,4 +9,5 @@ export type {
   QueryDatabaseParameters,
   QueryDatabaseResponse,
   RichTextItemResponse,
+  UpdatePageParameters,
 } from '@notionhq/client/build/src/api-endpoints.js';

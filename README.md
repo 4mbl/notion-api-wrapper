@@ -4,6 +4,7 @@
 
 * [Installation](#installation)
 * [Getting Started](#getting-started)
+  * [Basic Page Operations](#basic-page-operations)
   * [Querying Database](#querying-database)
   * [Filtering Results](#filtering-results)
   * [Sorting Results](#sorting-results)
@@ -24,6 +25,20 @@ npm install notion-api-wrapper
 _Or your favorite package manager, in which case you probably know the command._
 
 ## Getting Started
+
+### Basic Page Operations
+
+This package provides helpers to create, update, trash, and fetch pages.
+
+```ts
+const newPage = await createPage(process.env.NOTION_PAGE_ID, { /* page contents */ });
+
+const existingPage = await getPage(process.env.NOTION_PAGE_ID);
+
+const updatedPage = await updatePage(process.env.NOTION_PAGE_ID, { icon: { emoji: '🎁' } });
+
+const trashPage = await trashPage(process.env.NOTION_PAGE_ID);
+```
 
 ### Querying Database
 
@@ -248,4 +263,21 @@ builder.status('Status', 'Done');
 builder.url('URL', 'https://example.com');
 
 const page = await builder.create();
+```
+
+In additiion to creating pages, you can also use the `PageBuilder` to fetch, update, and trash existing pages.
+
+```ts
+const pageId = '00000000000000000000000000000000';
+
+const builder = new PageBuilder(process.env.NOTION_DATABASE_ID, {
+  notionToken: process.env.NOTION_API_KEY,
+});
+
+const existingPage = await builder.fetch(pageId);
+
+builder.title('Updated Title');
+const updatedPage = await builder.update(pageId);
+
+const trashedPage = await builder.trash(pageId);
 ```

@@ -9,11 +9,13 @@ import {
 import type {
   PageObjectResponse,
   PartialPageObjectResponse,
+  UpdatePageParameters,
 } from '../notion-types.js';
 import { isObjectId } from '../validation.js';
 
-export async function trashPage(
+export async function updatePage(
   pageId: string,
+  body: Omit<UpdatePageParameters, 'page_id'>,
   options?: {
     notionToken?: string;
     notionVersion?: string;
@@ -32,7 +34,7 @@ export async function trashPage(
       Authorization: `Bearer ${apiKey}`,
       'Notion-Version': options?.notionVersion ?? NOTION_VERSION,
     },
-    body: JSON.stringify({ in_trash: true }),
+    body: JSON.stringify(body),
   });
 
   if (response.status === 429) {
@@ -41,7 +43,7 @@ export async function trashPage(
 
   if (!response.ok) {
     throw new NotionError(
-      `Failed to trash page: ${response.status} ${response.statusText}`,
+      `Error updating page: ${response.status} ${response.statusText}`,
     );
   }
 

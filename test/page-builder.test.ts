@@ -1,6 +1,6 @@
 import { afterAll, afterEach, beforeEach, expect, test } from 'vitest';
-import dotenv from 'dotenv';
 import { PageBuilder, queryDatabaseFull, trashPage } from '../src';
+import dotenv from 'dotenv';
 dotenv.config();
 
 const TESTING_API_KEY = process.env.TESTING_API_KEY;
@@ -21,13 +21,13 @@ test('PageBuilder with minimal data', async () => {
 
   builder.title('Test Page with minimal data');
 
-  const page = await builder.create();
+  const page = (await builder.create()) as any;
 
   expect(page.object).toBeDefined();
   expect(page.id).toBeDefined();
   expect(page.created_time).toBeDefined();
   expect(page.last_edited_time).toBeDefined();
-  expect(page.parent?.database_id).toBeDefined();
+  expect(page.parent.database_id).toBeDefined();
   expect(page.url).toBeDefined();
 
   expect(page.parent.database_id).equals(BUILER_TESTING_DATABASE_ID);
@@ -63,7 +63,7 @@ test('PageBuilder with complete data - seperate methods', async () => {
   builder.status('Status', 'Done');
   builder.url('URL', 'https://example.com');
 
-  const page = await builder.create();
+  const page = (await builder.create()) as any;
 
   expect(page.object).toBeDefined();
   expect(page.id).toBeDefined();
@@ -126,7 +126,7 @@ test('PageBuilder with complete data - using the `property` method', async () =>
   builder.property('status', 'Status', 'Done');
   builder.property('url', 'URL', 'https://example.com');
 
-  const page = await builder.create();
+  const page = (await builder.create()) as any;
 
   expect(page.object).toBeDefined();
   expect(page.id).toBeDefined();
@@ -180,7 +180,7 @@ test('PageBuilder with complete data - alternative data', async () => {
 
   builder.multiSelect('Multi-Select', ['Option 1', 'Option 2']);
 
-  const page = await builder.create();
+  const page = (await builder.create()) as any;
 
   expect(page.object).toBeDefined();
   expect(page.id).toBeDefined();
@@ -202,6 +202,91 @@ test('PageBuilder with complete data - alternative data', async () => {
   expect(p['Date'].date.end).toEqual('2025-02-01T00:00:00.000-05:00');
   expect(p['Multi-Select'].multi_select[0].name).toEqual('Option 1');
   expect(p['Multi-Select'].multi_select[1].name).toEqual('Option 2');
+});
+
+test('PageBuilder - fetch', async () => {
+  const builder = new PageBuilder(BUILER_TESTING_DATABASE_ID, {
+    notionToken: TESTING_API_KEY,
+  });
+
+  const page = (await builder.fetch(RELATION_PAGE_ID)) as any;
+
+  expect(page.object).toBeDefined();
+  expect(page.id).toBeDefined();
+  expect(page.created_time).toBeDefined();
+  expect(page.last_edited_time).toBeDefined();
+  expect(page.parent?.database_id).toBeDefined();
+  expect(page.url).toBeDefined();
+
+  expect(page.parent.database_id).equals(BUILER_TESTING_DATABASE_ID);
+
+  const p = page.properties;
+  expect(p['Name'].title[0].text.content).toEqual(
+    'Relation page - [[ DO NOT DELETE ]]',
+  );
+});
+
+test('PageBuilder - update', async () => {
+  const initialBuilder = new PageBuilder(BUILER_TESTING_DATABASE_ID, {
+    notionToken: TESTING_API_KEY,
+  });
+  initialBuilder.title('Initial Title');
+  initialBuilder.richText('Rich Text', 'Some Rich Text');
+  initialBuilder.icon('😀');
+  initialBuilder.cover(SAMPLE_IMAGE_URL);
+  const page = (await initialBuilder.create()) as any;
+
+  expect(page.properties['Name'].title[0].text.content).toEqual(
+    'Initial Title',
+  );
+
+  const updateBuilder = new PageBuilder(BUILER_TESTING_DATABASE_ID, {
+    notionToken: TESTING_API_KEY,
+  });
+
+  updateBuilder.title('Updated Title');
+  const updatedPage = (await updateBuilder.update(page.id)) as any;
+
+  expect(updatedPage.properties['Name'].title[0].text.content).toEqual(
+    'Updated Title',
+  );
+  expect(updatedPage.properties['Rich Text'].rich_text[0].text.content).toEqual(
+    'Some Rich Text',
+  );
+  expect(updatedPage.icon?.emoji).toEqual('😀');
+  expect(updatedPage.cover?.external?.url).toEqual(SAMPLE_IMAGE_URL);
+});
+
+test('PageBuilder - trash', async () => {
+  const builder = new PageBuilder(BUILER_TESTING_DATABASE_ID, {
+    notionToken: TESTING_API_KEY,
+  });
+  builder.title('Initial Title');
+  const { id: pageId } = (await builder.create()) as any;
+
+  const initialBuilderData = builder['data'] as any;
+
+  expect(initialBuilderData.properties['Name'].title[0].text.content).toEqual(
+    'Initial Title',
+  );
+
+  const { id: updateId } = await builder.fetch(pageId);
+
+  const fetchedBuilderData = builder['data'] as any;
+
+  expect(fetchedBuilderData.properties['Name'].title[0].text.content).toEqual(
+    'Initial Title',
+  );
+
+  await builder.trash(updateId);
+
+  builder.fetch(pageId);
+
+  const trashedBuilderData = builder['data'] as any;
+
+  expect(
+    trashedBuilderData.properties['Name']?.title[0]?.text?.content,
+  ).toBeUndefined();
 });
 
 /* Require the notion token to be passed explicitly to avoid using the wrong token accidentally */

@@ -1,5 +1,7 @@
 export * from './api/delete.js';
+export * from './api/get.js';
 export * from './api/query.js';
+export * from './api/update.js';
 export * from './naw-types.js';
 export * from './filter-builder.js';
 export * from './page-builder.js';
