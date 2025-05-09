@@ -22,7 +22,7 @@ export async function createPage(
   if (!apiKey) throw new AuthenticationError(E.NO_API_KEY);
 
   const response = await fetch(`https://api.notion.com/v1/pages`, {
-    method: 'PATCH',
+    method: 'POST',
     headers: {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${apiKey}`,
