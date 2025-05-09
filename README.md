@@ -249,3 +249,20 @@ builder.url('URL', 'https://example.com');
 
 const page = await builder.create();
 ```
+
+In additiion to creating pages, you can also use the `PageBuilder` to fetch, update, and delete existing pages.
+
+```ts
+const pageId = '00000000000000000000000000000000';
+
+const builder = new PageBuilder(process.env.NOTION_DATABASE_ID, {
+  notionToken: process.env.NOTION_API_KEY,
+});
+
+const existingPage = await builder.fetch(pageId);
+
+builder.title('Updated Title');
+const updatedPage = await builder.update(pageId);
+
+const deletedPage = await builder.trash(pageId);
+```
