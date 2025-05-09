@@ -31,7 +31,9 @@ _Or your favorite package manager, in which case you probably know the command._
 This package provides helpers to create, update, trash, and fetch pages.
 
 ```ts
-const page = await getPage(process.env.NOTION_PAGE_ID);
+const newPage = await createPage(process.env.NOTION_PAGE_ID, { /* page contents */ });
+
+const existingPage = await getPage(process.env.NOTION_PAGE_ID);
 
 const updatedPage = await updatePage(process.env.NOTION_PAGE_ID, { icon: { emoji: '🎁' } });
 

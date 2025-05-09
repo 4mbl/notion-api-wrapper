@@ -3,7 +3,6 @@ import {
   E,
   AuthenticationError,
   NotionError,
-  NotionRateLimitError,
   ParameterValidationError,
 } from './internal/errors.js';
 
@@ -29,6 +28,7 @@ import type {
 import { trashPage } from './api/delete.js';
 import { updatePage } from './api/update.js';
 import { getPage } from './api/get.js';
+import { createPage } from './api/create.js';
 
 // More descriptive type names for anyone using the library.
 
@@ -320,27 +320,7 @@ export class PageBuilder {
 
   /** Creates a new page in the parent database with the data provided via the builder methods. */
   async create() {
-    const response = await fetch(`https://api.notion.com/v1/pages`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${this.notionToken}`,
-        'Notion-Version': this.notionVersion,
-      },
-      body: JSON.stringify(this.data),
-    });
-
-    if (response.status === 429) {
-      throw new NotionRateLimitError(E.RATE_LIMIT);
-    }
-
-    if (!response.ok) {
-      throw new NotionError(
-        `Error creating page: ${response.status} ${response.statusText}`,
-      );
-    }
-
-    const data = (await response.json()) as
+    const data = (await createPage(this.data)) as
       | PageObjectResponse
       | PartialPageObjectResponse;
 
