@@ -9,25 +9,25 @@ importers:
   .:
     devDependencies:
       '@eslint/js':
-        specifier: ^9.9.0
+        specifier: ^9.27.0
         version: 9.27.0
       '@notionhq/client':
-        specifier: ^3.0.1
+        specifier: ^3.1.1
         version: 3.1.1
       '@types/node':
-        specifier: ^22.4.2
+        specifier: ^22.15.21
         version: 22.15.21
       dotenv:
-        specifier: ^16.4.5
+        specifier: ^16.5.0
         version: 16.5.0
       eslint:
-        specifier: ^9.9.0
+        specifier: ^9.27.0
         version: 9.27.0
       globals:
-        specifier: ^16.0.0
+        specifier: ^16.1.0
         version: 16.1.0
       prettier:
-        specifier: ^3.3.3
+        specifier: ^3.5.3
         version: 3.5.3
       remark:
         specifier: ^15.0.1
@@ -42,7 +42,7 @@ importers:
         specifier: ^5.8.3
         version: 5.8.3
       typescript-eslint:
-        specifier: ^8.2.0
+        specifier: ^8.32.1
         version: 8.32.1(eslint@9.27.0)(typescript@5.8.3)
       unified:
         specifier: ^11.0.5
@@ -51,7 +51,7 @@ importers:
         specifier: ^5.0.0
         version: 5.0.0
       vitest:
-        specifier: ^3.1.2
+        specifier: ^3.1.4
         version: 3.1.4(@types/debug@4.1.12)(@types/node@22.15.21)(tsx@4.19.4)
 
 packages:
