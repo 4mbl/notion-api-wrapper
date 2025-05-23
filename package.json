@@ -32,9 +32,14 @@
     "eslint": "^9.9.0",
     "globals": "^16.0.0",
     "prettier": "^3.3.3",
-    "typescript": "^5.4.5",
+    "remark": "^15.0.1",
+    "remark-parse": "^11.0.0",
+    "tsx": "^4.19.4",
+    "typescript": "^5.8.3",
     "typescript-eslint": "^8.2.0",
-    "vitest": "^3.0.2"
+    "unified": "^11.0.5",
+    "unist-util-visit": "^5.0.0",
+    "vitest": "^3.1.2"
   },
   "packageManager": "pnpm@9.7.1"
 }

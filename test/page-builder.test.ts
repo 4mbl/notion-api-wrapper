@@ -1,5 +1,6 @@
 import { afterAll, afterEach, beforeEach, expect, test } from 'vitest';
-import { PageBuilder, queryDatabaseFull, trashPage } from '../src';
+import { PageBuilder, trashPage } from '../src';
+import { __cleanupOldDbPages } from './utils';
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -8,14 +9,33 @@ const TESTING_API_KEY = process.env.TESTING_API_KEY;
 const PERSON_ID = process.env.TESTING_PERSON_ID;
 if (!PERSON_ID) throw new Error('TESTING_PERSON_ID not set.');
 
-const BUILER_TESTING_DATABASE_ID = '1d9fe0dc-f383-8046-aa56-c64b0fd84d9c'; //* NOTE: notion stores database id with dashes
+const BUILDER_TESTING_DATABASE_ID = '1d9fe0dc-f383-8046-aa56-c64b0fd84d9c'; //* NOTE: notion stores database id with dashes
 const RELATION_PAGE_ID = '1d9fe0dc-f383-80a1-b222-cf59ca6e4aa6'; //* NOTE: notion stores page id with dashes
 
 const SAMPLE_IMAGE_URL =
   'https://upload.wikimedia.org/wikipedia/commons/9/9f/Ara_macao_-Fort_Worth_Zoo-8.jpg';
 
+/* Require the notion token to be passed explicitly to avoid using the wrong token accidentally */
+const initialEnvVars: Record<string, string | undefined> = {};
+beforeEach(() => {
+  initialEnvVars['NOTION_API_KEY'] = process.env.NOTION_API_KEY;
+  process.env.NOTION_API_KEY = undefined;
+});
+afterEach(() => {
+  process.env.NOTION_API_KEY = initialEnvVars['NOTION_API_KEY'];
+});
+
+afterAll(async () => {
+  await __cleanupOldDbPages({
+    databaseId: BUILDER_TESTING_DATABASE_ID,
+    apiKey: TESTING_API_KEY!,
+  });
+});
+
+/* END SETUP ============================== */
+
 test('PageBuilder with minimal data', async () => {
-  const builder = new PageBuilder(BUILER_TESTING_DATABASE_ID, {
+  const builder = new PageBuilder(BUILDER_TESTING_DATABASE_ID, {
     notionToken: TESTING_API_KEY,
   });
 
@@ -30,7 +50,7 @@ test('PageBuilder with minimal data', async () => {
   expect(page.parent.database_id).toBeDefined();
   expect(page.url).toBeDefined();
 
-  expect(page.parent.database_id).equals(BUILER_TESTING_DATABASE_ID);
+  expect(page.parent.database_id).equals(BUILDER_TESTING_DATABASE_ID);
 
   const p = page.properties;
   expect(p['Name'].title[0].text.content).toEqual(
@@ -42,7 +62,7 @@ test('PageBuilder with minimal data', async () => {
 });
 
 test('PageBuilder with complete data - seperate methods', async () => {
-  const builder = new PageBuilder(BUILER_TESTING_DATABASE_ID, {
+  const builder = new PageBuilder(BUILDER_TESTING_DATABASE_ID, {
     notionToken: TESTING_API_KEY,
   });
 
@@ -72,7 +92,7 @@ test('PageBuilder with complete data - seperate methods', async () => {
   expect(page.parent?.database_id).toBeDefined();
   expect(page.url).toBeDefined();
 
-  expect(page.parent.database_id).equals(BUILER_TESTING_DATABASE_ID);
+  expect(page.parent.database_id).equals(BUILDER_TESTING_DATABASE_ID);
 
   expect(page.cover?.external?.url).toEqual(SAMPLE_IMAGE_URL);
   expect(page.icon?.external?.url).toEqual(SAMPLE_IMAGE_URL);
@@ -101,7 +121,7 @@ test('PageBuilder with complete data - seperate methods', async () => {
 });
 
 test('PageBuilder with complete data - using the `property` method', async () => {
-  const builder = new PageBuilder(BUILER_TESTING_DATABASE_ID, {
+  const builder = new PageBuilder(BUILDER_TESTING_DATABASE_ID, {
     notionToken: TESTING_API_KEY,
   });
 
@@ -135,7 +155,7 @@ test('PageBuilder with complete data - using the `property` method', async () =>
   expect(page.parent?.database_id).toBeDefined();
   expect(page.url).toBeDefined();
 
-  expect(page.parent.database_id).equals(BUILER_TESTING_DATABASE_ID); //* NOTE: notion stores database id with dashes
+  expect(page.parent.database_id).equals(BUILDER_TESTING_DATABASE_ID);
 
   expect(page.cover?.external?.url).toEqual(SAMPLE_IMAGE_URL);
   expect(page.icon?.external?.url).toEqual(SAMPLE_IMAGE_URL);
@@ -164,7 +184,7 @@ test('PageBuilder with complete data - using the `property` method', async () =>
 });
 
 test('PageBuilder with complete data - alternative data', async () => {
-  const builder = new PageBuilder(BUILER_TESTING_DATABASE_ID, {
+  const builder = new PageBuilder(BUILDER_TESTING_DATABASE_ID, {
     notionToken: TESTING_API_KEY,
   });
 
@@ -189,7 +209,7 @@ test('PageBuilder with complete data - alternative data', async () => {
   expect(page.parent?.database_id).toBeDefined();
   expect(page.url).toBeDefined();
 
-  expect(page.parent.database_id).equals(BUILER_TESTING_DATABASE_ID);
+  expect(page.parent.database_id).equals(BUILDER_TESTING_DATABASE_ID);
 
   expect(page.icon?.emoji).toEqual('😀');
 
@@ -205,7 +225,7 @@ test('PageBuilder with complete data - alternative data', async () => {
 });
 
 test('PageBuilder - fetch', async () => {
-  const builder = new PageBuilder(BUILER_TESTING_DATABASE_ID, {
+  const builder = new PageBuilder(BUILDER_TESTING_DATABASE_ID, {
     notionToken: TESTING_API_KEY,
   });
 
@@ -218,7 +238,7 @@ test('PageBuilder - fetch', async () => {
   expect(page.parent?.database_id).toBeDefined();
   expect(page.url).toBeDefined();
 
-  expect(page.parent.database_id).equals(BUILER_TESTING_DATABASE_ID);
+  expect(page.parent.database_id).equals(BUILDER_TESTING_DATABASE_ID);
 
   const p = page.properties;
   expect(p['Name'].title[0].text.content).toEqual(
@@ -227,7 +247,7 @@ test('PageBuilder - fetch', async () => {
 });
 
 test('PageBuilder - update', async () => {
-  const initialBuilder = new PageBuilder(BUILER_TESTING_DATABASE_ID, {
+  const initialBuilder = new PageBuilder(BUILDER_TESTING_DATABASE_ID, {
     notionToken: TESTING_API_KEY,
   });
   initialBuilder.title('Initial Title');
@@ -240,7 +260,7 @@ test('PageBuilder - update', async () => {
     'Initial Title',
   );
 
-  const updateBuilder = new PageBuilder(BUILER_TESTING_DATABASE_ID, {
+  const updateBuilder = new PageBuilder(BUILDER_TESTING_DATABASE_ID, {
     notionToken: TESTING_API_KEY,
   });
 
@@ -258,7 +278,7 @@ test('PageBuilder - update', async () => {
 });
 
 test('PageBuilder - trash', async () => {
-  const builder = new PageBuilder(BUILER_TESTING_DATABASE_ID, {
+  const builder = new PageBuilder(BUILDER_TESTING_DATABASE_ID, {
     notionToken: TESTING_API_KEY,
   });
   builder.title('Initial Title');
@@ -288,42 +308,3 @@ test('PageBuilder - trash', async () => {
     trashedBuilderData.properties['Name']?.title[0]?.text?.content,
   ).toBeUndefined();
 });
-
-/* Require the notion token to be passed explicitly to avoid using the wrong token accidentally */
-const initialEnvVars: Record<string, string | undefined> = {};
-beforeEach(() => {
-  initialEnvVars['NOTION_API_KEY'] = process.env.NOTION_API_KEY;
-  process.env.NOTION_API_KEY = undefined;
-});
-afterEach(() => {
-  process.env.NOTION_API_KEY = initialEnvVars['NOTION_API_KEY'];
-});
-
-afterAll(async () => {
-  await cleanupOldPages();
-});
-
-async function cleanupOldPages() {
-  const today = new Date();
-  const cutoff = new Date(
-    today.getFullYear(),
-    today.getMonth(),
-    today.getDate() - 7,
-  );
-
-  const data = await queryDatabaseFull(BUILER_TESTING_DATABASE_ID, {
-    notionToken: TESTING_API_KEY,
-  });
-
-  const promises = data.map(async (page) => {
-    if (
-      !(page as any).properties.Name.title[0].text.content.includes(
-        '[[ DO NOT DELETE ]]',
-      ) &&
-      new Date((page as any).created_time) < cutoff
-    ) {
-      return await trashPage(page.id, { notionToken: TESTING_API_KEY });
-    }
-  });
-  await Promise.all(promises);
-}

@@ -2,19 +2,21 @@ import type { QueryDatabaseParameters } from './notion-types.js';
 
 export type BuiltFilter = QueryDatabaseParameters['filter'];
 
+type NestableFilter = Filter | BuiltFilter;
+
 export class FilterBuilder {
-  filters: Filter[];
+  filters: NestableFilter[];
 
   constructor() {
     this.filters = [];
   }
 
-  addFilter(filter: Filter) {
-    this.filters.push(filter);
+  addFilter(filter: NestableFilter | undefined) {
+    if (filter) this.filters.push(filter);
     return this;
   }
 
-  build(operator: 'AND' | 'OR'): BuiltFilter | EmptyObject {
+  build(operator: 'AND' | 'OR'): BuiltFilter | undefined {
     if (this.filters.length === 0) {
       return {} as BuiltFilter;
     }
