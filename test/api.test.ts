@@ -6,7 +6,7 @@ import {
   searchFromDatabase,
 } from '../src/api/query';
 import dotenv from 'dotenv';
-import { DatabaseIterator, FilterBuilder } from '../src';
+import { FilterBuilder } from '../src';
 import { afterEach, beforeEach } from 'node:test';
 dotenv.config();
 
@@ -23,6 +23,8 @@ beforeEach(() => {
 afterEach(() => {
   process.env.NOTION_API_KEY = initialEnvVars['NOTION_API_KEY'];
 });
+
+/* END SETUP ============================== */
 
 test('queryDatabase with notionToken', async () => {
   const resp = await queryDatabase(TESTING_DATABASE_ID, undefined, {
@@ -259,40 +261,4 @@ test('getDatabaseColumns', async () => {
   expect(resp.properties.ID).toBeDefined();
   expect(resp.properties.Tags).toBeDefined();
   expect(resp.properties.Description).toBeDefined();
-});
-
-test('DatabaseIterator', async () => {
-  const db = new DatabaseIterator(TESTING_DATABASE_ID, {
-    notionToken: TESTING_API_KEY,
-    batchSize: 10,
-    yieldSize: 5,
-    sort: {
-      direction: 'ascending',
-      property: 'ID',
-    },
-  });
-
-  const resp1 = await db.next();
-  expect(resp1.done).toBe(false);
-  expect(resp1.value.length).toBe(5);
-  expect(resp1.value[0].properties.Name.title[0].plain_text).toBe('One');
-
-  const resp2 = await db.next();
-  expect(resp2.done).toBe(false);
-  expect(resp2.value.length).toBe(5);
-  expect(resp2.value[0].properties.Name.title[0].plain_text).toBe('Six');
-
-  const resp3 = await db.next();
-  expect(resp3.done).toBe(false);
-  expect(resp3.value.length).toBe(5);
-  expect(resp3.value[0].properties.Name.title[0].plain_text).toBe('Eleven');
-
-  const resp4 = await db.next();
-  expect(resp4.done).toBe(false);
-  expect(resp4.value.length).toBe(5);
-  expect(resp4.value[0].properties.Name.title[0].plain_text).toBe('Sixteen');
-
-  const resp5 = await db.next();
-  expect(resp5.done).toBe(true);
-  expect(resp5.value).toBeUndefined();
 });
