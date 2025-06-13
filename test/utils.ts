@@ -17,9 +17,10 @@ export async function __cleanupOldDbPages(opts: {
 
   const promises = data.map(async (page) => {
     if (
-      !(page as any).properties.Name.title[0].text.content.includes(
-        '[[ DO NOT DELETE ]]',
-      ) &&
+      !(page as any).properties.Name.title
+        .map((t: any) => t.plain_text)
+        .join('')
+        .includes('[[ DO NOT DELETE ]]') &&
       new Date((page as any).created_time) < cutoff
     ) {
       return await trashPage(page.id, { notionToken: opts.apiKey });

@@ -146,7 +146,8 @@ There is also options to remove built-in fields and properties from the results.
 import { queryDatabaseFull } from 'notion-api-wrapper';
 
 const data = await queryDatabaseFull(process.env.NOTION_DATABASE_ID, {
-  remove: {
+  propOptions: {
+    remove: {
     userIds: true,
     pageTimestamps: true,
     url: true,
@@ -159,7 +160,8 @@ const data = await queryDatabaseFull(process.env.NOTION_DATABASE_ID, {
     parent: true,
     inTrash: true,
     customProps: ['Description', 'Priority'],
-  },
+    },
+  }
 });
 ```
 
@@ -252,7 +254,9 @@ const db = new NotionDatabase(process.env.NOTION_DATABASE_ID);
 for await (const page of db.iterator()) {
   const firstTitle =
     page.properties.Name.type === 'title'
-      ? page.properties.Name.title[0].plain_text
+      ? page.properties.Name.title
+          .map((t: any) => t.plain_text)
+          .join('')
       : undefined;
 }
 ```
@@ -268,7 +272,9 @@ for await (const chunk of db.iterator({ batchSize: 10, yieldSize: 2 })) {
   const tenTitles = chunk
     .map((c) =>
       c.properties.Name.type === 'title'
-        ? c.properties.Name.title[0].plain_text
+        ? c.properties.Name.title
+          .map((t: any) => t.plain_text)
+          .join('')
         : undefined,
     )
     .filter((text) => text !== undefined);
