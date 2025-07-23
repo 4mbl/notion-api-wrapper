@@ -5,6 +5,7 @@ import dotenv from 'dotenv';
 dotenv.config({ quiet: true });
 
 const TESTING_API_KEY = process.env.TESTING_API_KEY;
+if (!TESTING_API_KEY) throw new Error('TESTING_API_KEY not set.');
 
 const TESTING_DATABASE_ID = '16004341-ec56-4e03-97bd-75cbf6be6f91';
 
