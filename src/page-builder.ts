@@ -56,7 +56,9 @@ type PropertyType =
 
 export class PageBuilder {
   /** Notion page id of the parent database. */
-  private data: CreatePageParameters;
+  private data: Omit<CreatePageParameters, 'properties'> & {
+    properties: NonNullable<CreatePageParameters['properties']>;
+  };
   notionToken: string;
   notionVersion: string;
 
@@ -360,7 +362,9 @@ export class PageBuilder {
       notionVersion: this.notionVersion,
     });
 
-    this._updateMetadata(data as PageObjectResponse);
+    if (!this._isPartialPageObjectResponse(data)) {
+      this._updateMetadata(data);
+    }
 
     return data;
   }
@@ -379,14 +383,24 @@ export class PageBuilder {
 
   private _isPartialPageObjectResponse(
     data: PageObjectResponse | PartialPageObjectResponse,
-  ) {
-    return !(data as PageObjectResponse).created_time;
+  ): data is PartialPageObjectResponse {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return !(data as any).created_time;
+  }
+
+  private _isFullPageObjectResponse(
+    data: PageObjectResponse | PartialPageObjectResponse,
+  ): data is PageObjectResponse {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return !!(data as any).created_time;
   }
 
   private _updateMetadata(metadata: PageObjectResponse) {
-    if (this._isPartialPageObjectResponse(metadata)) return;
+    if (!this._isFullPageObjectResponse(metadata)) return;
 
-    this.data.properties = metadata.properties;
+    this.data.properties = this._transformPropertiesResponseToRequest(
+      metadata.properties,
+    );
 
     if (metadata.icon?.type !== 'file') {
       this.data.icon = metadata.icon;
@@ -401,5 +415,278 @@ export class PageBuilder {
     this.data.properties = {};
     this.data.icon = undefined;
     this.data.cover = undefined;
+  }
+
+  private _transformPropertiesResponseToRequest(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    input: Record<string, any>,
+  ) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const result: Record<string, any> = {};
+
+    for (const [key, value] of Object.entries(input)) {
+      const { type } = value;
+
+      switch (type) {
+        case 'title':
+          result[key] = {
+            title: value.title,
+            type,
+          };
+          break;
+
+        case 'rich_text':
+          result[key] = {
+            rich_text: value.rich_text,
+            type,
+          };
+          break;
+
+        case 'number':
+          result[key] = {
+            number: value.number,
+            type,
+          };
+          break;
+
+        case 'url':
+          result[key] = {
+            url: value.url,
+            type,
+          };
+          break;
+
+        case 'select':
+          result[key] = {
+            select: value.select,
+            type,
+          };
+          break;
+
+        case 'multi_select':
+          result[key] = {
+            multi_select: value.multi_select,
+            type,
+          };
+          break;
+
+        case 'people':
+          result[key] = {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            people: value.people.map((p: any) => (p.id ? { id: p.id } : p)),
+            type,
+          };
+          break;
+
+        case 'email':
+          result[key] = {
+            email: value.email,
+            type,
+          };
+          break;
+
+        case 'phone_number':
+          result[key] = {
+            phone_number: value.phone_number,
+            type,
+          };
+          break;
+
+        case 'date':
+          result[key] = {
+            date: value.date,
+            type,
+          };
+          break;
+
+        case 'checkbox':
+          result[key] = {
+            checkbox: value.checkbox,
+            type,
+          };
+          break;
+
+        case 'relation':
+          result[key] = {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            relation: value.relation.map((r: any) => ({ id: r.id })),
+            type,
+          };
+          break;
+
+        case 'verification':
+          result[key] = {
+            verification: value.verification,
+            type,
+          };
+          break;
+
+        case 'status':
+          result[key] = {
+            status: value.status,
+            type,
+          };
+          break;
+
+        case 'formula':
+          result[key] = {
+            formula: value.formula,
+            type,
+          };
+          break;
+
+        case 'unique_id':
+          result[key] = {
+            unique_id: value.unique_id,
+            type,
+          };
+          break;
+
+        case 'button':
+          result[key] = {
+            button: {},
+            type,
+          };
+          break;
+
+        case 'files':
+          result[key] = transformFiles(value, type);
+          break;
+
+        case 'rollup':
+          result[key] = {
+            rollup: transformRollup(value.rollup),
+            type,
+          };
+          break;
+
+        case 'created_by':
+        case 'created_time':
+        case 'last_edited_by':
+        case 'last_edited_time':
+          continue;
+
+        default:
+          break;
+      }
+    }
+
+    return result;
+  }
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function transformFiles(item: any, type: string) {
+  return {
+    type,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    files: item.files.map((file: any) => {
+      if ('file' in file) {
+        return {
+          file: {
+            url: file.file.url,
+            expiry_time: file.file.expiry_time,
+          },
+          name: file.name,
+          type: 'file',
+        };
+      } else {
+        return {
+          external: {
+            url: file.external.url,
+          },
+          name: file.name,
+          type: 'external',
+        };
+      }
+    }),
+  };
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function transformRollup(rollup: any) {
+  const base = { function: rollup.function };
+
+  switch (rollup.type) {
+    case 'number':
+      return {
+        ...base,
+        type: 'number',
+        number: rollup.number,
+      };
+    case 'date':
+      return {
+        ...base,
+        type: 'date',
+        date: rollup.date,
+      };
+    case 'array':
+      return {
+        ...base,
+        type: 'array',
+        array: rollup.array.map(transformRollupArrayItem),
+      };
+    default:
+      return rollup;
+  }
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function transformRollupArrayItem(item: any) {
+  const { type } = item;
+
+  switch (type) {
+    case 'number':
+      return { type, number: item.number };
+    case 'url':
+      return { type, url: item.url };
+    case 'select':
+      return { type, select: item.select };
+    case 'multi_select':
+      return { type, multi_select: item.multi_select };
+    case 'status':
+      return { type, status: item.status };
+    case 'date':
+      return { type, date: item.date };
+    case 'email':
+      return { type, email: item.email };
+    case 'phone_number':
+      return { type, phone_number: item.phone_number };
+    case 'checkbox':
+      return { type, checkbox: item.checkbox };
+    case 'files':
+      return transformFiles(item, type);
+    case 'created_by':
+    case 'last_edited_by':
+      return { type, [type]: item[type] };
+    case 'created_time':
+    case 'last_edited_time':
+      return { type, [type]: item[type] };
+    case 'formula':
+      return { type, formula: item.formula };
+    case 'button':
+      return { type, button: {} };
+    case 'unique_id':
+      return { type, unique_id: item.unique_id };
+    case 'verification':
+      return { type, verification: item.verification };
+    case 'title':
+      return { type, title: item.title };
+    case 'rich_text':
+      return { type, rich_text: item.rich_text };
+    case 'people':
+      return {
+        type,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        people: item.people.map((p: any) => (p.id ? { id: p.id } : p)),
+      };
+    case 'relation':
+      return {
+        type,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        relation: item.relation.map((r: any) => ({ id: r.id })),
+      };
+    default:
+      return item;
   }
 }

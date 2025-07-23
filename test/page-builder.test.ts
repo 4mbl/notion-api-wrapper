@@ -2,9 +2,10 @@ import { afterAll, afterEach, beforeEach, expect, test } from 'vitest';
 import { PageBuilder, trashPage } from '../src';
 import { __cleanupOldDbPages } from './utils';
 import dotenv from 'dotenv';
-dotenv.config();
+dotenv.config({ quiet: true });
 
 const TESTING_API_KEY = process.env.TESTING_API_KEY;
+if (!TESTING_API_KEY) throw new Error('TESTING_API_KEY not set.');
 
 const PERSON_ID = process.env.TESTING_PERSON_ID;
 if (!PERSON_ID) throw new Error('TESTING_PERSON_ID not set.');

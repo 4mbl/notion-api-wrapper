@@ -8,9 +8,10 @@ import {
 import dotenv from 'dotenv';
 import { FilterBuilder } from '../src';
 import { afterEach, beforeEach } from 'node:test';
-dotenv.config();
+dotenv.config({ quiet: true });
 
 const TESTING_API_KEY = process.env.TESTING_API_KEY;
+if (!TESTING_API_KEY) throw new Error('TESTING_API_KEY not set.');
 
 const TESTING_DATABASE_ID = '16004341ec564e0397bd75cbf6be6f91';
 
