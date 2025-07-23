@@ -7,7 +7,7 @@ import { visit } from 'unist-util-visit';
 import { execSync } from 'child_process';
 import { __cleanupOldDbPages } from './utils';
 import dotenv from 'dotenv';
-dotenv.config();
+dotenv.config({ quiet: true });
 
 const markdownPath = path.resolve(__dirname, '../README.md');
 const markdownContent = fs.readFileSync(markdownPath, 'utf-8');
@@ -47,7 +47,7 @@ describe('Markdown TypeScript code blocks', () => {
       const tempPath = path.join(testDirectory, `t${index}.ts`);
       fs.writeFileSync(
         tempPath,
-        `import dotenv from 'dotenv';dotenv.config();` +
+        `import dotenv from 'dotenv';dotenv.config({quiet:true});` +
           `process.env.NOTION_API_KEY='${process.env.TESTING_API_KEY}';` +
           `process.env.NOTION_PAGE_ID='${DOCTEST_TESTING_PAGE_ID}';` +
           `process.env.NOTION_DATABASE_ID='${DOCTEST_TESTING_DATABASE_ID}';\n` +

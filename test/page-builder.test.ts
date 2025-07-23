@@ -2,7 +2,7 @@ import { afterAll, afterEach, beforeEach, expect, test } from 'vitest';
 import { PageBuilder, trashPage } from '../src';
 import { __cleanupOldDbPages } from './utils';
 import dotenv from 'dotenv';
-dotenv.config();
+dotenv.config({ quiet: true });
 
 const TESTING_API_KEY = process.env.TESTING_API_KEY;
 

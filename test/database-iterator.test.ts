@@ -2,7 +2,7 @@ import { expect, test } from 'vitest';
 import { NotionDatabase } from '../src';
 import { afterEach, beforeEach } from 'node:test';
 import dotenv from 'dotenv';
-dotenv.config();
+dotenv.config({ quiet: true });
 
 const TESTING_API_KEY = process.env.TESTING_API_KEY;
 

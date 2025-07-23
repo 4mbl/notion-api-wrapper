@@ -8,7 +8,7 @@ import {
 import dotenv from 'dotenv';
 import { FilterBuilder } from '../src';
 import { afterEach, beforeEach } from 'node:test';
-dotenv.config();
+dotenv.config({ quiet: true });
 
 const TESTING_API_KEY = process.env.TESTING_API_KEY;
 
