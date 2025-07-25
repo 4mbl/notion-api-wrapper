@@ -59,7 +59,7 @@ const trashedPage = await trashPage(pageId);
 
 2. Give the integration permissions to read the database you want to query. You can do this in the database page: `⋯` → `Connection To` → `<Integration Name>`.
 
-3. Make the secret key available as an environment variable under the name `NOTION_API_KEY`. You may also pass it as a parameter to the query functions. You should also store the database ID in an environment variable but this is not mandatory. The examples below assume that you have done so.
+3. Make the secret key available as an environment variable under the name `NOTION_API_KEY`. You may also pass it as a parameter to the functions using the `notionToken` parameter. The examples below also assume that you have set the database ID as an environment variable called `NOTION_DATABASE_ID`.
 
    You can find the database ID in the URL of the database page. For instance, in the URL: `https://www.notion.so/<workspace>/00000000000000000000000000000000?v=1111111111111111111111111111111`, the database ID is `00000000000000000000000000000000`.
 
