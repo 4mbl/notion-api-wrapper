@@ -2,14 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [main]
-
-  pull_request:
-    types: [opened, synchronize]
-    branches: [main]
-
+    branches:
+      - '**'
   workflow_dispatch:
-
   schedule:
     - cron: '0 0 * * 3' # weekly on wednesdays at 00:00
 
