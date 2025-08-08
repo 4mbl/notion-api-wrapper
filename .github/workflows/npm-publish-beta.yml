@@ -34,8 +34,9 @@ jobs:
 
       - name: Bump to beta version
         run: |
-          SHORT_SHA=$(git rev-parse --short HEAD)
-          BETA_VERSION="0.0.0-beta.$SHORT_SHA"
+          SHORT_SHA=$(git rev-parse --short=8 HEAD)
+          BUILD_DATE=$(date +%Y%m%d)
+          BETA_VERSION="0.0.0-beta-$SHORT_SHA-$BUILD_DATE"
           echo "Setting version to $BETA_VERSION"
           npm version "$BETA_VERSION" --no-git-tag-version
 
