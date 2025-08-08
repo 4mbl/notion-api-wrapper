@@ -22,13 +22,16 @@ export class NotionDatabase<T extends PageObjectResponse = PageObjectResponse> {
   private _queryOptions: QueryOptions;
   private _primaryProperty: string | undefined;
   private _columns: GetDatabaseResponse['properties'] | undefined;
+  private _yieldSize: number | undefined;
 
   constructor(databaseId: string, options?: DatabaseOptions) {
     if (!isObjectId(databaseId))
       throw new ParameterValidationError(E.INVALID_DATABASE_ID);
 
     this._databaseId = databaseId;
-    this._queryOptions = options ?? {};
+    const { yieldSize, ...rest } = options ?? {};
+    this._queryOptions = rest ?? {};
+    this._yieldSize = yieldSize;
   }
 
   iterator(
@@ -38,7 +41,8 @@ export class NotionDatabase<T extends PageObjectResponse = PageObjectResponse> {
     options: DatabaseOptions & { yieldSize: Y },
   ): NotionDatabaseIterator<T, Y>;
   iterator(options?: DatabaseOptions): NotionDatabaseIterator<T, number> {
-    const yieldSize = options?.yieldSize ?? DEFAULT_YIELD_SIZE;
+    const yieldSize =
+      options?.yieldSize ?? this._yieldSize ?? DEFAULT_YIELD_SIZE;
     return new NotionDatabaseIterator<T, typeof yieldSize>(this, {
       ...this._queryOptions,
       ...options,
