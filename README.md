@@ -348,3 +348,13 @@ const updatedPage = await builder.update(dummyPage.id);
 
 const trashedPage = await builder.trash(dummyPage.id);
 ```
+
+You can also seed the builder directly from a page response (e.g., from the database iterator) so you only need to specify the properties you want to change. Existing properties and metadata will be preserved automatically:
+
+```ts skip-test
+import { PageBuilder } from 'notion-api-wrapper';
+
+const builder = PageBuilder.from(existingPage);
+builder.title('Updated Title');
+await builder.update(existingPage.id);
+```

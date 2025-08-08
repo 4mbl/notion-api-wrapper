@@ -1,5 +1,5 @@
 import { afterAll, afterEach, beforeEach, expect, test } from 'vitest';
-import { PageBuilder, trashPage } from '../src';
+import { NotionDatabase, PageBuilder, trashPage } from '../src';
 import { __cleanupOldDbPages } from './utils';
 import dotenv from 'dotenv';
 dotenv.config({ quiet: true });
@@ -308,4 +308,80 @@ test('PageBuilder - trash', async () => {
   expect(
     trashedBuilderData.properties['Name']?.title[0]?.text?.content,
   ).toBeUndefined();
+});
+
+test('PageBuilder.from - update existing page', async () => {
+  const createPage = async () => {
+    const initialBuilder = new PageBuilder(BUILDER_TESTING_DATABASE_ID, {
+      notionToken: TESTING_API_KEY,
+    });
+
+    initialBuilder
+      .title('From Source Title')
+      .richText('Rich Text', 'From Source Rich Text')
+      .status('Status', 'In progress');
+
+    const page = await initialBuilder.create();
+    if (!page) throw new Error('No page created');
+    return page;
+  };
+
+  const created = await createPage();
+  expect(created).toBeDefined();
+
+  const builderFrom = PageBuilder.from(created, {
+    notionToken: TESTING_API_KEY,
+  });
+
+  builderFrom.title('From Updated Title');
+  const updated = (await builderFrom.update(created.id)) as any;
+
+  expect(updated.properties['Name'].title[0].text.content).toEqual(
+    'From Updated Title',
+  );
+  expect(updated.properties['Rich Text'].rich_text[0].text.content).toEqual(
+    'From Source Rich Text',
+  );
+  expect(updated.properties['Status'].status.name).toEqual('In progress');
+});
+
+test('PageBuilder.from - update page from DatabaseIterator', async () => {
+  const createPage = async () => {
+    const initialBuilder = new PageBuilder(BUILDER_TESTING_DATABASE_ID, {
+      notionToken: TESTING_API_KEY,
+    });
+
+    initialBuilder
+      .title('From Source Title')
+      .richText('Rich Text', 'From Source Rich Text')
+      .status('Status', 'In progress');
+
+    const page = await initialBuilder.create();
+    if (!page) throw new Error('No page created');
+    return page;
+  };
+
+  const created = await createPage();
+  expect(created).toBeDefined();
+
+  const db = new NotionDatabase(BUILDER_TESTING_DATABASE_ID, {
+    notionToken: TESTING_API_KEY,
+  });
+  for await (const page of db.iterator()) {
+    if (page.id !== created.id) continue;
+
+    const builderFrom = PageBuilder.from(page, {
+      notionToken: TESTING_API_KEY,
+    });
+
+    builderFrom.title('From Updated Title');
+    const updated = (await builderFrom.update(created.id)) as any;
+
+    expect(updated.properties['Name'].title[0].text.content).toEqual(
+      'From Updated Title',
+    );
+    expect(updated.properties['Rich Text'].rich_text[0].text.content).toEqual(
+      'From Source Rich Text',
+    );
+  }
 });
