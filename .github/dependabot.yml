@@ -10,8 +10,10 @@ updates:
     schedule:
       interval: 'weekly'
     groups:
-      dev-deps:
+      dev:
         dependency-type: 'development'
+      prod:
+        dependency-type: 'production'
   - package-ecosystem: 'github-actions'
     directory: '/'
     schedule:
