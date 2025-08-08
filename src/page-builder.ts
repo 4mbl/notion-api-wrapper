@@ -79,12 +79,15 @@ type PropertyValueType<T extends PropertyType> = T extends 'title'
                           : never;
 
 export class PageBuilder {
-  /** Notion page id of the parent database. */
-  private data: Omit<CreatePageParameters, 'properties'> & {
+  private _data: Omit<CreatePageParameters, 'properties'> & {
     properties: NonNullable<CreatePageParameters['properties']>;
   };
   notionToken: string;
   notionVersion: string;
+
+  get data() {
+    return this._data;
+  }
 
   constructor(
     parentId: string,
@@ -99,7 +102,7 @@ export class PageBuilder {
 
     this.notionVersion = options?.notionVersion ?? NOTION_VERSION;
 
-    this.data = {
+    this._data = {
       parent: {
         type: 'database_id',
         database_id: parentId,
@@ -136,7 +139,7 @@ export class PageBuilder {
   // PAGE METADATA //
 
   cover(url: string) {
-    this.data.cover = {
+    this._data.cover = {
       type: 'external',
       external: {
         url,
@@ -147,14 +150,14 @@ export class PageBuilder {
 
   icon(icon: string | Emoji) {
     if (isUrl(icon)) {
-      this.data.icon = {
+      this._data.icon = {
         type: 'external',
         external: {
           url: icon,
         },
       };
     } else if (isEmoji(icon)) {
-      this.data.icon = {
+      this._data.icon = {
         type: 'emoji',
         emoji: icon as EmojiRequest,
       };
@@ -241,7 +244,7 @@ export class PageBuilder {
   }
 
   title(value: string) {
-    this.data.properties.Name = {
+    this._data.properties.Name = {
       title: [
         {
           text: {
@@ -254,7 +257,7 @@ export class PageBuilder {
   }
 
   richText(key: PropertyKey, value: string) {
-    this.data.properties[key] = {
+    this._data.properties[key] = {
       rich_text: [
         {
           text: {
@@ -267,7 +270,7 @@ export class PageBuilder {
   }
 
   checkbox(key: PropertyKey, value: boolean) {
-    this.data.properties[key] = {
+    this._data.properties[key] = {
       checkbox: value,
     };
     return this;
@@ -277,7 +280,7 @@ export class PageBuilder {
     const start = Array.isArray(value) ? value[0] : value;
     const end =
       Array.isArray(value) && value.length === 2 ? value[1] : undefined;
-    this.data.properties[key] = {
+    this._data.properties[key] = {
       type: 'date',
       date: {
         start: start.toISOString(),
@@ -290,7 +293,7 @@ export class PageBuilder {
 
   files(key: PropertyKey, value: string | string[]) {
     const val = typeof value === 'string' ? [value] : value;
-    this.data.properties[key] = {
+    this._data.properties[key] = {
       files: val.map((url: string) => ({
         name: `file_${crypto.randomUUID()}`,
         external: {
@@ -303,7 +306,7 @@ export class PageBuilder {
 
   multiSelect(key: PropertyKey, value: string | string[]) {
     const val = Array.isArray(value) ? value : [value];
-    this.data.properties[key] = {
+    this._data.properties[key] = {
       multi_select: val.map((v: string) => ({
         name: v,
       })),
@@ -312,7 +315,7 @@ export class PageBuilder {
   }
 
   number(key: PropertyKey, value: number) {
-    this.data.properties[key] = {
+    this._data.properties[key] = {
       number: value,
     };
     return this;
@@ -320,7 +323,7 @@ export class PageBuilder {
 
   people(key: PropertyKey, value: string | string[]) {
     const val = Array.isArray(value) ? value : [value];
-    this.data.properties[key] = {
+    this._data.properties[key] = {
       people: val.map((v: string) => ({
         id: v,
       })),
@@ -329,7 +332,7 @@ export class PageBuilder {
   }
 
   phoneNumber(key: PropertyKey, value: string) {
-    this.data.properties[key] = {
+    this._data.properties[key] = {
       phone_number: value,
     };
     return this;
@@ -337,7 +340,7 @@ export class PageBuilder {
 
   relation(key: PropertyKey, value: string | string[]) {
     const val = Array.isArray(value) ? value : [value];
-    this.data.properties[key] = {
+    this._data.properties[key] = {
       relation: val.map((v: string) => ({
         id: v,
       })),
@@ -346,7 +349,7 @@ export class PageBuilder {
   }
 
   select(key: PropertyKey, value: string) {
-    this.data.properties[key] = {
+    this._data.properties[key] = {
       select: {
         name: value,
       },
@@ -355,7 +358,7 @@ export class PageBuilder {
   }
 
   status(key: PropertyKey, value: string) {
-    this.data.properties[key] = {
+    this._data.properties[key] = {
       status: {
         name: value,
       },
@@ -366,7 +369,7 @@ export class PageBuilder {
   url(key: PropertyKey, value: string) {
     if (!isUrl(value)) throw new ParameterValidationError('Invalid URL.');
 
-    this.data.properties[key] = {
+    this._data.properties[key] = {
       url: value,
     };
     return this;
@@ -374,7 +377,7 @@ export class PageBuilder {
 
   /** Creates a new page in the parent database with the data provided via the builder methods. */
   async create() {
-    const data = await createPage(this.data, {
+    const data = await createPage(this._data, {
       notionToken: this.notionToken,
       notionVersion: this.notionVersion,
     });
@@ -409,7 +412,7 @@ export class PageBuilder {
 
   /** Updates an existing page with the data provided via the builder methods. */
   async update(pageId: string) {
-    const data = await updatePage(pageId, this.data, {
+    const data = await updatePage(pageId, this._data, {
       notionToken: this.notionToken,
       notionVersion: this.notionVersion,
     });
@@ -450,23 +453,23 @@ export class PageBuilder {
   private _updateMetadata(metadata: PageObjectResponse) {
     if (!this._isFullPageObjectResponse(metadata)) return;
 
-    this.data.properties = this._transformPropertiesResponseToRequest(
+    this._data.properties = this._transformPropertiesResponseToRequest(
       metadata.properties,
     );
 
     if (metadata.icon?.type !== 'file') {
-      this.data.icon = metadata.icon;
+      this._data.icon = metadata.icon;
     }
 
     if (metadata.cover?.type !== 'file') {
-      this.data.cover = metadata.cover;
+      this._data.cover = metadata.cover;
     }
   }
 
   private _clearMetadata() {
-    this.data.properties = {};
-    this.data.icon = undefined;
-    this.data.cover = undefined;
+    this._data.properties = {};
+    this._data.icon = undefined;
+    this._data.cover = undefined;
   }
 
   private _transformPropertiesResponseToRequest(
