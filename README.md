@@ -244,7 +244,7 @@ const columns = await getDatabaseColumns(process.env.NOTION_DATABASE_ID);
 
 ### Database Iterator
 
-This package also provides a `DatabaseIterator` class that can be used to iterate over the database in a paginated way.
+This package also provides a `NotionDatabase` class that can be used to iterate over the database in a paginated way.
 
 ```ts
 import { NotionDatabase } from 'notion-api-wrapper';
@@ -252,16 +252,23 @@ import { NotionDatabase } from 'notion-api-wrapper';
 const db = new NotionDatabase(process.env.NOTION_DATABASE_ID);
 
 for await (const page of db.iterator()) {
-  const firstTitle =
-    page.properties.Name.type === 'title'
-      ? page.properties.Name.title
-          .map((t: any) => t.plain_text)
-          .join('')
-      : undefined;
+  console.log(page.id);
 }
 ```
 
-The `batchSize` option controls the number of pages fetched at once from Notion and `yieldSize` the number of pages that will be yielded at a time to the caller. By default both are set to 1.
+By default the iterator yields each page individually. You can pass the `yieldSize` option to control the number of pages that will be yielded at a time to the caller.
+
+```ts
+import { NotionDatabase } from 'notion-api-wrapper';
+
+const db = new NotionDatabase(process.env.NOTION_DATABASE_ID);
+
+for await (const page of db.iterator({ yieldSize: 10 })) {
+  console.log(page.id);
+}
+```
+
+The `batchSize` option controls the number of pages fetched at once from Notion and `yieldSize` the number of pages that will be yielded at a time to the caller. By default both are set to 1. If you set `yieldSize` to a value other than the default of 1, you will get the results in an array instead of as a bare object as before.
 
 ```ts
 import { NotionDatabase } from 'notion-api-wrapper';
@@ -269,15 +276,7 @@ import { NotionDatabase } from 'notion-api-wrapper';
 const db = new NotionDatabase(process.env.NOTION_DATABASE_ID);
 
 for await (const chunk of db.iterator({ batchSize: 10, yieldSize: 2 })) {
-  const tenTitles = chunk
-    .map((c) =>
-      c.properties.Name.type === 'title'
-        ? c.properties.Name.title
-          .map((t: any) => t.plain_text)
-          .join('')
-        : undefined,
-    )
-    .filter((text) => text !== undefined);
+  chunk.map((page) => console.log(page.id));
 }
 ```
 
