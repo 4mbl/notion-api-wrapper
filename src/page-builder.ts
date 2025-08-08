@@ -6,11 +6,7 @@ import {
   ParameterValidationError,
 } from './internal/errors.js';
 
-import type {
-  EmojiRequest,
-  SimpleDatabaseProperty,
-  TimeZoneRequest,
-} from './naw-types.js';
+import type { EmojiRequest, TimeZoneRequest } from './naw-types.js';
 import {
   isArrayOfStrings,
   isBoolean,
@@ -37,7 +33,7 @@ type Emoji = EmojiRequest;
 type TimeZone = TimeZoneRequest;
 /** Property id or name. Using the id is recommended to allow the end user to change the name of the property. */
 type PropertyKey = string;
-type PropertyValue = SimpleDatabaseProperty;
+type DateRange = [Date, Date];
 
 type PropertyType =
   | 'title'
@@ -53,6 +49,34 @@ type PropertyType =
   | 'select'
   | 'status'
   | 'url';
+
+type PropertyValueType<T extends PropertyType> = T extends 'title'
+  ? string
+  : T extends 'rich_text'
+    ? string
+    : T extends 'checkbox'
+      ? boolean
+      : T extends 'date'
+        ? Date | [Date, Date]
+        : T extends 'files'
+          ? string | string[]
+          : T extends 'multi_select'
+            ? string | string[]
+            : T extends 'number'
+              ? number
+              : T extends 'people'
+                ? string | string[]
+                : T extends 'phone_number'
+                  ? string
+                  : T extends 'relation'
+                    ? string | string[]
+                    : T extends 'select'
+                      ? string
+                      : T extends 'status'
+                        ? string
+                        : T extends 'url'
+                          ? string
+                          : never;
 
 export class PageBuilder {
   /** Notion page id of the parent database. */
@@ -144,7 +168,11 @@ export class PageBuilder {
 
   // PROPERTIES //
 
-  property(type: PropertyType, key: PropertyKey, value: PropertyValue) {
+  property<T extends PropertyType>(
+    type: T,
+    key: string,
+    value: PropertyValueType<T>,
+  ) {
     switch (type) {
       case 'title':
         if (!isString(value))
@@ -161,7 +189,7 @@ export class PageBuilder {
       case 'date':
         if (
           // prettier-ignore
-          !isString(value)
+          !(value instanceof Date)
           || (Array.isArray(value) && value.length === 1 && !isString(value[0]))
           || (Array.isArray(value) && value.length === 2 && !isString(value[0]) && !isString(value[1]))
           || (Array.isArray(value) && value.length > 2)
@@ -245,16 +273,15 @@ export class PageBuilder {
     return this;
   }
 
-  date(
-    key: PropertyKey,
-    value: string | [string, string],
-    timezone?: TimeZone,
-  ) {
+  date(key: PropertyKey, value: Date | DateRange, timezone?: TimeZone) {
+    const start = Array.isArray(value) ? value[0] : value;
+    const end =
+      Array.isArray(value) && value.length === 2 ? value[1] : undefined;
     this.data.properties[key] = {
       type: 'date',
       date: {
-        start: Array.isArray(value) ? value[0] : value,
-        end: Array.isArray(value) && value.length === 2 ? value[1] : undefined,
+        start: start.toISOString(),
+        end: end?.toISOString(),
         time_zone: timezone ?? null,
       },
     };

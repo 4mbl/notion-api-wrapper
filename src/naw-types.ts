@@ -31,7 +31,9 @@ export type SimpleDatabaseProperty =
   | number
   | null
   | boolean
-  | (string | number | null | boolean)[];
+  | Date
+  | [Date, Date]
+  | (string | number | null | boolean | Date)[];
 
 /** Represents a Notion API compatible emoji character. */
 export type EmojiRequest = Extract<

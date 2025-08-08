@@ -133,7 +133,7 @@ function simplifyProp(
     case 'status':
       return prop.status?.name ?? null;
     case 'date':
-      return prop.date?.start ?? null;
+      return prop.date?.start ? new Date(prop.date?.start) : null;
     case 'people':
       return prop.people?.map((person: { id: string }) => person.id);
     case 'files':

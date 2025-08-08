@@ -29,7 +29,9 @@ export function isEmoji(input: SimpleDatabaseProperty) {
   return typeof input === 'string' && /^[\p{Emoji}]+$/u.test(input);
 }
 
-export function isArrayOfStrings(input: SimpleDatabaseProperty) {
+export function isArrayOfStrings(
+  input: SimpleDatabaseProperty,
+): input is string[] {
   return Array.isArray(input) && input.every((item) => isString(item));
 }
 

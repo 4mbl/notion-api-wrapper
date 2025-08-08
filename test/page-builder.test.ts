@@ -73,7 +73,7 @@ test('PageBuilder with complete data - seperate methods', async () => {
   builder.title('Test Page with all data - separate methods');
   builder.richText('Rich Text', 'Test Rich Text');
   builder.checkbox('Checkbox', true);
-  builder.date('Date', '2025-01-01');
+  builder.date('Date', new Date('2025-01-01'));
   builder.files('Files & Media', SAMPLE_IMAGE_URL);
   builder.multiSelect('Multi-Select', 'Option 1');
   builder.number('Number', 42);
@@ -104,7 +104,7 @@ test('PageBuilder with complete data - seperate methods', async () => {
   );
   expect(p['Rich Text'].rich_text[0].text.content).toEqual('Test Rich Text');
   expect(p['Checkbox'].checkbox).toEqual(true);
-  expect(p['Date'].date.start).toEqual('2025-01-01');
+  expect(p['Date'].date.start).toEqual('2025-01-01T00:00:00.000+00:00');
   expect(p['Date'].date.end).toEqual(null);
   expect(p['Date'].date.time_zone).toEqual(null);
   expect(p['Files & Media'].files[0].external.url).toEqual(SAMPLE_IMAGE_URL);
@@ -136,7 +136,7 @@ test('PageBuilder with complete data - using the `property` method', async () =>
   );
   builder.richText('Rich Text', 'Test Rich Text');
   builder.property('checkbox', 'Checkbox', true);
-  builder.property('date', 'Date', '2025-01-01');
+  builder.property('date', 'Date', new Date('2025-01-01'));
   builder.property('files', 'Files & Media', SAMPLE_IMAGE_URL);
   builder.property('multi_select', 'Multi-Select', 'Option 1');
   builder.property('number', 'Number', 42);
@@ -167,7 +167,7 @@ test('PageBuilder with complete data - using the `property` method', async () =>
   );
   expect(p['Rich Text'].rich_text[0].text.content).toEqual('Test Rich Text');
   expect(p['Checkbox'].checkbox).toEqual(true);
-  expect(p['Date'].date.start).toEqual('2025-01-01');
+  expect(p['Date'].date.start).toEqual('2025-01-01T00:00:00.000+00:00');
   expect(p['Date'].date.end).toEqual(null);
   expect(p['Date'].date.time_zone).toEqual(null);
   expect(p['Files & Media'].files[0].external.url).toEqual(SAMPLE_IMAGE_URL);
@@ -195,7 +195,10 @@ test('PageBuilder with complete data - alternative data', async () => {
   builder.checkbox('Checkbox', true);
   builder.date(
     'Date',
-    ['2025-01-01T00:00:00.000Z', '2025-02-01T00:00:00.000Z'],
+    [
+      new Date('2025-01-01T00:00:00.000Z'),
+      new Date('2025-02-01T00:00:00.000Z'),
+    ],
     'America/New_York',
   );
 
