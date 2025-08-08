@@ -35,10 +35,11 @@ afterAll(async () => {
   });
 });
 
-visit(ast, 'code', (node: any) => {
-  if (node.lang === 'ts' || node.lang === 'typescript') {
-    codeBlocks.push(node.value);
-  }
+visit(ast, 'code', (node) => {
+  if (node.meta?.includes('skip-test')) return;
+  if (node.lang !== 'ts' && node.lang !== 'typescript') return;
+
+  codeBlocks.push(node.value);
 });
 
 describe('Markdown TypeScript code blocks', () => {

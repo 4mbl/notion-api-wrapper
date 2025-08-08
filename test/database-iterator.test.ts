@@ -21,7 +21,34 @@ afterEach(() => {
 
 /* END SETUP ============================== */
 
-test('DatabaseIterator', async () => {
+test('DatabaseIterator - bare', async () => {
+  const db = new NotionDatabase(TESTING_DATABASE_ID, {
+    notionToken: TESTING_API_KEY,
+    batchSize: 10,
+    sort: {
+      direction: 'ascending',
+      property: 'ID',
+    },
+  });
+
+  const interator = db.iterator();
+
+  const resp1 = await interator.next();
+  expect(resp1.done).toBe(false);
+  expect(resp1.value.length).toBeUndefined();
+  expect(resp1.value.properties.Name.title[0].plain_text).toBe('One');
+
+  // database should have 20 values, so 19 left
+  for (let i = 0; i < 19; i++) {
+    await interator.next();
+  }
+
+  const respNoMore = await interator.next();
+  expect(respNoMore.done).toBe(true);
+  expect(respNoMore.value).toBeUndefined();
+});
+
+test('DatabaseIterator - batches', async () => {
   const db = new NotionDatabase(TESTING_DATABASE_ID, {
     notionToken: TESTING_API_KEY,
     batchSize: 10,
@@ -54,7 +81,7 @@ test('DatabaseIterator', async () => {
   expect(resp4.value.length).toBe(5);
   expect(resp4.value[0].properties.Name.title[0].plain_text).toBe('Sixteen');
 
-  const resp5 = await interator.next();
-  expect(resp5.done).toBe(true);
-  expect(resp5.value).toBeUndefined();
+  const respNoMore = await interator.next();
+  expect(respNoMore.done).toBe(true);
+  expect(respNoMore.value).toBeUndefined();
 });

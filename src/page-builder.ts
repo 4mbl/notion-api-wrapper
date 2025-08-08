@@ -84,6 +84,31 @@ export class PageBuilder {
     };
   }
 
+  /** Creates a PageBuilder pre-populated from an existing page response. */
+  static from(
+    page: PageObjectResponse | PartialPageObjectResponse,
+    options?: { notionToken?: string; notionVersion?: string },
+  ) {
+    if (
+      !('parent' in page) ||
+      !page.parent ||
+      page.parent.type !== 'database_id' ||
+      !page.parent.database_id
+    ) {
+      throw new ParameterValidationError(
+        'PageBuilder.from only supports pages with a database parent.',
+      );
+    }
+
+    const builder = new PageBuilder(page.parent.database_id, options);
+
+    if ('created_time' in page) {
+      builder._updateMetadata(page as PageObjectResponse);
+    }
+
+    return builder;
+  }
+
   // PAGE METADATA //
 
   cover(url: string) {

@@ -22,21 +22,32 @@ export class NotionDatabase<T extends PageObjectResponse = PageObjectResponse> {
   private _queryOptions: QueryOptions;
   private _primaryProperty: string | undefined;
   private _columns: GetDatabaseResponse['properties'] | undefined;
+  private _yieldSize: number | undefined;
 
   constructor(databaseId: string, options?: DatabaseOptions) {
     if (!isObjectId(databaseId))
       throw new ParameterValidationError(E.INVALID_DATABASE_ID);
 
     this._databaseId = databaseId;
-    this._queryOptions = options ?? {};
+    const { yieldSize, ...rest } = options ?? {};
+    this._queryOptions = rest ?? {};
+    this._yieldSize = yieldSize;
   }
 
   iterator(
-    options: DatabaseOptions & { yieldSize: 1 },
-  ): NotionDatabaseIterator<T>;
-  iterator(options?: DatabaseOptions): NotionDatabaseIterator<T>;
-  iterator(options?: DatabaseOptions): NotionDatabaseIterator<T> {
-    return new NotionDatabaseIterator<T>(this, options ?? this._queryOptions);
+    options?: Omit<DatabaseOptions, 'yieldSize'> & { yieldSize?: 1 },
+  ): NotionDatabaseIterator<T, 1>;
+  iterator<Y extends number>(
+    options: DatabaseOptions & { yieldSize: Y },
+  ): NotionDatabaseIterator<T, Y>;
+  iterator(options?: DatabaseOptions): NotionDatabaseIterator<T, number> {
+    const yieldSize =
+      options?.yieldSize ?? this._yieldSize ?? DEFAULT_YIELD_SIZE;
+    return new NotionDatabaseIterator<T, typeof yieldSize>(this, {
+      ...this._queryOptions,
+      ...options,
+      yieldSize,
+    });
   }
 
   async getColumns() {
@@ -69,46 +80,51 @@ export class NotionDatabase<T extends PageObjectResponse = PageObjectResponse> {
   }
 }
 
-class NotionDatabaseIterator<T extends PageObjectResponse>
-  implements AsyncIterableIterator<T | T[]>
+class NotionDatabaseIterator<T extends PageObjectResponse, Y extends number>
+  implements AsyncIterableIterator<Y extends 1 ? T : T[]>
 {
-  private _moreToFetch: boolean = true;
+  private _moreToFetch = true;
   private _cursor: string | undefined | null;
   private _database: NotionDatabase<T>;
   private _queryOptions: QueryOptions;
-  private _yieldSize: number;
-  private _cachedResults: Array<T> = [];
+  private _yieldSize: Y;
+  private _cachedResults: T[] = [];
 
-  constructor(database: NotionDatabase<T>, options?: DatabaseOptions) {
+  constructor(
+    database: NotionDatabase<T>,
+    options: DatabaseOptions & { yieldSize: Y },
+  ) {
     this._cursor = undefined;
     this._database = database;
-
-    const opts = { ...options };
-    this._yieldSize = opts?.yieldSize ?? DEFAULT_YIELD_SIZE;
-
-    delete opts.yieldSize;
-    this._queryOptions = opts;
+    const { yieldSize, ...rest } = options;
+    this._yieldSize = yieldSize;
+    this._queryOptions = rest;
   }
 
-  [Symbol.asyncIterator](): AsyncIterableIterator<T | T[]> {
+  [Symbol.asyncIterator](): AsyncIterableIterator<Y extends 1 ? T : T[]> {
     return this;
   }
 
-  async next(): Promise<IteratorResult<T | T[]>> {
+  async next(): Promise<IteratorResult<Y extends 1 ? T : T[]>> {
     if (this._cachedResults.length < this._yieldSize) {
       const nextBatch = await this._fetchNext();
       if (nextBatch) this._cachedResults.push(...nextBatch);
     }
 
-    if (this._cachedResults.length === 0 && !this._moreToFetch)
+    if (this._cachedResults.length === 0 && !this._moreToFetch) {
       return { done: true, value: undefined };
+    }
 
     const batch = await this._getNextBatch();
+    const value = (this._yieldSize === 1 ? batch.at(0) : batch) as Y extends 1
+      ? T
+      : T[];
 
-    const value = this._yieldSize === 1 ? batch.at(0) : batch;
-    if (!value) return { done: true, value: undefined };
+    if (!value) {
+      return { done: true, value: undefined };
+    }
 
-    return { done: false, value: value };
+    return { done: false, value };
   }
 
   private async _getNextBatch(): Promise<T[]> {
@@ -128,7 +144,7 @@ class NotionDatabaseIterator<T extends PageObjectResponse>
       return undefined;
     }
 
-    const queryOptions = this._queryOptions;
+    const queryOptions = { ...this._queryOptions };
     if (!queryOptions.sort) {
       const primaryProperty = await this._database.getPrimaryPropertyId();
       if (primaryProperty) {
