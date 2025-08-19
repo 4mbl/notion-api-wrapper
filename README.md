@@ -88,7 +88,7 @@ const trashedPage = await trashPage(pageId);
 You can also use the `FilterBuilder` to create filters that will be used in the query.
 
 ```ts
-import { queryDatabaseFull, Filter, FilterBuilder } from 'notion-api-wrapper';
+import { queryDatabaseFull, type Filter, FilterBuilder } from 'notion-api-wrapper';
 
 const filterA: Filter = {
   property: 'Done',
