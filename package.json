@@ -34,7 +34,6 @@
     "prettier": "^3.6.2",
     "remark": "^15.0.1",
     "remark-parse": "^11.0.0",
-    "tsx": "^4.20.3",
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.38.0",
     "unified": "^11.0.5",

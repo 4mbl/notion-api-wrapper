@@ -53,12 +53,12 @@ describe('Markdown TypeScript code blocks', () => {
           `process.env.NOTION_PAGE_ID='${DOCTEST_TESTING_PAGE_ID}';` +
           `process.env.NOTION_DATABASE_ID='${DOCTEST_TESTING_DATABASE_ID}';\n` +
           code
-            .replace("'notion-api-wrapper'", "'../../src/index.js'")
+            .replace("'notion-api-wrapper'", "'../../dist/index.js'")
             .replaceAll('PERSON_ID', 'TESTING_PERSON_ID')
             .replaceAll('RELATION_PAGE_ID', 'NOTION_PAGE_ID'),
       );
 
-      const result = execSync(`tsx ${tempPath}`);
+      const result = execSync(`node ${tempPath}`);
       expect(result).toBeDefined();
     });
   });
