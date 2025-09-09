@@ -1,14 +1,12 @@
-import { processQueryData, removeProps, simplifyProps } from '../util.js';
+import { getApiKey } from '../auth.js';
+import { NOTION_VERSION } from '../constants.js';
 import type { BuiltFilter } from '../filter-builder.js';
 import {
   E,
-  AuthenticationError,
   NotionError,
   NotionRateLimitError,
   ParameterValidationError,
 } from '../internal/errors.js';
-import { NOTION_VERSION } from '../constants.js';
-import { isObjectId } from '../validation.js';
 import type {
   DatabaseObjectResponse,
   GetDatabaseResponse,
@@ -17,6 +15,8 @@ import type {
   PartialPageObjectResponse,
   QueryDatabaseResponse,
 } from '../notion-types.js';
+import { processQueryData, removeProps, simplifyProps } from '../util.js';
+import { isObjectId } from '../validation.js';
 
 export const DEFAULT_BATCH_SIZE = 100;
 
@@ -72,8 +72,7 @@ export async function queryDatabase(
   if (!isObjectId(id))
     throw new ParameterValidationError(E.INVALID_DATABASE_ID);
 
-  const apiKey = options?.notionToken ?? process.env.NOTION_API_KEY;
-  if (!apiKey) throw new AuthenticationError(E.NO_API_KEY);
+  const apiKey = getApiKey(options);
 
   const body = {
     start_cursor: nextCursor,
@@ -142,8 +141,7 @@ export async function queryDatabaseFull(
 }
 
 export async function getDatabaseColumns(id: string, options?: QueryOptions) {
-  const apiKey = options?.notionToken ?? process.env.NOTION_API_KEY;
-  if (!apiKey) throw new AuthenticationError(E.NO_API_KEY);
+  const apiKey = getApiKey(options);
 
   const response = await fetch(`https://api.notion.com/v1/databases/${id}`, {
     method: 'GET',
@@ -210,8 +208,7 @@ export async function searchFromDatabase(
     }
   };
 
-  const apiKey = options?.notionToken ?? process.env.NOTION_API_KEY;
-  if (!apiKey) throw new AuthenticationError(E.NO_API_KEY);
+  const apiKey = getApiKey(options);
 
   const response = await fetch(
     `https://api.notion.com/v1/databases/${id}/query`,

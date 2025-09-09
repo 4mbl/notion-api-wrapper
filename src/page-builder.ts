@@ -1,12 +1,17 @@
 import { NOTION_VERSION } from './constants.js';
-import {
-  E,
-  AuthenticationError,
-  NotionError,
-  ParameterValidationError,
-} from './internal/errors.js';
+import { E, NotionError, ParameterValidationError } from './internal/errors.js';
 
+import { createPage } from './api/create.js';
+import { trashPage } from './api/delete.js';
+import { getPage } from './api/get.js';
+import { updatePage } from './api/update.js';
+import { getApiKey } from './auth.js';
 import type { EmojiRequest, TimeZoneRequest } from './naw-types.js';
+import type {
+  CreatePageParameters,
+  PageObjectResponse,
+  PartialPageObjectResponse,
+} from './notion-types.js';
 import {
   isArrayOfStrings,
   isBoolean,
@@ -16,15 +21,6 @@ import {
   isString,
   isUrl,
 } from './validation.js';
-import type {
-  CreatePageParameters,
-  PageObjectResponse,
-  PartialPageObjectResponse,
-} from './notion-types.js';
-import { trashPage } from './api/delete.js';
-import { updatePage } from './api/update.js';
-import { getPage } from './api/get.js';
-import { createPage } from './api/create.js';
 
 // More descriptive type names for anyone using the library.
 
@@ -81,6 +77,8 @@ type PropertyValueType<T extends PropertyType> = T extends 'title'
 export class PageBuilder {
   private _data: Omit<CreatePageParameters, 'properties'> & {
     properties: NonNullable<CreatePageParameters['properties']>;
+    in_trash?: boolean;
+    archived?: boolean;
   };
   notionToken: string;
   notionVersion: string;
@@ -96,8 +94,8 @@ export class PageBuilder {
     if (!isObjectId(parentId))
       throw new ParameterValidationError(E.INVALID_PARENT_ID);
 
-    const apiKey = options?.notionToken ?? process.env.NOTION_API_KEY;
-    if (!apiKey) throw new AuthenticationError(E.NO_API_KEY);
+    const apiKey = getApiKey(options);
+
     this.notionToken = apiKey;
 
     this.notionVersion = options?.notionVersion ?? NOTION_VERSION;
@@ -431,7 +429,7 @@ export class PageBuilder {
       notionVersion: this.notionVersion,
     });
 
-    this._clearMetadata();
+    this._updateMetadata(data as PageObjectResponse);
 
     return data;
   }
@@ -464,12 +462,8 @@ export class PageBuilder {
     if (metadata.cover?.type !== 'file') {
       this._data.cover = metadata.cover;
     }
-  }
-
-  private _clearMetadata() {
-    this._data.properties = {};
-    this._data.icon = undefined;
-    this._data.cover = undefined;
+    this._data.in_trash = metadata.in_trash;
+    this._data.archived = metadata.archived;
   }
 
   private _transformPropertiesResponseToRequest(
