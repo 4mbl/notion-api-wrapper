@@ -41,5 +41,5 @@ jobs:
       - name: Test
         run: pnpm run test
         env:
-          TESTING_API_KEY: ${{ secrets.TESTING_API_KEY }}
+          TESTING_NOTION_TOKEN: ${{ secrets.TESTING_NOTION_TOKEN }}
           TESTING_PERSON_ID: ${{ secrets.TESTING_PERSON_ID }}
