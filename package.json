@@ -7,9 +7,18 @@
   "types": "dist/index.d.ts",
   "author": "4mbl",
   "license": "MIT",
+  "homepage": "https://github.com/4mbl/notion-api-wrapper#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/4mbl/notion-api-wrapper"
+  },
   "keywords": [
     "notion",
-    "api"
+    "notion api",
+    "notion-api",
+    "notion-api-wrapper",
+    "naw",
+    "ntn"
   ],
   "files": [
     "dist/*"
