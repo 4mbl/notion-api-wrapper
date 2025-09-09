@@ -304,13 +304,11 @@ test('PageBuilder - trash', async () => {
 
   await builder.trash(updateId);
 
-  builder.fetch(pageId);
+  await builder.fetch(pageId);
 
   const trashedBuilderData = builder['data'] as any;
 
-  expect(
-    trashedBuilderData.properties['Name']?.title[0]?.text?.content,
-  ).toBeUndefined();
+  expect(trashedBuilderData.in_trash).toEqual(true);
 });
 
 test('PageBuilder.from - update existing page', async () => {

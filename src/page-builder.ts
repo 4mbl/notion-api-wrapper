@@ -1,9 +1,5 @@
 import { NOTION_VERSION } from './constants.js';
-import {
-  E,
-  NotionError,
-  ParameterValidationError
-} from './internal/errors.js';
+import { E, NotionError, ParameterValidationError } from './internal/errors.js';
 
 import { createPage } from './api/create.js';
 import { trashPage } from './api/delete.js';
@@ -81,6 +77,8 @@ type PropertyValueType<T extends PropertyType> = T extends 'title'
 export class PageBuilder {
   private _data: Omit<CreatePageParameters, 'properties'> & {
     properties: NonNullable<CreatePageParameters['properties']>;
+    in_trash?: boolean;
+    archived?: boolean;
   };
   notionToken: string;
   notionVersion: string;
@@ -431,7 +429,7 @@ export class PageBuilder {
       notionVersion: this.notionVersion,
     });
 
-    this._clearMetadata();
+    this._updateMetadata(data as PageObjectResponse);
 
     return data;
   }
@@ -464,12 +462,8 @@ export class PageBuilder {
     if (metadata.cover?.type !== 'file') {
       this._data.cover = metadata.cover;
     }
-  }
-
-  private _clearMetadata() {
-    this._data.properties = {};
-    this._data.icon = undefined;
-    this._data.cover = undefined;
+    this._data.in_trash = metadata.in_trash;
+    this._data.archived = metadata.archived;
   }
 
   private _transformPropertiesResponseToRequest(
