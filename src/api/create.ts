@@ -1,10 +1,6 @@
 import { getApiKey } from '../auth.js';
 import { NOTION_VERSION } from '../constants.js';
-import {
-  E,
-  NotionError,
-  NotionRateLimitError
-} from '../internal/errors.js';
+import { E, NotionError, NotionRateLimitError } from '../internal/errors.js';
 import type {
   CreatePageParameters,
   PageObjectResponse,

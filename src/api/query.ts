@@ -5,7 +5,7 @@ import {
   E,
   NotionError,
   NotionRateLimitError,
-  ParameterValidationError
+  ParameterValidationError,
 } from '../internal/errors.js';
 import type {
   DatabaseObjectResponse,
