@@ -49,7 +49,7 @@ describe('Markdown TypeScript code blocks', () => {
       fs.writeFileSync(
         tempPath,
         `import dotenv from 'dotenv';dotenv.config({quiet:true});` +
-          `process.env.NOTION_API_KEY='${process.env.TESTING_API_KEY}';` +
+          `process.env.NOTION_TOKEN='${process.env.TESTING_NOTION_TOKEN}';` +
           `process.env.NOTION_PAGE_ID='${DOCTEST_TESTING_PAGE_ID}';` +
           `process.env.NOTION_DATABASE_ID='${DOCTEST_TESTING_DATABASE_ID}';\n` +
           code

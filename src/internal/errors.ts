@@ -1,6 +1,6 @@
 export const E = {
   NO_API_KEY:
-    'Notion API key not found. Please set the `NOTION_API_KEY` environment variable and make sure is is accessible by this process.',
+    'Notion API key not found. Please set the `NOTION_TOKEN` environment variable and make sure is is accessible by this process.',
   INVALID_VALUE: 'Invalid value.',
   RATE_LIMIT: 'Too many requests. Please try again later.',
   INVALID_DATABASE_ID:

@@ -4,26 +4,26 @@ import { afterEach, beforeEach } from 'node:test';
 import dotenv from 'dotenv';
 dotenv.config({ quiet: true });
 
-const TESTING_API_KEY = process.env.TESTING_API_KEY;
-if (!TESTING_API_KEY) throw new Error('TESTING_API_KEY not set.');
+const TESTING_TOKEN = process.env.TESTING_NOTION_TOKEN;
+if (!TESTING_TOKEN) throw new Error('TESTING_NOTION_TOKEN not set.');
 
 const TESTING_DATABASE_ID = '16004341-ec56-4e03-97bd-75cbf6be6f91';
 
 /* Require the notion token to be passed explicitly to avoid using the wrong token accidentally */
 const initialEnvVars: Record<string, string | undefined> = {};
 beforeEach(() => {
-  initialEnvVars['NOTION_API_KEY'] = process.env.NOTION_API_KEY;
-  process.env.NOTION_API_KEY = undefined;
+  initialEnvVars['NOTION_TOKEN'] = process.env.NOTION_TOKEN;
+  process.env.NOTION_TOKEN = undefined;
 });
 afterEach(() => {
-  process.env.NOTION_API_KEY = initialEnvVars['NOTION_API_KEY'];
+  process.env.NOTION_TOKEN = initialEnvVars['NOTION_TOKEN'];
 });
 
 /* END SETUP ============================== */
 
 test('DatabaseIterator - bare', async () => {
   const db = new NotionDatabase(TESTING_DATABASE_ID, {
-    notionToken: TESTING_API_KEY,
+    notionToken: TESTING_TOKEN,
     batchSize: 10,
     sort: {
       direction: 'ascending',
@@ -50,7 +50,7 @@ test('DatabaseIterator - bare', async () => {
 
 test('DatabaseIterator - batches', async () => {
   const db = new NotionDatabase(TESTING_DATABASE_ID, {
-    notionToken: TESTING_API_KEY,
+    notionToken: TESTING_TOKEN,
     batchSize: 10,
     yieldSize: 5,
     sort: {

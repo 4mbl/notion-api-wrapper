@@ -1,10 +1,10 @@
+import { getApiKey } from '../auth.js';
 import { NOTION_VERSION } from '../constants.js';
 import {
   E,
-  AuthenticationError,
   NotionError,
   NotionRateLimitError,
-  ParameterValidationError,
+  ParameterValidationError
 } from '../internal/errors.js';
 import type {
   PageObjectResponse,
@@ -22,8 +22,7 @@ export async function getPage(
   if (!isObjectId(pageId))
     throw new ParameterValidationError(E.INVALID_PAGE_ID);
 
-  const apiKey = options?.notionToken ?? process.env.NOTION_API_KEY;
-  if (!apiKey) throw new AuthenticationError(E.NO_API_KEY);
+  const apiKey = getApiKey(options);
 
   const response = await fetch(`https://api.notion.com/v1/pages/${pageId}`, {
     method: 'GET',

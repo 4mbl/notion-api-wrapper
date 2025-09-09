@@ -4,8 +4,8 @@ import { __cleanupOldDbPages } from './utils';
 import dotenv from 'dotenv';
 dotenv.config({ quiet: true });
 
-const TESTING_API_KEY = process.env.TESTING_API_KEY;
-if (!TESTING_API_KEY) throw new Error('TESTING_API_KEY not set.');
+const TESTING_TOKEN = process.env.TESTING_NOTION_TOKEN;
+if (!TESTING_TOKEN) throw new Error('TESTING_NOTION_TOKEN not set.');
 
 const PERSON_ID = process.env.TESTING_PERSON_ID;
 if (!PERSON_ID) throw new Error('TESTING_PERSON_ID not set.');
@@ -19,17 +19,17 @@ const SAMPLE_IMAGE_URL =
 /* Require the notion token to be passed explicitly to avoid using the wrong token accidentally */
 const initialEnvVars: Record<string, string | undefined> = {};
 beforeEach(() => {
-  initialEnvVars['NOTION_API_KEY'] = process.env.NOTION_API_KEY;
-  process.env.NOTION_API_KEY = undefined;
+  initialEnvVars['NOTION_TOKEN'] = process.env.NOTION_TOKEN;
+  process.env.NOTION_TOKEN = undefined;
 });
 afterEach(() => {
-  process.env.NOTION_API_KEY = initialEnvVars['NOTION_API_KEY'];
+  process.env.NOTION_TOKEN = initialEnvVars['NOTION_TOKEN'];
 });
 
 afterAll(async () => {
   await __cleanupOldDbPages({
     databaseId: BUILDER_TESTING_DATABASE_ID,
-    apiKey: TESTING_API_KEY!,
+    apiKey: TESTING_TOKEN!,
   });
 });
 
@@ -37,7 +37,7 @@ afterAll(async () => {
 
 test('PageBuilder with minimal data', async () => {
   const builder = new PageBuilder(BUILDER_TESTING_DATABASE_ID, {
-    notionToken: TESTING_API_KEY,
+    notionToken: TESTING_TOKEN,
   });
 
   builder.title('Test Page with minimal data');
@@ -59,12 +59,12 @@ test('PageBuilder with minimal data', async () => {
   );
 
   // cleanup
-  trashPage(page.id, { notionToken: TESTING_API_KEY });
+  trashPage(page.id, { notionToken: TESTING_TOKEN });
 });
 
 test('PageBuilder with complete data - seperate methods', async () => {
   const builder = new PageBuilder(BUILDER_TESTING_DATABASE_ID, {
-    notionToken: TESTING_API_KEY,
+    notionToken: TESTING_TOKEN,
   });
 
   builder.cover(SAMPLE_IMAGE_URL);
@@ -118,12 +118,12 @@ test('PageBuilder with complete data - seperate methods', async () => {
   expect(p['URL'].url).toEqual('https://example.com');
 
   // cleanup
-  trashPage(page.id, { notionToken: TESTING_API_KEY });
+  trashPage(page.id, { notionToken: TESTING_TOKEN });
 });
 
 test('PageBuilder with complete data - using the `property` method', async () => {
   const builder = new PageBuilder(BUILDER_TESTING_DATABASE_ID, {
-    notionToken: TESTING_API_KEY,
+    notionToken: TESTING_TOKEN,
   });
 
   builder.cover(SAMPLE_IMAGE_URL);
@@ -181,12 +181,12 @@ test('PageBuilder with complete data - using the `property` method', async () =>
   expect(p['URL'].url).toEqual('https://example.com');
 
   // cleanup
-  trashPage(page.id, { notionToken: TESTING_API_KEY });
+  trashPage(page.id, { notionToken: TESTING_TOKEN });
 });
 
 test('PageBuilder with complete data - alternative data', async () => {
   const builder = new PageBuilder(BUILDER_TESTING_DATABASE_ID, {
-    notionToken: TESTING_API_KEY,
+    notionToken: TESTING_TOKEN,
   });
 
   builder.icon('😀');
@@ -230,7 +230,7 @@ test('PageBuilder with complete data - alternative data', async () => {
 
 test('PageBuilder - fetch', async () => {
   const builder = new PageBuilder(BUILDER_TESTING_DATABASE_ID, {
-    notionToken: TESTING_API_KEY,
+    notionToken: TESTING_TOKEN,
   });
 
   const page = (await builder.fetch(RELATION_PAGE_ID)) as any;
@@ -252,7 +252,7 @@ test('PageBuilder - fetch', async () => {
 
 test('PageBuilder - update', async () => {
   const initialBuilder = new PageBuilder(BUILDER_TESTING_DATABASE_ID, {
-    notionToken: TESTING_API_KEY,
+    notionToken: TESTING_TOKEN,
   });
   initialBuilder.title('Initial Title');
   initialBuilder.richText('Rich Text', 'Some Rich Text');
@@ -265,7 +265,7 @@ test('PageBuilder - update', async () => {
   );
 
   const updateBuilder = new PageBuilder(BUILDER_TESTING_DATABASE_ID, {
-    notionToken: TESTING_API_KEY,
+    notionToken: TESTING_TOKEN,
   });
 
   updateBuilder.title('Updated Title');
@@ -283,7 +283,7 @@ test('PageBuilder - update', async () => {
 
 test('PageBuilder - trash', async () => {
   const builder = new PageBuilder(BUILDER_TESTING_DATABASE_ID, {
-    notionToken: TESTING_API_KEY,
+    notionToken: TESTING_TOKEN,
   });
   builder.title('Initial Title');
   const { id: pageId } = (await builder.create()) as any;
@@ -316,7 +316,7 @@ test('PageBuilder - trash', async () => {
 test('PageBuilder.from - update existing page', async () => {
   const createPage = async () => {
     const initialBuilder = new PageBuilder(BUILDER_TESTING_DATABASE_ID, {
-      notionToken: TESTING_API_KEY,
+      notionToken: TESTING_TOKEN,
     });
 
     initialBuilder
@@ -333,7 +333,7 @@ test('PageBuilder.from - update existing page', async () => {
   expect(created).toBeDefined();
 
   const builderFrom = PageBuilder.from(created, {
-    notionToken: TESTING_API_KEY,
+    notionToken: TESTING_TOKEN,
   });
 
   builderFrom.title('From Updated Title');
@@ -351,7 +351,7 @@ test('PageBuilder.from - update existing page', async () => {
 test('PageBuilder.from - update page from DatabaseIterator', async () => {
   const createPage = async () => {
     const initialBuilder = new PageBuilder(BUILDER_TESTING_DATABASE_ID, {
-      notionToken: TESTING_API_KEY,
+      notionToken: TESTING_TOKEN,
     });
 
     initialBuilder
@@ -368,13 +368,13 @@ test('PageBuilder.from - update page from DatabaseIterator', async () => {
   expect(created).toBeDefined();
 
   const db = new NotionDatabase(BUILDER_TESTING_DATABASE_ID, {
-    notionToken: TESTING_API_KEY,
+    notionToken: TESTING_TOKEN,
   });
   for await (const page of db.iterator()) {
     if (page.id !== created.id) continue;
 
     const builderFrom = PageBuilder.from(page, {
-      notionToken: TESTING_API_KEY,
+      notionToken: TESTING_TOKEN,
     });
 
     builderFrom.title('From Updated Title');

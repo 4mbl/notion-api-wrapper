@@ -1,12 +1,21 @@
 import { NOTION_VERSION } from './constants.js';
 import {
   E,
-  AuthenticationError,
   NotionError,
-  ParameterValidationError,
+  ParameterValidationError
 } from './internal/errors.js';
 
+import { createPage } from './api/create.js';
+import { trashPage } from './api/delete.js';
+import { getPage } from './api/get.js';
+import { updatePage } from './api/update.js';
+import { getApiKey } from './auth.js';
 import type { EmojiRequest, TimeZoneRequest } from './naw-types.js';
+import type {
+  CreatePageParameters,
+  PageObjectResponse,
+  PartialPageObjectResponse,
+} from './notion-types.js';
 import {
   isArrayOfStrings,
   isBoolean,
@@ -16,15 +25,6 @@ import {
   isString,
   isUrl,
 } from './validation.js';
-import type {
-  CreatePageParameters,
-  PageObjectResponse,
-  PartialPageObjectResponse,
-} from './notion-types.js';
-import { trashPage } from './api/delete.js';
-import { updatePage } from './api/update.js';
-import { getPage } from './api/get.js';
-import { createPage } from './api/create.js';
 
 // More descriptive type names for anyone using the library.
 
@@ -96,8 +96,8 @@ export class PageBuilder {
     if (!isObjectId(parentId))
       throw new ParameterValidationError(E.INVALID_PARENT_ID);
 
-    const apiKey = options?.notionToken ?? process.env.NOTION_API_KEY;
-    if (!apiKey) throw new AuthenticationError(E.NO_API_KEY);
+    const apiKey = getApiKey(options);
+
     this.notionToken = apiKey;
 
     this.notionVersion = options?.notionVersion ?? NOTION_VERSION;
