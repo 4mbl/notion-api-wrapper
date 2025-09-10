@@ -88,7 +88,7 @@ const trashedPage = await trashPage(pageId);
 You can also use the `FilterBuilder` to create filters that will be used in the query.
 
 ```ts
-import { queryDatabaseFull, type Filter, FilterBuilder } from 'notion-api-wrapper';
+import { queryDatabaseFull, FilterBuilder } from 'notion-api-wrapper';
 
 const filterA: Filter = {
   property: 'Done',
@@ -119,7 +119,7 @@ const myFilter = new FilterBuilder()
   .build('AND');
 
 const data = await queryDatabaseFull(process.env.NOTION_DATABASE_ID, {
-    filter: myFilter,
+  filter: myFilter,
 });
 ```
 
@@ -148,20 +148,20 @@ import { queryDatabaseFull } from 'notion-api-wrapper';
 const data = await queryDatabaseFull(process.env.NOTION_DATABASE_ID, {
   propOptions: {
     remove: {
-    userIds: true,
-    pageTimestamps: true,
-    url: true,
-    publicUrl: true,
-    objectType: true,
-    id: true,
-    icon: true,
-    cover: true,
-    archived: true,
-    parent: true,
-    inTrash: true,
-    customProps: ['Description', 'Priority'],
+      userIds: true,
+      pageTimestamps: true,
+      url: true,
+      publicUrl: true,
+      objectType: true,
+      id: true,
+      icon: true,
+      cover: true,
+      archived: true,
+      parent: true,
+      inTrash: true,
+      customProps: ['Description', 'Priority'],
     },
-  }
+  },
 });
 ```
 
@@ -305,25 +305,25 @@ import { PageBuilder } from 'notion-api-wrapper';
 
 const builder = new PageBuilder(process.env.NOTION_DATABASE_ID)
 
-.cover('https://example.com/image.png')
+  .cover('https://example.com/image.png')
 
-.icon('🎁')
-// emoji or image url:
-// .icon("https://example.com/image.png")
+  .icon('🎁')
+  // emoji or image url:
+  // .icon("https://example.com/image.png")
 
-.title('This is a Title')
-.richText('Rich Text', 'Test Rich Text')
-.checkbox('Checkbox', true)
-.date('Date', new Date('2025-01-01'))
-.files('Files & Media', 'https://example.com/image.png')
-.multiSelect('Multi-Select', ['Option 1', 'Option 2'])
-.number('Number', 42)
-.people('People', process.env.PERSON_ID)
-.phoneNumber('Phone Number', '+1 (555) 555-5555')
-.relation('Relation', process.env.RELATION_PAGE_ID)
-.select('Select', 'Option A')
-.status('Status', 'Done')
-.url('URL', 'https://example.com');
+  .title('This is a Title')
+  .richText('Rich Text', 'Test Rich Text')
+  .checkbox('Checkbox', true)
+  .date('Date', new Date('2025-01-01'))
+  .files('Files & Media', 'https://example.com/image.png')
+  .multiSelect('Multi-Select', ['Option 1', 'Option 2'])
+  .number('Number', 42)
+  .people('People', process.env.PERSON_ID)
+  .phoneNumber('Phone Number', '+1 (555) 555-5555')
+  .relation('Relation', process.env.RELATION_PAGE_ID)
+  .select('Select', 'Option A')
+  .status('Status', 'Done')
+  .url('URL', 'https://example.com');
 
 const page = await builder.create();
 ```
