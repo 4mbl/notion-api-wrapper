@@ -35,7 +35,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.31.0",
-    "@notionhq/client": "^4.0.1",
+    "@notionhq/client": "^5.0.0",
     "@types/node": "^24.2.0",
     "dotenv": "^17.2.0",
     "eslint": "^9.31.0",
