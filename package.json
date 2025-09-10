@@ -10,7 +10,7 @@
   "homepage": "https://github.com/4mbl/notion-api-wrapper#readme",
   "repository": {
     "type": "git",
-    "url": "https://github.com/4mbl/notion-api-wrapper"
+    "url": "git+https://github.com/4mbl/notion-api-wrapper"
   },
   "keywords": [
     "notion",
