@@ -11,7 +11,7 @@ const NOTION_VERSION = '2022-06-28' as const;
 export const DEFAULT_BATCH_SIZE = 100;
 
 const NO_API_KEY_ERROR =
-  'Notion API key not found. Please set the `NOTION_API_KEY` environment variable and make sure is is accessible by this process.' as const;
+  'Notion API key not found. Please set the `NOTION_API_KEY` (or `NOTION_TOKEN`) environment variable and make sure is is accessible by this process.' as const;
 
 export type PropOptions = {
   remove?: {
@@ -60,7 +60,10 @@ export async function queryDatabase(
   nextCursor?: string,
   options?: QueryOptions,
 ) {
-  const apiKey = options?.notionToken ?? process.env.NOTION_API_KEY;
+  const apiKey =
+    options?.notionToken ??
+    process.env.NOTION_API_KEY ??
+    process.env.NOTION_TOKEN;
   if (!apiKey) throw new Error(NO_API_KEY_ERROR);
 
   const body = {
@@ -112,7 +115,10 @@ export async function queryDatabaseFull(
 }
 
 export async function getDatabaseColumns(id: string, options?: QueryOptions) {
-  const apiKey = options?.notionToken ?? process.env.NOTION_API_KEY;
+  const apiKey =
+    options?.notionToken ??
+    process.env.NOTION_API_KEY ??
+    process.env.NOTION_TOKEN;
   if (!apiKey) throw new Error(NO_API_KEY_ERROR);
 
   const data = await fetch(`https://api.notion.com/v1/databases/${id}`, {
@@ -167,7 +173,10 @@ export async function searchFromDatabase(
     }
   };
 
-  const apiKey = options?.notionToken ?? process.env.NOTION_API_KEY;
+  const apiKey =
+    options?.notionToken ??
+    process.env.NOTION_API_KEY ??
+    process.env.NOTION_TOKEN;
   if (!apiKey) throw new Error(NO_API_KEY_ERROR);
 
   const data = await fetch(`https://api.notion.com/v1/databases/${id}/query`, {

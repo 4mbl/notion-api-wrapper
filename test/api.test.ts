@@ -1,41 +1,48 @@
 import { expect, test } from 'vitest';
 import {
+  DatabaseIterator,
   getDatabaseColumns,
   queryDatabase,
   queryDatabaseFull,
   searchFromDatabase,
-} from '../src/api';
+} from '../src';
 import dotenv from 'dotenv';
-import { DatabaseIterator, FilterBuilder } from '../src';
-dotenv.config();
+import { FilterBuilder } from '../src';
+import { afterEach, beforeEach } from 'node:test';
+dotenv.config({ quiet: true });
 
-const TESTING_API_KEY = process.env.TESTING_API_KEY;
+const TESTING_TOKEN = process.env.TESTING_NOTION_TOKEN;
+if (!TESTING_TOKEN) throw new Error('TESTING_NOTION_TOKEN not set.');
 
 const TESTING_DATABASE_ID = '16004341ec564e0397bd75cbf6be6f91';
 
-test('queryDatabase with notionToken', async () => {
-  const prevNotionApiKey = process.env.NOTION_API_KEY;
-  process.env.NOTION_API_KEY = undefined;
+/* Require the notion token to be passed explicitly to avoid using the wrong token accidentally */
+const initialEnvVars: Record<string, string | undefined> = {};
+beforeEach(() => {
+  initialEnvVars['NOTION_TOKEN'] = process.env.NOTION_TOKEN;
+  process.env.NOTION_TOKEN = undefined;
+});
+afterEach(() => {
+  process.env.NOTION_TOKEN = initialEnvVars['NOTION_TOKEN'];
+});
 
+/* END SETUP ============================== */
+
+test('queryDatabase with notionToken', async () => {
   const resp = await queryDatabase(TESTING_DATABASE_ID, undefined, {
-    notionToken: TESTING_API_KEY,
+    notionToken: TESTING_TOKEN,
     batchSize: 10,
   });
   expect(resp.data.results).toHaveLength(10);
-
-  process.env.NOTION_API_KEY = prevNotionApiKey;
 });
 
 test('queryDatabase with environment variable', async () => {
-  const prevNotionApiKey = process.env.NOTION_API_KEY;
-  process.env.NOTION_API_KEY = process.env.TESTING_API_KEY;
-
+  // NOTE: this is the only test that uses the env variable and not explicit token argument
+  process.env.NOTION_TOKEN = TESTING_TOKEN;
   const resp = await queryDatabase(TESTING_DATABASE_ID, undefined, {
     batchSize: 10,
   });
   expect(resp.data.results).toHaveLength(10);
-
-  process.env.NOTION_API_KEY = prevNotionApiKey;
 });
 
 test('queryDatabase with filter', async () => {
@@ -43,7 +50,7 @@ test('queryDatabase with filter', async () => {
   fb.addFilter({ multi_select: { contains: 'A' }, property: 'Tags' });
 
   const resp = await queryDatabase(TESTING_DATABASE_ID, undefined, {
-    notionToken: TESTING_API_KEY,
+    notionToken: TESTING_TOKEN,
     batchSize: 10,
     filter: fb.build('AND'),
   });
@@ -52,7 +59,7 @@ test('queryDatabase with filter', async () => {
 
 test('queryDatabase with sort', async () => {
   const resp = await queryDatabase(TESTING_DATABASE_ID, undefined, {
-    notionToken: TESTING_API_KEY,
+    notionToken: TESTING_TOKEN,
     batchSize: 10,
     sort: {
       direction: 'ascending',
@@ -72,7 +79,7 @@ test('queryDatabase with sort', async () => {
 
 test('queryDatabase with prop options', async () => {
   const resp = await queryDatabase(TESTING_DATABASE_ID, undefined, {
-    notionToken: TESTING_API_KEY,
+    notionToken: TESTING_TOKEN,
     batchSize: 10,
     propOptions: {
       remove: {
@@ -113,7 +120,7 @@ test('queryDatabase with prop options', async () => {
   expect(pageA.properties.Tags).toBeDefined();
 
   const resp2 = await queryDatabase(TESTING_DATABASE_ID, undefined, {
-    notionToken: TESTING_API_KEY,
+    notionToken: TESTING_TOKEN,
     batchSize: 10,
     propOptions: {
       remove: {
@@ -156,7 +163,7 @@ test('queryDatabase with prop options', async () => {
 
 test('queryDatabase with prop keep', async () => {
   const resp = await queryDatabase(TESTING_DATABASE_ID, undefined, {
-    notionToken: TESTING_API_KEY,
+    notionToken: TESTING_TOKEN,
     batchSize: 10,
     sort: {
       direction: 'ascending',
@@ -176,7 +183,7 @@ test('queryDatabase with prop keep', async () => {
 
 test('queryDatabase with prop simplify', async () => {
   const resp = await queryDatabase(TESTING_DATABASE_ID, undefined, {
-    notionToken: TESTING_API_KEY,
+    notionToken: TESTING_TOKEN,
     batchSize: 10,
     sort: {
       direction: 'ascending',
@@ -196,7 +203,7 @@ test('queryDatabase with prop simplify', async () => {
 
 test('queryDatabase with pagination', async () => {
   const resp = await queryDatabase(TESTING_DATABASE_ID, undefined, {
-    notionToken: TESTING_API_KEY,
+    notionToken: TESTING_TOKEN,
     batchSize: 10,
   });
   expect(resp.cursor).toBeDefined();
@@ -204,7 +211,7 @@ test('queryDatabase with pagination', async () => {
   expect(resp.data.results).toHaveLength(10);
 
   const resp2 = await queryDatabase(TESTING_DATABASE_ID, resp.cursor, {
-    notionToken: TESTING_API_KEY,
+    notionToken: TESTING_TOKEN,
     batchSize: 10,
   });
   expect(resp2.cursor).toBeNull();
@@ -214,7 +221,7 @@ test('queryDatabase with pagination', async () => {
 
 test('queryDatabaseFull', async () => {
   const resp = await queryDatabaseFull(TESTING_DATABASE_ID, {
-    notionToken: TESTING_API_KEY,
+    notionToken: TESTING_TOKEN,
     batchSize: 10,
   });
   expect(resp).toHaveLength(20);
@@ -224,7 +231,7 @@ test('searchFromDatabase', async () => {
   const resp = await searchFromDatabase(
     TESTING_DATABASE_ID,
     { query: 'Thirteen' },
-    { notionToken: TESTING_API_KEY },
+    { notionToken: TESTING_TOKEN },
   );
 
   const match = resp.results[0] as any;
@@ -236,7 +243,7 @@ test('searchFromDatabase with custom prop', async () => {
     TESTING_DATABASE_ID,
     { query: '14th page', property: 'Description' },
     {
-      notionToken: TESTING_API_KEY,
+      notionToken: TESTING_TOKEN,
     },
   );
 
@@ -246,7 +253,7 @@ test('searchFromDatabase with custom prop', async () => {
 
 test('getDatabaseColumns', async () => {
   const resp = await getDatabaseColumns(TESTING_DATABASE_ID, {
-    notionToken: TESTING_API_KEY,
+    notionToken: TESTING_TOKEN,
   });
 
   expect(resp.url).toBe('https://www.notion.so/' + TESTING_DATABASE_ID);
@@ -260,7 +267,7 @@ test('getDatabaseColumns', async () => {
 
 test('DatabaseIterator', async () => {
   const db = new DatabaseIterator(TESTING_DATABASE_ID, {
-    notionToken: TESTING_API_KEY,
+    notionToken: TESTING_TOKEN,
     batchSize: 10,
     yieldSize: 5,
     sort: {
