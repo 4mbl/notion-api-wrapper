@@ -23,17 +23,14 @@ updates:
     directory: '/'
     schedule:
       interval: 'weekly'
+    ignore:
+      - update-types:
+          - version-update:semver-major
     groups:
       dev:
         dependency-type: 'development'
-        update-types:
-          - minor
-          - patch
       prod:
         dependency-type: 'production'
-        update-types:
-          - minor
-          - patch
 
   - package-ecosystem: 'github-actions'
     directory: '/'
