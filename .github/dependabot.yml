@@ -6,6 +6,7 @@
 version: 2
 updates:
   - package-ecosystem: 'npm'
+    target-branch: 'main'
     directory: '/'
     schedule:
       interval: 'weekly'
@@ -14,6 +15,26 @@ updates:
         dependency-type: 'development'
       prod:
         dependency-type: 'production'
+
+  # v1..v4 are no longer supported
+
+  - package-ecosystem: 'npm'
+    target-branch: 'v5'
+    directory: '/'
+    schedule:
+      interval: 'weekly'
+    groups:
+      dev:
+        dependency-type: 'development'
+        update-types:
+          - minor
+          - patch
+      prod:
+        dependency-type: 'production'
+        update-types:
+          - minor
+          - patch
+
   - package-ecosystem: 'github-actions'
     directory: '/'
     schedule:
