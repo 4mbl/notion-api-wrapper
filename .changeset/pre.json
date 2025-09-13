@@ -4,5 +4,28 @@
   "initialVersions": {
     "notion-api-wrapper": "5.0.3"
   },
-  "changesets": []
+  "changesets": [
+    "bitter-heads-melt",
+    "clear-parts-matter",
+    "curvy-carpets-fall",
+    "dull-foxes-see",
+    "easy-women-kneel",
+    "funny-regions-hear",
+    "good-bears-cry",
+    "large-pumas-hope",
+    "large-taxis-deny",
+    "lucky-friends-lie",
+    "nice-peas-bake",
+    "public-pets-wear",
+    "sad-rocks-chew",
+    "seven-grapes-warn",
+    "shy-eagles-build",
+    "shy-pianos-enjoy",
+    "some-clocks-throw",
+    "stale-pumas-begin",
+    "stupid-foxes-poke",
+    "thirty-ears-wave",
+    "tiny-seals-appear",
+    "tough-pugs-search"
+  ]
 }
