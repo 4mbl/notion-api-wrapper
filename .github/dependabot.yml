@@ -16,22 +16,6 @@ updates:
       prod:
         dependency-type: 'production'
 
-  # v1..v4 are no longer supported
-
-  - package-ecosystem: 'npm'
-    target-branch: 'v5'
-    directory: '/'
-    schedule:
-      interval: 'weekly'
-    ignore:
-      - update-types:
-          - version-update:semver-major
-    groups:
-      dev:
-        dependency-type: 'development'
-      prod:
-        dependency-type: 'production'
-
   - package-ecosystem: 'github-actions'
     directory: '/'
     schedule:
