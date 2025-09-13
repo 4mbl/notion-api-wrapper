@@ -25,4 +25,3 @@ When the beta is ready to go stable:
    2. Run `pnpm changeset pre exit`
    3. Set the package version on `package.json` to the recently published version
    4. Run `pnpm changeset pre enter beta`
-   5. Update `.github/dependabot.yml` with new update group targeting `vX`
