@@ -29,9 +29,6 @@
     "lint": "eslint",
     "format:write": "prettier --write ./src/**/*.ts",
     "format:check": "prettier --check ./src/**/*.ts",
-    "bump:patch": "npm version patch --no-git-tag-version",
-    "bump:minor": "npm version minor --no-git-tag-version",
-    "bump:major": "npm version major --no-git-tag-version",
     "publish": "pnpm run build && changeset publish"
   },
   "devDependencies": {
