@@ -19,9 +19,11 @@
     "lint": "eslint",
     "format:write": "prettier --write ./src/**/*.ts",
     "format:check": "prettier --check ./src/**/*.ts",
-    "publish": "pnpm run build && changeset publish"
+    "publish:beta": "pnpm run build && changeset publish",
+    "publish:stable": "pnpm run build && changeset publish"
   },
   "devDependencies": {
+    "@changesets/cli": "^2.29.7",
     "@eslint/js": "^9.9.0",
     "@notionhq/client": "^2.2.15",
     "@types/node": "^22.4.2",
