@@ -2,19 +2,19 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [v5]
 
   pull_request:
     types: [opened, synchronize]
-    branches: [main]
+    branches: [v5]
 
   workflow_dispatch:
 
-  schedule:
-    - cron: '0 0 * * 3' # weekly on wednesdays at 00:00
+#   schedule:
+#     - cron: '0 0 * * 3' # weekly on wednesdays at 00:00
 
 env:
-  NODE_VERSION: '20'
+  NODE_VERSION: '22'
 
 jobs:
   ci:
@@ -42,4 +42,4 @@ jobs:
       - name: Test
         run: pnpm run test
         env:
-          TESTING_API_KEY: ${{ secrets.TESTING_API_KEY }}
+          TESTING_API_KEY: ${{ secrets.TESTING_NOTION_TOKEN }}
