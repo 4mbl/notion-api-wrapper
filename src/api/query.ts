@@ -1,12 +1,7 @@
 import { getApiKey } from '../auth.js';
 import { NOTION_VERSION } from '../constants.js';
 import type { BuiltFilter } from '../filter-builder.js';
-import {
-  E,
-  NotionError,
-  NotionRateLimitError,
-  ParameterValidationError,
-} from '../internal/errors.js';
+import { E, NotionError, NotionRateLimitError } from '../internal/errors.js';
 import type {
   DatabaseObjectResponse,
   GetDatabaseResponse,
@@ -16,7 +11,7 @@ import type {
   QueryDatabaseResponse,
 } from '../notion-types.js';
 import { processQueryData, removeProps, simplifyProps } from '../util.js';
-import { isObjectId } from '../validation.js';
+import { validateObjectId } from '../validation.js';
 
 export const DEFAULT_BATCH_SIZE = 100;
 
@@ -69,8 +64,7 @@ export async function queryDatabase(
   nextCursor?: string | null,
   options?: QueryOptions,
 ) {
-  if (!isObjectId(id))
-    throw new ParameterValidationError(E.INVALID_DATABASE_ID);
+  validateObjectId(id);
 
   const apiKey = getApiKey(options);
 
@@ -121,8 +115,7 @@ export async function queryDatabaseFull(
   id: string,
   options?: QueryOptions,
 ) {
-  if (!isObjectId(id))
-    throw new ParameterValidationError(E.INVALID_DATABASE_ID);
+  validateObjectId(id);
 
   let nextCursor: string | undefined = undefined;
   const allResults: Array<
@@ -140,7 +133,11 @@ export async function queryDatabaseFull(
   return allResults;
 }
 
-export async function getDatabaseColumns(id: string, options?: QueryOptions) {
+export async function getDatabaseColumns(
+  /** Notion database id. */
+  id: string,
+  options?: QueryOptions,
+) {
   const apiKey = getApiKey(options);
 
   const response = await fetch(`https://api.notion.com/v1/databases/${id}`, {
@@ -188,8 +185,7 @@ export async function searchFromDatabase(
   search: SearchOptions,
   options?: QueryOptions,
 ) {
-  if (!isObjectId(id))
-    throw new ParameterValidationError(E.INVALID_DATABASE_ID);
+  validateObjectId(id);
 
   const convertMatchType = (matchType: MatchType) => {
     switch (matchType) {

@@ -17,9 +17,9 @@ import {
   isBoolean,
   isEmoji,
   isNumber,
-  isObjectId,
   isString,
   isUrl,
+  validateObjectId,
 } from './validation.js';
 
 // More descriptive type names for anyone using the library.
@@ -91,8 +91,7 @@ export class PageBuilder {
     parentId: string,
     options?: { notionToken?: string; notionVersion?: string },
   ) {
-    if (!isObjectId(parentId))
-      throw new ParameterValidationError(E.INVALID_PARENT_ID);
+    validateObjectId(parentId);
 
     const apiKey = getApiKey(options);
 
@@ -393,8 +392,11 @@ export class PageBuilder {
   }
 
   /** Fetches data of an existing page and updates this object with the property state. */
-  async fetch(pageId: string) {
-    const data = await getPage(pageId, {
+  async fetch(
+    /** Notion page id. */
+    id: string,
+  ) {
+    const data = await getPage(id, {
       notionToken: this.notionToken,
       notionVersion: this.notionVersion,
     });
@@ -409,8 +411,11 @@ export class PageBuilder {
   }
 
   /** Updates an existing page with the data provided via the builder methods. */
-  async update(pageId: string) {
-    const data = await updatePage(pageId, this._data, {
+  async update(
+    /** Notion page id. */
+    id: string,
+  ) {
+    const data = await updatePage(id, this._data, {
       notionToken: this.notionToken,
       notionVersion: this.notionVersion,
     });
@@ -423,8 +428,11 @@ export class PageBuilder {
   }
 
   /** Trashes the page with the given ID. */
-  async trash(pageId: string) {
-    const data = await trashPage(pageId, {
+  async trash(
+    /** Notion database id. */
+    id: string,
+  ) {
+    const data = await trashPage(id, {
       notionToken: this.notionToken,
       notionVersion: this.notionVersion,
     });

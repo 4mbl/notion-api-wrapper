@@ -3,12 +3,12 @@ import {
   queryDatabase,
   type QueryOptions,
 } from './api/query.js';
-import { E, NotionError, ParameterValidationError } from './internal/errors.js';
+import { NotionError } from './internal/errors.js';
 import type {
   GetDatabaseResponse,
   PageObjectResponse,
 } from './notion-types.js';
-import { isObjectId } from './validation.js';
+import { validateObjectId } from './validation.js';
 
 const DEFAULT_YIELD_SIZE = 1;
 
@@ -25,8 +25,7 @@ export class NotionDatabase<T extends PageObjectResponse = PageObjectResponse> {
   private _yieldSize: number | undefined;
 
   constructor(databaseId: string, options?: DatabaseOptions) {
-    if (!isObjectId(databaseId))
-      throw new ParameterValidationError(E.INVALID_DATABASE_ID);
+    validateObjectId(databaseId);
 
     this._databaseId = databaseId;
     const { yieldSize, ...rest } = options ?? {};

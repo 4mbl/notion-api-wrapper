@@ -1,3 +1,4 @@
+import { E, ParameterValidationError } from './internal/errors.js';
 import type { SimpleDatabaseProperty } from './naw-types.js';
 
 export function isUrl(input: string) {
@@ -39,4 +40,10 @@ export function isArrayOfStrings(
 export function isObjectId(id: string) {
   const regex = /^[0-9a-f]{32}$/;
   return regex.test(id.replace(/-/g, ''));
+}
+
+export function validateObjectId(id: string) {
+  if (!isObjectId(id)) {
+    throw new ParameterValidationError(E.INVALID_OBJECT_ID);
+  }
 }
