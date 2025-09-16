@@ -1,48 +1,47 @@
 import {
-  getDatabaseColumns,
-  queryDatabase,
+  getDataSourceColumns,
+  queryDataSource,
   type QueryOptions,
 } from './api/query.js';
 import { NotionError } from './internal/errors.js';
-import type {
-  GetDatabaseResponse,
-  PageObjectResponse,
-} from './notion-types.js';
+import type { Notion } from './notion-types.js';
 import { validateObjectId } from './validation.js';
 
 const DEFAULT_YIELD_SIZE = 1;
 
-export type DatabaseOptions = QueryOptions & {
+export type DataSourceOptions = QueryOptions & {
   /** How many items to yield at a time. Defaults to `1`. */
   yieldSize?: number;
 };
 
-export class NotionDatabase<T extends PageObjectResponse = PageObjectResponse> {
-  private _databaseId: string;
+export class NotionDataSource<
+  T extends Notion.PageObjectResponse = Notion.PageObjectResponse,
+> {
+  private _dataSourceId: string;
   private _queryOptions: QueryOptions;
   private _primaryProperty: string | undefined;
-  private _columns: GetDatabaseResponse['properties'] | undefined;
+  private _columns: Notion.GetDataSourceResponse['properties'] | undefined;
   private _yieldSize: number | undefined;
 
-  constructor(databaseId: string, options?: DatabaseOptions) {
-    validateObjectId(databaseId);
+  constructor(dataSourceId: string, options?: DataSourceOptions) {
+    validateObjectId(dataSourceId);
 
-    this._databaseId = databaseId;
+    this._dataSourceId = dataSourceId;
     const { yieldSize, ...rest } = options ?? {};
     this._queryOptions = rest ?? {};
     this._yieldSize = yieldSize;
   }
 
   iterator(
-    options?: Omit<DatabaseOptions, 'yieldSize'> & { yieldSize?: 1 },
-  ): NotionDatabaseIterator<T, 1>;
+    options?: Omit<DataSourceOptions, 'yieldSize'> & { yieldSize?: 1 },
+  ): NotionDataSourceIterator<T, 1>;
   iterator<Y extends number>(
-    options: DatabaseOptions & { yieldSize: Y },
-  ): NotionDatabaseIterator<T, Y>;
-  iterator(options?: DatabaseOptions): NotionDatabaseIterator<T, number> {
+    options: DataSourceOptions & { yieldSize: Y },
+  ): NotionDataSourceIterator<T, Y>;
+  iterator(options?: DataSourceOptions): NotionDataSourceIterator<T, number> {
     const yieldSize =
       options?.yieldSize ?? this._yieldSize ?? DEFAULT_YIELD_SIZE;
-    return new NotionDatabaseIterator<T, typeof yieldSize>(this, {
+    return new NotionDataSourceIterator<T, typeof yieldSize>(this, {
       ...this._queryOptions,
       ...options,
       yieldSize,
@@ -51,7 +50,7 @@ export class NotionDatabase<T extends PageObjectResponse = PageObjectResponse> {
 
   async getColumns() {
     try {
-      const data = await getDatabaseColumns(this._databaseId, {
+      const data = await getDataSourceColumns(this._dataSourceId, {
         notionToken: this._queryOptions.notionToken,
       });
       this._columns = data.properties;
@@ -67,7 +66,7 @@ export class NotionDatabase<T extends PageObjectResponse = PageObjectResponse> {
 
     const columnsArray = Object.keys(this._columns).map((key) => ({
       ...this._columns![key],
-    })) as GetDatabaseResponse['properties'][string][];
+    })) as Notion.GetDataSourceResponse['properties'][string][];
 
     const primary = columnsArray.find((col) => col.type === 'title');
     this._primaryProperty = primary?.id;
@@ -75,26 +74,28 @@ export class NotionDatabase<T extends PageObjectResponse = PageObjectResponse> {
   }
 
   get databaseId() {
-    return this._databaseId;
+    return this._dataSourceId;
   }
 }
 
-class NotionDatabaseIterator<T extends PageObjectResponse, Y extends number>
-  implements AsyncIterableIterator<Y extends 1 ? T : T[]>
+class NotionDataSourceIterator<
+  T extends Notion.PageObjectResponse,
+  Y extends number,
+> implements AsyncIterableIterator<Y extends 1 ? T : T[]>
 {
   private _moreToFetch = true;
   private _cursor: string | undefined | null;
-  private _database: NotionDatabase<T>;
+  private _dataSource: NotionDataSource<T>;
   private _queryOptions: QueryOptions;
   private _yieldSize: Y;
   private _cachedResults: T[] = [];
 
   constructor(
-    database: NotionDatabase<T>,
-    options: DatabaseOptions & { yieldSize: Y },
+    dataSource: NotionDataSource<T>,
+    options: DataSourceOptions & { yieldSize: Y },
   ) {
     this._cursor = undefined;
-    this._database = database;
+    this._dataSource = dataSource;
     const { yieldSize, ...rest } = options;
     this._yieldSize = yieldSize;
     this._queryOptions = rest;
@@ -145,7 +146,7 @@ class NotionDatabaseIterator<T extends PageObjectResponse, Y extends number>
 
     const queryOptions = { ...this._queryOptions };
     if (!queryOptions.sort) {
-      const primaryProperty = await this._database.getPrimaryPropertyId();
+      const primaryProperty = await this._dataSource.getPrimaryPropertyId();
       if (primaryProperty) {
         queryOptions.sort = {
           direction: 'ascending',
@@ -154,8 +155,8 @@ class NotionDatabaseIterator<T extends PageObjectResponse, Y extends number>
       }
     }
 
-    const response = await queryDatabase(
-      this._database.databaseId,
+    const response = await queryDataSource(
+      this._dataSource.databaseId,
       this._cursor,
       queryOptions,
     );

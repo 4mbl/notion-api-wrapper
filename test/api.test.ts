@@ -1,19 +1,19 @@
 import { expect, test } from 'vitest';
-import {
-  getDatabaseColumns,
-  queryDatabase,
-  queryDatabaseFull,
-  searchFromDatabase,
-} from '../src/api/query';
-import dotenv from 'dotenv';
-import { FilterBuilder } from '../src';
+
+import 'dotenv';
 import { afterEach, beforeEach } from 'node:test';
-dotenv.config({ quiet: true });
+import {
+  FilterBuilder,
+  getDataSourceColumns,
+  queryDataSource,
+  queryDataSourceFull,
+  searchFromDataSource,
+} from '../src';
 
 const TESTING_TOKEN = process.env.TESTING_NOTION_TOKEN;
 if (!TESTING_TOKEN) throw new Error('TESTING_NOTION_TOKEN not set.');
 
-const TESTING_DATABASE_ID = '16004341ec564e0397bd75cbf6be6f91';
+const TESTING_DATA_SOURCE_ID = '8b00d89e35574a3780afa2e929d7a80c';
 
 /* Require the notion token to be passed explicitly to avoid using the wrong token accidentally */
 const initialEnvVars: Record<string, string | undefined> = {};
@@ -28,7 +28,7 @@ afterEach(() => {
 /* END SETUP ============================== */
 
 test('queryDatabase with notionToken', async () => {
-  const resp = await queryDatabase(TESTING_DATABASE_ID, undefined, {
+  const resp = await queryDataSource(TESTING_DATA_SOURCE_ID, undefined, {
     notionToken: TESTING_TOKEN,
     batchSize: 10,
   });
@@ -38,7 +38,7 @@ test('queryDatabase with notionToken', async () => {
 test('queryDatabase with environment variable', async () => {
   // NOTE: this is the only test that uses the env variable and not explicit token argument
   process.env.NOTION_TOKEN = TESTING_TOKEN;
-  const resp = await queryDatabase(TESTING_DATABASE_ID, undefined, {
+  const resp = await queryDataSource(TESTING_DATA_SOURCE_ID, undefined, {
     batchSize: 10,
   });
   expect(resp.data.results).toHaveLength(10);
@@ -48,7 +48,7 @@ test('queryDatabase with filter', async () => {
   const fb = new FilterBuilder();
   fb.addFilter({ multi_select: { contains: 'A' }, property: 'Tags' });
 
-  const resp = await queryDatabase(TESTING_DATABASE_ID, undefined, {
+  const resp = await queryDataSource(TESTING_DATA_SOURCE_ID, undefined, {
     notionToken: TESTING_TOKEN,
     batchSize: 10,
     filter: fb.build('AND'),
@@ -57,7 +57,7 @@ test('queryDatabase with filter', async () => {
 });
 
 test('queryDatabase with sort', async () => {
-  const resp = await queryDatabase(TESTING_DATABASE_ID, undefined, {
+  const resp = await queryDataSource(TESTING_DATA_SOURCE_ID, undefined, {
     notionToken: TESTING_TOKEN,
     batchSize: 10,
     sort: {
@@ -77,7 +77,7 @@ test('queryDatabase with sort', async () => {
 });
 
 test('queryDatabase with prop options', async () => {
-  const resp = await queryDatabase(TESTING_DATABASE_ID, undefined, {
+  const resp = await queryDataSource(TESTING_DATA_SOURCE_ID, undefined, {
     notionToken: TESTING_TOKEN,
     batchSize: 10,
     propOptions: {
@@ -118,7 +118,7 @@ test('queryDatabase with prop options', async () => {
   expect(pageA.properties.Name).toBeDefined();
   expect(pageA.properties.Tags).toBeDefined();
 
-  const resp2 = await queryDatabase(TESTING_DATABASE_ID, undefined, {
+  const resp2 = await queryDataSource(TESTING_DATA_SOURCE_ID, undefined, {
     notionToken: TESTING_TOKEN,
     batchSize: 10,
     propOptions: {
@@ -161,7 +161,7 @@ test('queryDatabase with prop options', async () => {
 });
 
 test('queryDatabase with prop keep', async () => {
-  const resp = await queryDatabase(TESTING_DATABASE_ID, undefined, {
+  const resp = await queryDataSource(TESTING_DATA_SOURCE_ID, undefined, {
     notionToken: TESTING_TOKEN,
     batchSize: 10,
     sort: {
@@ -181,7 +181,7 @@ test('queryDatabase with prop keep', async () => {
 });
 
 test('queryDatabase with prop simplify', async () => {
-  const resp = await queryDatabase(TESTING_DATABASE_ID, undefined, {
+  const resp = await queryDataSource(TESTING_DATA_SOURCE_ID, undefined, {
     notionToken: TESTING_TOKEN,
     batchSize: 10,
     sort: {
@@ -201,7 +201,7 @@ test('queryDatabase with prop simplify', async () => {
 });
 
 test('queryDatabase with pagination', async () => {
-  const resp = await queryDatabase(TESTING_DATABASE_ID, undefined, {
+  const resp = await queryDataSource(TESTING_DATA_SOURCE_ID, undefined, {
     notionToken: TESTING_TOKEN,
     batchSize: 10,
   });
@@ -209,7 +209,7 @@ test('queryDatabase with pagination', async () => {
   expect(resp.data.has_more).toBe(true);
   expect(resp.data.results).toHaveLength(10);
 
-  const resp2 = await queryDatabase(TESTING_DATABASE_ID, resp.cursor, {
+  const resp2 = await queryDataSource(TESTING_DATA_SOURCE_ID, resp.cursor, {
     notionToken: TESTING_TOKEN,
     batchSize: 10,
   });
@@ -219,7 +219,7 @@ test('queryDatabase with pagination', async () => {
 });
 
 test('queryDatabaseFull', async () => {
-  const resp = await queryDatabaseFull(TESTING_DATABASE_ID, {
+  const resp = await queryDataSourceFull(TESTING_DATA_SOURCE_ID, {
     notionToken: TESTING_TOKEN,
     batchSize: 10,
   });
@@ -227,8 +227,8 @@ test('queryDatabaseFull', async () => {
 });
 
 test('searchFromDatabase', async () => {
-  const resp = await searchFromDatabase(
-    TESTING_DATABASE_ID,
+  const resp = await searchFromDataSource(
+    TESTING_DATA_SOURCE_ID,
     { query: 'Thirteen' },
     { notionToken: TESTING_TOKEN },
   );
@@ -238,8 +238,8 @@ test('searchFromDatabase', async () => {
 });
 
 test('searchFromDatabase with custom prop', async () => {
-  const resp = await searchFromDatabase(
-    TESTING_DATABASE_ID,
+  const resp = await searchFromDataSource(
+    TESTING_DATA_SOURCE_ID,
     { query: '14th page', property: 'Description' },
     {
       notionToken: TESTING_TOKEN,
@@ -251,11 +251,10 @@ test('searchFromDatabase with custom prop', async () => {
 });
 
 test('getDatabaseColumns', async () => {
-  const resp = await getDatabaseColumns(TESTING_DATABASE_ID, {
+  const resp = await getDataSourceColumns(TESTING_DATA_SOURCE_ID, {
     notionToken: TESTING_TOKEN,
   });
 
-  expect(resp.url).toBe('https://www.notion.so/' + TESTING_DATABASE_ID);
   expect(resp.title[0].plain_text).toBe('NAW TESTING DATABASE');
   expect(resp.description[0].plain_text).contains('NAW');
   expect(resp.properties.Name).toBeDefined();

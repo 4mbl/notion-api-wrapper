@@ -1,8 +1,8 @@
 import { afterAll, afterEach, beforeEach, expect, test } from 'vitest';
-import { NotionDatabase, PageBuilder, trashPage } from '../src';
-import { __cleanupOldDbPages } from './utils';
-import dotenv from 'dotenv';
-dotenv.config({ quiet: true });
+
+import 'dotenv/config';
+import { NotionDataSource, PageBuilder, trashPage } from '../src';
+import { __cleanupOldDataSourcePages } from './test-utils';
 
 const TESTING_TOKEN = process.env.TESTING_NOTION_TOKEN;
 if (!TESTING_TOKEN) throw new Error('TESTING_NOTION_TOKEN not set.');
@@ -10,7 +10,7 @@ if (!TESTING_TOKEN) throw new Error('TESTING_NOTION_TOKEN not set.');
 const PERSON_ID = process.env.TESTING_PERSON_ID;
 if (!PERSON_ID) throw new Error('TESTING_PERSON_ID not set.');
 
-const BUILDER_TESTING_DATABASE_ID = '1d9fe0dc-f383-8046-aa56-c64b0fd84d9c'; //* NOTE: notion stores database id with dashes
+const BUILDER_TESTING_DATA_SOURCE_ID = '1d9fe0dcf3838052b01c000ba89421ce'; //* NOTE: notion stores database id with dashes
 const RELATION_PAGE_ID = '1d9fe0dc-f383-80a1-b222-cf59ca6e4aa6'; //* NOTE: notion stores page id with dashes
 
 const SAMPLE_IMAGE_URL =
@@ -22,21 +22,21 @@ beforeEach(() => {
   initialEnvVars['NOTION_TOKEN'] = process.env.NOTION_TOKEN;
   process.env.NOTION_TOKEN = undefined;
 });
-afterEach(() => {
+afterEach(async () => {
   process.env.NOTION_TOKEN = initialEnvVars['NOTION_TOKEN'];
 });
 
 afterAll(async () => {
-  await __cleanupOldDbPages({
-    databaseId: BUILDER_TESTING_DATABASE_ID,
+  await __cleanupOldDataSourcePages({
+    databaseId: BUILDER_TESTING_DATA_SOURCE_ID,
     apiKey: TESTING_TOKEN!,
   });
 });
 
 /* END SETUP ============================== */
 
-test('PageBuilder with minimal data', async () => {
-  const builder = new PageBuilder(BUILDER_TESTING_DATABASE_ID, {
+test('PageBuilder - create - minimal data', async () => {
+  const builder = new PageBuilder(BUILDER_TESTING_DATA_SOURCE_ID, {
     notionToken: TESTING_TOKEN,
   });
 
@@ -48,10 +48,12 @@ test('PageBuilder with minimal data', async () => {
   expect(page.id).toBeDefined();
   expect(page.created_time).toBeDefined();
   expect(page.last_edited_time).toBeDefined();
-  expect(page.parent.database_id).toBeDefined();
+  expect(page.parent.data_source_id).toBeDefined();
   expect(page.url).toBeDefined();
 
-  expect(page.parent.database_id).equals(BUILDER_TESTING_DATABASE_ID);
+  expect(page.parent.data_source_id.replaceAll('-', '')).equals(
+    BUILDER_TESTING_DATA_SOURCE_ID.replaceAll('-', ''),
+  );
 
   const p = page.properties;
   expect(p['Name'].title[0].text.content).toEqual(
@@ -62,8 +64,8 @@ test('PageBuilder with minimal data', async () => {
   trashPage(page.id, { notionToken: TESTING_TOKEN });
 });
 
-test('PageBuilder with complete data - seperate methods', async () => {
-  const builder = new PageBuilder(BUILDER_TESTING_DATABASE_ID, {
+test('PageBuilder - create - complete data - seperate methods', async () => {
+  const builder = new PageBuilder(BUILDER_TESTING_DATA_SOURCE_ID, {
     notionToken: TESTING_TOKEN,
   });
 
@@ -90,10 +92,12 @@ test('PageBuilder with complete data - seperate methods', async () => {
   expect(page.id).toBeDefined();
   expect(page.created_time).toBeDefined();
   expect(page.last_edited_time).toBeDefined();
-  expect(page.parent?.database_id).toBeDefined();
+  expect(page.parent.data_source_id).toBeDefined();
   expect(page.url).toBeDefined();
 
-  expect(page.parent.database_id).equals(BUILDER_TESTING_DATABASE_ID);
+  expect(page.parent.data_source_id.replaceAll('-', '')).equals(
+    BUILDER_TESTING_DATA_SOURCE_ID.replaceAll('-', ''),
+  );
 
   expect(page.cover?.external?.url).toEqual(SAMPLE_IMAGE_URL);
   expect(page.icon?.external?.url).toEqual(SAMPLE_IMAGE_URL);
@@ -121,8 +125,8 @@ test('PageBuilder with complete data - seperate methods', async () => {
   trashPage(page.id, { notionToken: TESTING_TOKEN });
 });
 
-test('PageBuilder with complete data - using the `property` method', async () => {
-  const builder = new PageBuilder(BUILDER_TESTING_DATABASE_ID, {
+test('PageBuilder - create - complete data - `property` method', async () => {
+  const builder = new PageBuilder(BUILDER_TESTING_DATA_SOURCE_ID, {
     notionToken: TESTING_TOKEN,
   });
 
@@ -153,10 +157,12 @@ test('PageBuilder with complete data - using the `property` method', async () =>
   expect(page.id).toBeDefined();
   expect(page.created_time).toBeDefined();
   expect(page.last_edited_time).toBeDefined();
-  expect(page.parent?.database_id).toBeDefined();
+  expect(page.parent.data_source_id).toBeDefined();
   expect(page.url).toBeDefined();
 
-  expect(page.parent.database_id).equals(BUILDER_TESTING_DATABASE_ID);
+  expect(page.parent.data_source_id.replaceAll('-', '')).equals(
+    BUILDER_TESTING_DATA_SOURCE_ID.replaceAll('-', ''),
+  );
 
   expect(page.cover?.external?.url).toEqual(SAMPLE_IMAGE_URL);
   expect(page.icon?.external?.url).toEqual(SAMPLE_IMAGE_URL);
@@ -184,8 +190,8 @@ test('PageBuilder with complete data - using the `property` method', async () =>
   trashPage(page.id, { notionToken: TESTING_TOKEN });
 });
 
-test('PageBuilder with complete data - alternative data', async () => {
-  const builder = new PageBuilder(BUILDER_TESTING_DATABASE_ID, {
+test('PageBuilder - create - complete data - alternative data', async () => {
+  const builder = new PageBuilder(BUILDER_TESTING_DATA_SOURCE_ID, {
     notionToken: TESTING_TOKEN,
   });
 
@@ -210,10 +216,12 @@ test('PageBuilder with complete data - alternative data', async () => {
   expect(page.id).toBeDefined();
   expect(page.created_time).toBeDefined();
   expect(page.last_edited_time).toBeDefined();
-  expect(page.parent?.database_id).toBeDefined();
+  expect(page.parent.data_source_id).toBeDefined();
   expect(page.url).toBeDefined();
 
-  expect(page.parent.database_id).equals(BUILDER_TESTING_DATABASE_ID);
+  expect(page.parent.data_source_id.replaceAll('-', '')).equals(
+    BUILDER_TESTING_DATA_SOURCE_ID.replaceAll('-', ''),
+  );
 
   expect(page.icon?.emoji).toEqual('😀');
 
@@ -229,7 +237,7 @@ test('PageBuilder with complete data - alternative data', async () => {
 });
 
 test('PageBuilder - fetch', async () => {
-  const builder = new PageBuilder(BUILDER_TESTING_DATABASE_ID, {
+  const builder = new PageBuilder(BUILDER_TESTING_DATA_SOURCE_ID, {
     notionToken: TESTING_TOKEN,
   });
 
@@ -239,10 +247,12 @@ test('PageBuilder - fetch', async () => {
   expect(page.id).toBeDefined();
   expect(page.created_time).toBeDefined();
   expect(page.last_edited_time).toBeDefined();
-  expect(page.parent?.database_id).toBeDefined();
+  expect(page.parent.data_source_id).toBeDefined();
   expect(page.url).toBeDefined();
 
-  expect(page.parent.database_id).equals(BUILDER_TESTING_DATABASE_ID);
+  expect(page.parent.data_source_id.replaceAll('-', '')).equals(
+    BUILDER_TESTING_DATA_SOURCE_ID.replaceAll('-', ''),
+  );
 
   const p = page.properties;
   expect(p['Name'].title[0].text.content).toEqual(
@@ -251,7 +261,7 @@ test('PageBuilder - fetch', async () => {
 });
 
 test('PageBuilder - update', async () => {
-  const initialBuilder = new PageBuilder(BUILDER_TESTING_DATABASE_ID, {
+  const initialBuilder = new PageBuilder(BUILDER_TESTING_DATA_SOURCE_ID, {
     notionToken: TESTING_TOKEN,
   });
   initialBuilder.title('Initial Title');
@@ -264,7 +274,7 @@ test('PageBuilder - update', async () => {
     'Initial Title',
   );
 
-  const updateBuilder = new PageBuilder(BUILDER_TESTING_DATABASE_ID, {
+  const updateBuilder = new PageBuilder(BUILDER_TESTING_DATA_SOURCE_ID, {
     notionToken: TESTING_TOKEN,
   });
 
@@ -282,7 +292,7 @@ test('PageBuilder - update', async () => {
 });
 
 test('PageBuilder - trash', async () => {
-  const builder = new PageBuilder(BUILDER_TESTING_DATABASE_ID, {
+  const builder = new PageBuilder(BUILDER_TESTING_DATA_SOURCE_ID, {
     notionToken: TESTING_TOKEN,
   });
   builder.title('Initial Title');
@@ -313,7 +323,7 @@ test('PageBuilder - trash', async () => {
 
 test('PageBuilder.from - update existing page', async () => {
   const createPage = async () => {
-    const initialBuilder = new PageBuilder(BUILDER_TESTING_DATABASE_ID, {
+    const initialBuilder = new PageBuilder(BUILDER_TESTING_DATA_SOURCE_ID, {
       notionToken: TESTING_TOKEN,
     });
 
@@ -348,7 +358,7 @@ test('PageBuilder.from - update existing page', async () => {
 
 test('PageBuilder.from - update page from DatabaseIterator', async () => {
   const createPage = async () => {
-    const initialBuilder = new PageBuilder(BUILDER_TESTING_DATABASE_ID, {
+    const initialBuilder = new PageBuilder(BUILDER_TESTING_DATA_SOURCE_ID, {
       notionToken: TESTING_TOKEN,
     });
 
@@ -365,7 +375,7 @@ test('PageBuilder.from - update page from DatabaseIterator', async () => {
   const created = await createPage();
   expect(created).toBeDefined();
 
-  const db = new NotionDatabase(BUILDER_TESTING_DATABASE_ID, {
+  const db = new NotionDataSource(BUILDER_TESTING_DATA_SOURCE_ID, {
     notionToken: TESTING_TOKEN,
   });
   for await (const page of db.iterator()) {

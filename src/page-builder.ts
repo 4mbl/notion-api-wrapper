@@ -7,11 +7,7 @@ import { getPage } from './api/get.js';
 import { updatePage } from './api/update.js';
 import { getApiKey } from './auth.js';
 import type { EmojiRequest, TimeZoneRequest } from './naw-types.js';
-import type {
-  CreatePageParameters,
-  PageObjectResponse,
-  PartialPageObjectResponse,
-} from './notion-types.js';
+import type { Notion } from './notion-types.js';
 import {
   isArrayOfStrings,
   isBoolean,
@@ -22,7 +18,7 @@ import {
   validateObjectId,
 } from './validation.js';
 
-// More descriptive type names for anyone using the library.
+// More descriptive type names for library consumers.
 
 /** A Notion API compatible emoji character. */
 type Emoji = EmojiRequest;
@@ -75,8 +71,8 @@ type PropertyValueType<T extends PropertyType> = T extends 'title'
                           : never;
 
 export class PageBuilder {
-  private _data: Omit<CreatePageParameters, 'properties'> & {
-    properties: NonNullable<CreatePageParameters['properties']>;
+  private _data: Omit<Notion.CreatePageParameters, 'properties'> & {
+    properties: NonNullable<Notion.CreatePageParameters['properties']>;
     in_trash?: boolean;
     archived?: boolean;
   };
@@ -88,10 +84,10 @@ export class PageBuilder {
   }
 
   constructor(
-    parentId: string,
+    parentDataSourceId: string,
     options?: { notionToken?: string; notionVersion?: string },
   ) {
-    validateObjectId(parentId);
+    validateObjectId(parentDataSourceId);
 
     const apiKey = getApiKey(options);
 
@@ -101,8 +97,7 @@ export class PageBuilder {
 
     this._data = {
       parent: {
-        type: 'database_id',
-        database_id: parentId,
+        data_source_id: parentDataSourceId,
       },
       properties: {},
     };
@@ -110,24 +105,24 @@ export class PageBuilder {
 
   /** Creates a PageBuilder pre-populated from an existing page response. */
   static from(
-    page: PageObjectResponse | PartialPageObjectResponse,
+    page: Notion.PageObjectResponse | Notion.PartialPageObjectResponse,
     options?: { notionToken?: string; notionVersion?: string },
   ) {
     if (
       !('parent' in page) ||
       !page.parent ||
-      page.parent.type !== 'database_id' ||
-      !page.parent.database_id
+      page.parent.type !== 'data_source_id' ||
+      !page.parent.data_source_id
     ) {
       throw new ParameterValidationError(
         'PageBuilder.from only supports pages with a database parent.',
       );
     }
 
-    const builder = new PageBuilder(page.parent.database_id, options);
+    const builder = new PageBuilder(page.parent.data_source_id, options);
 
     if ('created_time' in page) {
-      builder._updateMetadata(page as PageObjectResponse);
+      builder._updateMetadata(page as Notion.PageObjectResponse);
     }
 
     return builder;
@@ -372,7 +367,7 @@ export class PageBuilder {
     return this;
   }
 
-  /** Creates a new page in the parent database with the data provided via the builder methods. */
+  /** Creates a new page in the parent data source with the data provided via the builder methods. */
   async create() {
     const data = await createPage(this._data, {
       notionToken: this.notionToken,
@@ -383,12 +378,12 @@ export class PageBuilder {
       throw new NotionError('No page ID returned from Notion API.');
     }
 
-    this._updateMetadata(data as PageObjectResponse);
+    this._updateMetadata(data as Notion.PageObjectResponse);
 
     // don't return the page object if it is a partial response
     if (this._isPartialPageObjectResponse(data)) return undefined;
 
-    return data as PageObjectResponse;
+    return data as Notion.PageObjectResponse;
   }
 
   /** Fetches data of an existing page and updates this object with the property state. */
@@ -405,7 +400,7 @@ export class PageBuilder {
       throw new NotionError('No page ID returned from Notion API.');
     }
 
-    this._updateMetadata(data as PageObjectResponse);
+    this._updateMetadata(data as Notion.PageObjectResponse);
 
     return data;
   }
@@ -429,7 +424,7 @@ export class PageBuilder {
 
   /** Trashes the page with the given ID. */
   async trash(
-    /** Notion database id. */
+    /** Notion oage id. */
     id: string,
   ) {
     const data = await trashPage(id, {
@@ -437,26 +432,26 @@ export class PageBuilder {
       notionVersion: this.notionVersion,
     });
 
-    this._updateMetadata(data as PageObjectResponse);
+    this._updateMetadata(data as Notion.PageObjectResponse);
 
     return data;
   }
 
   private _isPartialPageObjectResponse(
-    data: PageObjectResponse | PartialPageObjectResponse,
-  ): data is PartialPageObjectResponse {
+    data: Notion.PageObjectResponse | Notion.PartialPageObjectResponse,
+  ): data is Notion.PartialPageObjectResponse {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return !(data as any).created_time;
   }
 
   private _isFullPageObjectResponse(
-    data: PageObjectResponse | PartialPageObjectResponse,
-  ): data is PageObjectResponse {
+    data: Notion.PageObjectResponse | Notion.PartialPageObjectResponse,
+  ): data is Notion.PageObjectResponse {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return !!(data as any).created_time;
   }
 
-  private _updateMetadata(metadata: PageObjectResponse) {
+  private _updateMetadata(metadata: Notion.PageObjectResponse) {
     if (!this._isFullPageObjectResponse(metadata)) return;
 
     this._data.properties = this._transformPropertiesResponseToRequest(

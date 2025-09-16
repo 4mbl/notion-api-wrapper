@@ -1,15 +1,14 @@
+import type { GetDataSourceResponse } from '@notionhq/client/build/src/api-endpoints.js';
 import { getApiKey } from '../auth.js';
 import { NOTION_VERSION } from '../constants.js';
 import type { BuiltFilter } from '../filter-builder.js';
-import { E, NotionError, NotionRateLimitError } from '../internal/errors.js';
-import type {
-  DatabaseObjectResponse,
-  GetDatabaseResponse,
-  PageObjectResponse,
-  PartialDatabaseObjectResponse,
-  PartialPageObjectResponse,
-  QueryDatabaseResponse,
-} from '../notion-types.js';
+import {
+  E,
+  NotionError,
+  NotionRateLimitError,
+  NotionUnauthorizedError,
+} from '../internal/errors.js';
+import type { Notion } from '../notion-types.js';
 import { processQueryData, removeProps, simplifyProps } from '../util.js';
 import { validateApiVersion, validateObjectId } from '../validation.js';
 
@@ -58,14 +57,14 @@ export type QueryOptions = {
   notionVersion?: string;
 };
 
-export async function queryDatabase(
-  /** Notion database id. */
+export async function queryDataSource(
+  /** Notion data source id. */
   id: string,
   nextCursor?: string | null,
   options?: QueryOptions,
 ) {
   validateObjectId(id);
-  validateApiVersion(options?.notionToken);
+  validateApiVersion(options?.notionVersion);
 
   const apiKey = getApiKey(options);
 
@@ -76,12 +75,12 @@ export async function queryDatabase(
       options?.sort &&
       (Array.isArray(options?.sort) ? options?.sort : [options?.sort]),
     page_size: options?.batchSize ?? DEFAULT_BATCH_SIZE,
-    in_trash: options?.includeTrashed,
-    archived: options?.includeArchived,
+    // in_trash: options?.includeTrashed,
+    // archived: options?.includeArchived,
   };
 
   const response = await fetch(
-    `https://api.notion.com/v1/databases/${id}/query`,
+    `https://api.notion.com/v1/data_sources/${id}/query`,
     {
       method: 'POST',
       headers: {
@@ -93,17 +92,21 @@ export async function queryDatabase(
     },
   );
 
+  if (response.status === 401) {
+    throw new NotionUnauthorizedError(E.UNAUTHORIZED);
+  }
+
   if (response.status === 429) {
     throw new NotionRateLimitError(E.RATE_LIMIT);
   }
 
   if (!response.ok) {
     throw new NotionError(
-      `Failed to query database: ${response.status} ${response.statusText}`,
+      `Failed to query data source: ${response.status} ${response.statusText}`,
     );
   }
 
-  const data = (await response.json()) as QueryDatabaseResponse;
+  const data = (await response.json()) as Notion.QueryDataSourceResponse;
 
   return {
     data: processQueryData(data, options?.propOptions),
@@ -111,8 +114,8 @@ export async function queryDatabase(
   };
 }
 
-export async function queryDatabaseFull(
-  /** Notion database id. */
+export async function queryDataSourceFull(
+  /** Notion data source id. */
   id: string,
   options?: QueryOptions,
 ) {
@@ -120,28 +123,29 @@ export async function queryDatabaseFull(
 
   let nextCursor: string | undefined = undefined;
   const allResults: Array<
-    | PageObjectResponse
-    | PartialPageObjectResponse
-    | PartialDatabaseObjectResponse
-    | DatabaseObjectResponse
+    | Notion.PageObjectResponse
+    | Notion.PartialPageObjectResponse
+    | Notion.PartialDataSourceObjectResponse
+    | Notion.DataSourceObjectResponse
   > = [];
 
   do {
-    const response = await queryDatabase(id, nextCursor, options);
+    const response = await queryDataSource(id, nextCursor, options);
     nextCursor = response.cursor ?? undefined;
     allResults.push(...response.data.results);
   } while (nextCursor);
   return allResults;
 }
 
-export async function getDatabaseColumns(
-  /** Notion database id. */
+// TODO: rename
+export async function getDataSourceColumns(
+  /** Notion data source id. */
   id: string,
   options?: QueryOptions,
 ) {
   const apiKey = getApiKey(options);
 
-  const response = await fetch(`https://api.notion.com/v1/databases/${id}`, {
+  const response = await fetch(`https://api.notion.com/v1/data_sources/${id}`, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
@@ -150,19 +154,25 @@ export async function getDatabaseColumns(
     },
   });
 
-  if (response.status === 429) throw new NotionRateLimitError(E.RATE_LIMIT);
+  if (response.status === 401) {
+    throw new NotionUnauthorizedError(E.UNAUTHORIZED);
+  }
+
+  if (response.status === 429) {
+    throw new NotionRateLimitError(E.RATE_LIMIT);
+  }
 
   if (!response.ok) {
     throw new NotionError(
-      `Failed to get database columns: ${response.status} ${response.statusText}`,
+      `Failed to get data source columns: ${response.status} ${response.statusText}`,
     );
   }
 
-  const data = (await response.json()) as GetDatabaseResponse;
+  const data = (await response.json()) as GetDataSourceResponse;
 
   return removeProps(
     simplifyProps(data, options?.propOptions),
-  ) as DatabaseObjectResponse;
+  ) as Notion.DataSourceObjectResponse;
 }
 
 type SearchOptions = {
@@ -180,8 +190,8 @@ type MatchType =
   | 'endsWith'
   | 'notEquals'
   | 'notContains';
-export async function searchFromDatabase(
-  /** Notion database id. */
+export async function searchFromDataSource(
+  /** Notion data source id. */
   id: string,
   search: SearchOptions,
   options?: QueryOptions,
@@ -208,7 +218,7 @@ export async function searchFromDatabase(
   const apiKey = getApiKey(options);
 
   const response = await fetch(
-    `https://api.notion.com/v1/databases/${id}/query`,
+    `https://api.notion.com/v1/data_sources/${id}/query`,
     {
       method: 'POST',
       headers: {
@@ -227,17 +237,21 @@ export async function searchFromDatabase(
     },
   );
 
+  if (response.status === 401) {
+    throw new NotionUnauthorizedError(E.UNAUTHORIZED);
+  }
+
   if (response.status === 429) {
     throw new NotionRateLimitError(E.RATE_LIMIT);
   }
 
   if (!response.ok) {
     throw new NotionError(
-      `Failed to search from database: ${response.status} ${response.statusText}`,
+      `Failed to search from data source: ${response.status} ${response.statusText}`,
     );
   }
 
-  const data = (await response.json()) as QueryDatabaseResponse;
+  const data = (await response.json()) as Notion.QueryDataSourceResponse;
 
   return processQueryData(data, options?.propOptions);
 }

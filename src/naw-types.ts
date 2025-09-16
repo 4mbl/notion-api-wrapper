@@ -1,10 +1,6 @@
-import type {
-  DatabaseObjectResponse,
-  DatePropertyItemObjectResponse,
-  PageObjectResponse,
-} from './notion-types.js';
+import type { Notion } from './notion-types.js';
 
-export type VerboseDatabaseProperty = PageObjectResponse['properties'][number];
+export type VerboseProperty = Notion.PageObjectResponse['properties'][number];
 
 export type SimpleDatabasePage = {
   object: 'page';
@@ -15,18 +11,18 @@ export type SimpleDatabasePage = {
   last_edited_by?: { object: 'user'; id: string };
   cover?: string;
   icon?: string;
-  parent?: { type: 'database_id'; database_id: string };
+  parent?: { type: 'database_source_id'; database_source_id: string };
   archived?: boolean;
   url?: string;
   publicUrl?: string;
   in_trash?: boolean;
-} & SimpleDatabaseProperties;
+} & SimpleProperties;
 
-export type SimpleDatabaseProperties = {
-  [key: string]: SimpleDatabaseProperty;
+export type SimpleProperties = {
+  [key: string]: SimpleProperty;
 };
 
-export type SimpleDatabaseProperty =
+export type SimpleProperty =
   | string
   | number
   | null
@@ -37,12 +33,12 @@ export type SimpleDatabaseProperty =
 
 /** Represents a Notion API compatible emoji character. */
 export type EmojiRequest = Extract<
-  DatabaseObjectResponse['icon'],
+  Notion.DatabaseObjectResponse['icon'],
   { type: 'emoji'; emoji: string }
 >['emoji'];
 
 export type TimeZoneRequest =
-  NonNullable<DatePropertyItemObjectResponse['date']> extends {
+  NonNullable<Notion.DatePropertyItemObjectResponse['date']> extends {
     time_zone: infer T;
   }
     ? T

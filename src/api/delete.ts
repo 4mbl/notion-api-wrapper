@@ -1,10 +1,7 @@
 import { getApiKey } from '../auth.js';
 import { NOTION_VERSION } from '../constants.js';
-import { E, NotionError, NotionRateLimitError } from '../internal/errors.js';
-import type {
-  PageObjectResponse,
-  PartialPageObjectResponse,
-} from '../notion-types.js';
+import { E, NotionError, NotionRateLimitError, NotionUnauthorizedError } from '../internal/errors.js';
+import type { Notion } from '../notion-types.js';
 import { validateApiVersion, validateObjectId } from '../validation.js';
 
 export async function trashPage(
@@ -16,7 +13,7 @@ export async function trashPage(
   },
 ) {
   validateObjectId(id);
-  validateApiVersion(options?.notionToken);
+  validateApiVersion(options?.notionVersion);
 
   const apiKey = getApiKey(options);
 
@@ -30,6 +27,10 @@ export async function trashPage(
     body: JSON.stringify({ in_trash: true }),
   });
 
+  if (response.status === 401) {
+    throw new NotionUnauthorizedError(E.UNAUTHORIZED);
+  }
+
   if (response.status === 429) {
     throw new NotionRateLimitError(E.RATE_LIMIT);
   }
@@ -41,6 +42,6 @@ export async function trashPage(
   }
 
   return response.json() as Promise<
-    PageObjectResponse | PartialPageObjectResponse
+    Notion.PageObjectResponse | Notion.PartialPageObjectResponse
   >;
 }

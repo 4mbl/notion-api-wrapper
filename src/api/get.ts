@@ -1,10 +1,12 @@
 import { getApiKey } from '../auth.js';
 import { NOTION_VERSION } from '../constants.js';
-import { E, NotionError, NotionRateLimitError } from '../internal/errors.js';
-import type {
-  PageObjectResponse,
-  PartialPageObjectResponse,
-} from '../notion-types.js';
+import {
+  E,
+  NotionError,
+  NotionRateLimitError,
+  NotionUnauthorizedError,
+} from '../internal/errors.js';
+import type { Notion } from '../notion-types.js';
 import { validateApiVersion, validateObjectId } from '../validation.js';
 
 export async function getPage(
@@ -16,7 +18,7 @@ export async function getPage(
   },
 ) {
   validateObjectId(id);
-  validateApiVersion(options?.notionToken);
+  validateApiVersion(options?.notionVersion);
 
   const apiKey = getApiKey(options);
 
@@ -29,6 +31,10 @@ export async function getPage(
     },
   });
 
+  if (response.status === 401) {
+    throw new NotionUnauthorizedError(E.UNAUTHORIZED);
+  }
+
   if (response.status === 429) {
     throw new NotionRateLimitError(E.RATE_LIMIT);
   }
@@ -40,6 +46,6 @@ export async function getPage(
   }
 
   return response.json() as Promise<
-    PageObjectResponse | PartialPageObjectResponse
+    Notion.PageObjectResponse | Notion.PartialPageObjectResponse
   >;
 }
