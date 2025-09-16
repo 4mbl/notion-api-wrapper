@@ -71,7 +71,7 @@ type PropertyValueType<T extends PropertyType> = T extends 'title'
                           : never;
 
 export class PageBuilder {
-  private _data: Omit<Notion.CreatePageParameters, 'properties'> & {
+  #data: Omit<Notion.CreatePageParameters, 'properties'> & {
     properties: NonNullable<Notion.CreatePageParameters['properties']>;
     in_trash?: boolean;
     archived?: boolean;
@@ -80,7 +80,7 @@ export class PageBuilder {
   notionVersion: string;
 
   get data() {
-    return this._data;
+    return this.#data;
   }
 
   constructor(
@@ -95,7 +95,7 @@ export class PageBuilder {
 
     this.notionVersion = options?.notionVersion ?? NOTION_VERSION;
 
-    this._data = {
+    this.#data = {
       parent: {
         data_source_id: parentDataSourceId,
       },
@@ -122,7 +122,7 @@ export class PageBuilder {
     const builder = new PageBuilder(page.parent.data_source_id, options);
 
     if ('created_time' in page) {
-      builder._updateMetadata(page as Notion.PageObjectResponse);
+      builder.#updateMetadata(page as Notion.PageObjectResponse);
     }
 
     return builder;
@@ -131,7 +131,7 @@ export class PageBuilder {
   // PAGE METADATA //
 
   cover(url: string) {
-    this._data.cover = {
+    this.#data.cover = {
       type: 'external',
       external: {
         url,
@@ -142,14 +142,14 @@ export class PageBuilder {
 
   icon(icon: string | Emoji) {
     if (isUrl(icon)) {
-      this._data.icon = {
+      this.#data.icon = {
         type: 'external',
         external: {
           url: icon,
         },
       };
     } else if (isEmoji(icon)) {
-      this._data.icon = {
+      this.#data.icon = {
         type: 'emoji',
         emoji: icon as EmojiRequest,
       };
@@ -236,7 +236,7 @@ export class PageBuilder {
   }
 
   title(value: string) {
-    this._data.properties.Name = {
+    this.#data.properties.Name = {
       title: [
         {
           text: {
@@ -249,7 +249,7 @@ export class PageBuilder {
   }
 
   richText(key: PropertyKey, value: string) {
-    this._data.properties[key] = {
+    this.#data.properties[key] = {
       rich_text: [
         {
           text: {
@@ -262,7 +262,7 @@ export class PageBuilder {
   }
 
   checkbox(key: PropertyKey, value: boolean) {
-    this._data.properties[key] = {
+    this.#data.properties[key] = {
       checkbox: value,
     };
     return this;
@@ -272,7 +272,7 @@ export class PageBuilder {
     const start = Array.isArray(value) ? value[0] : value;
     const end =
       Array.isArray(value) && value.length === 2 ? value[1] : undefined;
-    this._data.properties[key] = {
+    this.#data.properties[key] = {
       type: 'date',
       date: {
         start: start.toISOString(),
@@ -285,7 +285,7 @@ export class PageBuilder {
 
   files(key: PropertyKey, value: string | string[]) {
     const val = typeof value === 'string' ? [value] : value;
-    this._data.properties[key] = {
+    this.#data.properties[key] = {
       files: val.map((url: string) => ({
         name: `file_${crypto.randomUUID()}`,
         external: {
@@ -298,7 +298,7 @@ export class PageBuilder {
 
   multiSelect(key: PropertyKey, value: string | string[]) {
     const val = Array.isArray(value) ? value : [value];
-    this._data.properties[key] = {
+    this.#data.properties[key] = {
       multi_select: val.map((v: string) => ({
         name: v,
       })),
@@ -307,7 +307,7 @@ export class PageBuilder {
   }
 
   number(key: PropertyKey, value: number) {
-    this._data.properties[key] = {
+    this.#data.properties[key] = {
       number: value,
     };
     return this;
@@ -315,7 +315,7 @@ export class PageBuilder {
 
   people(key: PropertyKey, value: string | string[]) {
     const val = Array.isArray(value) ? value : [value];
-    this._data.properties[key] = {
+    this.#data.properties[key] = {
       people: val.map((v: string) => ({
         id: v,
       })),
@@ -324,7 +324,7 @@ export class PageBuilder {
   }
 
   phoneNumber(key: PropertyKey, value: string) {
-    this._data.properties[key] = {
+    this.#data.properties[key] = {
       phone_number: value,
     };
     return this;
@@ -332,7 +332,7 @@ export class PageBuilder {
 
   relation(key: PropertyKey, value: string | string[]) {
     const val = Array.isArray(value) ? value : [value];
-    this._data.properties[key] = {
+    this.#data.properties[key] = {
       relation: val.map((v: string) => ({
         id: v,
       })),
@@ -341,7 +341,7 @@ export class PageBuilder {
   }
 
   select(key: PropertyKey, value: string) {
-    this._data.properties[key] = {
+    this.#data.properties[key] = {
       select: {
         name: value,
       },
@@ -350,7 +350,7 @@ export class PageBuilder {
   }
 
   status(key: PropertyKey, value: string) {
-    this._data.properties[key] = {
+    this.#data.properties[key] = {
       status: {
         name: value,
       },
@@ -361,7 +361,7 @@ export class PageBuilder {
   url(key: PropertyKey, value: string) {
     if (!isUrl(value)) throw new ParameterValidationError('Invalid URL.');
 
-    this._data.properties[key] = {
+    this.#data.properties[key] = {
       url: value,
     };
     return this;
@@ -369,7 +369,7 @@ export class PageBuilder {
 
   /** Creates a new page in the parent data source with the data provided via the builder methods. */
   async create() {
-    const data = await createPage(this._data, {
+    const data = await createPage(this.#data, {
       notionToken: this.notionToken,
       notionVersion: this.notionVersion,
     });
@@ -378,10 +378,10 @@ export class PageBuilder {
       throw new NotionError('No page ID returned from Notion API.');
     }
 
-    this._updateMetadata(data as Notion.PageObjectResponse);
+    this.#updateMetadata(data as Notion.PageObjectResponse);
 
     // don't return the page object if it is a partial response
-    if (this._isPartialPageObjectResponse(data)) return undefined;
+    if (this.#isPartialPageObjectResponse(data)) return undefined;
 
     return data as Notion.PageObjectResponse;
   }
@@ -400,7 +400,7 @@ export class PageBuilder {
       throw new NotionError('No page ID returned from Notion API.');
     }
 
-    this._updateMetadata(data as Notion.PageObjectResponse);
+    this.#updateMetadata(data as Notion.PageObjectResponse);
 
     return data;
   }
@@ -410,13 +410,13 @@ export class PageBuilder {
     /** Notion page id. */
     id: string,
   ) {
-    const data = await updatePage(id, this._data, {
+    const data = await updatePage(id, this.#data, {
       notionToken: this.notionToken,
       notionVersion: this.notionVersion,
     });
 
-    if (!this._isPartialPageObjectResponse(data)) {
-      this._updateMetadata(data);
+    if (!this.#isPartialPageObjectResponse(data)) {
+      this.#updateMetadata(data);
     }
 
     return data;
@@ -432,44 +432,44 @@ export class PageBuilder {
       notionVersion: this.notionVersion,
     });
 
-    this._updateMetadata(data as Notion.PageObjectResponse);
+    this.#updateMetadata(data as Notion.PageObjectResponse);
 
     return data;
   }
 
-  private _isPartialPageObjectResponse(
+  #isPartialPageObjectResponse(
     data: Notion.PageObjectResponse | Notion.PartialPageObjectResponse,
   ): data is Notion.PartialPageObjectResponse {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return !(data as any).created_time;
   }
 
-  private _isFullPageObjectResponse(
+  #isFullPageObjectResponse(
     data: Notion.PageObjectResponse | Notion.PartialPageObjectResponse,
   ): data is Notion.PageObjectResponse {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return !!(data as any).created_time;
   }
 
-  private _updateMetadata(metadata: Notion.PageObjectResponse) {
-    if (!this._isFullPageObjectResponse(metadata)) return;
+  #updateMetadata(metadata: Notion.PageObjectResponse) {
+    if (!this.#isFullPageObjectResponse(metadata)) return;
 
-    this._data.properties = this._transformPropertiesResponseToRequest(
+    this.#data.properties = this.#transformPropertiesResponseToRequest(
       metadata.properties,
     );
 
     if (metadata.icon?.type !== 'file') {
-      this._data.icon = metadata.icon;
+      this.#data.icon = metadata.icon;
     }
 
     if (metadata.cover?.type !== 'file') {
-      this._data.cover = metadata.cover;
+      this.#data.cover = metadata.cover;
     }
-    this._data.in_trash = metadata.in_trash;
-    this._data.archived = metadata.archived;
+    this.#data.in_trash = metadata.in_trash;
+    this.#data.archived = metadata.archived;
   }
 
-  private _transformPropertiesResponseToRequest(
+  #transformPropertiesResponseToRequest(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     input: Record<string, any>,
   ) {

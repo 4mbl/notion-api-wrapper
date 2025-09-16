@@ -17,19 +17,19 @@ export type DataSourceOptions = QueryOptions & {
 export class NotionDataSource<
   T extends Notion.PageObjectResponse = Notion.PageObjectResponse,
 > {
-  private _dataSourceId: string;
-  private _queryOptions: QueryOptions;
-  private _primaryProperty: string | undefined;
-  private _columns: Notion.GetDataSourceResponse['properties'] | undefined;
-  private _yieldSize: number | undefined;
+  #dataSourceId: string;
+  #queryOptions: QueryOptions;
+  #primaryProperty: string | undefined;
+  #columns: Notion.GetDataSourceResponse['properties'] | undefined;
+  #yieldSize: number | undefined;
 
   constructor(dataSourceId: string, options?: DataSourceOptions) {
     validateObjectId(dataSourceId);
 
-    this._dataSourceId = dataSourceId;
+    this.#dataSourceId = dataSourceId;
     const { yieldSize, ...rest } = options ?? {};
-    this._queryOptions = rest ?? {};
-    this._yieldSize = yieldSize;
+    this.#queryOptions = rest ?? {};
+    this.#yieldSize = yieldSize;
   }
 
   iterator(
@@ -40,9 +40,9 @@ export class NotionDataSource<
   ): NotionDataSourceIterator<T, Y>;
   iterator(options?: DataSourceOptions): NotionDataSourceIterator<T, number> {
     const yieldSize =
-      options?.yieldSize ?? this._yieldSize ?? DEFAULT_YIELD_SIZE;
+      options?.yieldSize ?? this.#yieldSize ?? DEFAULT_YIELD_SIZE;
     return new NotionDataSourceIterator<T, typeof yieldSize>(this, {
-      ...this._queryOptions,
+      ...this.#queryOptions,
       ...options,
       yieldSize,
     });
@@ -50,31 +50,31 @@ export class NotionDataSource<
 
   async getColumns() {
     try {
-      const data = await retrieveDataSource(this._dataSourceId, {
-        notionToken: this._queryOptions.notionToken,
+      const data = await retrieveDataSource(this.#dataSourceId, {
+        notionToken: this.#queryOptions.notionToken,
       });
-      this._columns = data.properties;
+      this.#columns = data.properties;
     } catch (e) {
       throw new NotionError(`Error fetching columns: ${(e as Error).message}`);
     }
   }
 
   async getPrimaryPropertyId() {
-    if (this._primaryProperty) return this._primaryProperty;
-    if (!this._columns) await this.getColumns();
-    if (!this._columns) return undefined;
+    if (this.#primaryProperty) return this.#primaryProperty;
+    if (!this.#columns) await this.getColumns();
+    if (!this.#columns) return undefined;
 
-    const columnsArray = Object.keys(this._columns).map((key) => ({
-      ...this._columns![key],
+    const columnsArray = Object.keys(this.#columns).map((key) => ({
+      ...this.#columns![key],
     })) as Notion.GetDataSourceResponse['properties'][string][];
 
     const primary = columnsArray.find((col) => col.type === 'title');
-    this._primaryProperty = primary?.id;
-    return this._primaryProperty;
+    this.#primaryProperty = primary?.id;
+    return this.#primaryProperty;
   }
 
   get databaseId() {
-    return this._dataSourceId;
+    return this.#dataSourceId;
   }
 }
 
@@ -83,22 +83,22 @@ class NotionDataSourceIterator<
   Y extends number,
 > implements AsyncIterableIterator<Y extends 1 ? T : T[]>
 {
-  private _moreToFetch = true;
-  private _cursor: string | undefined | null;
-  private _dataSource: NotionDataSource<T>;
-  private _queryOptions: QueryOptions;
-  private _yieldSize: Y;
-  private _cachedResults: T[] = [];
+  #moreToFetch = true;
+  #cursor: string | undefined | null;
+  #dataSource: NotionDataSource<T>;
+  #queryOptions: QueryOptions;
+  #yieldSize: Y;
+  #cachedResults: T[] = [];
 
   constructor(
     dataSource: NotionDataSource<T>,
     options: DataSourceOptions & { yieldSize: Y },
   ) {
-    this._cursor = undefined;
-    this._dataSource = dataSource;
+    this.#cursor = undefined;
+    this.#dataSource = dataSource;
     const { yieldSize, ...rest } = options;
-    this._yieldSize = yieldSize;
-    this._queryOptions = rest;
+    this.#yieldSize = yieldSize;
+    this.#queryOptions = rest;
   }
 
   [Symbol.asyncIterator](): AsyncIterableIterator<Y extends 1 ? T : T[]> {
@@ -106,17 +106,17 @@ class NotionDataSourceIterator<
   }
 
   async next(): Promise<IteratorResult<Y extends 1 ? T : T[]>> {
-    if (this._cachedResults.length < this._yieldSize) {
-      const nextBatch = await this._fetchNext();
-      if (nextBatch) this._cachedResults.push(...nextBatch);
+    if (this.#cachedResults.length < this.#yieldSize) {
+      const nextBatch = await this.#fetchNext();
+      if (nextBatch) this.#cachedResults.push(...nextBatch);
     }
 
-    if (this._cachedResults.length === 0 && !this._moreToFetch) {
+    if (this.#cachedResults.length === 0 && !this.#moreToFetch) {
       return { done: true, value: undefined };
     }
 
-    const batch = await this._getNextBatch();
-    const value = (this._yieldSize === 1 ? batch.at(0) : batch) as Y extends 1
+    const batch = await this.#getNextBatch();
+    const value = (this.#yieldSize === 1 ? batch.at(0) : batch) as Y extends 1
       ? T
       : T[];
 
@@ -127,26 +127,26 @@ class NotionDataSourceIterator<
     return { done: false, value };
   }
 
-  private async _getNextBatch(): Promise<T[]> {
+  async #getNextBatch(): Promise<T[]> {
     const nextBatch: T[] = [];
     while (
-      this._cachedResults.length > 0 &&
-      nextBatch.length < this._yieldSize
+      this.#cachedResults.length > 0 &&
+      nextBatch.length < this.#yieldSize
     ) {
-      nextBatch.push(this._cachedResults.shift()!);
+      nextBatch.push(this.#cachedResults.shift()!);
     }
     return nextBatch;
   }
 
-  private async _fetchNext(): Promise<T[] | undefined> {
-    if (this._cursor === null) {
-      this._moreToFetch = false;
+  async #fetchNext(): Promise<T[] | undefined> {
+    if (this.#cursor === null) {
+      this.#moreToFetch = false;
       return undefined;
     }
 
-    const queryOptions = { ...this._queryOptions };
+    const queryOptions = { ...this.#queryOptions };
     if (!queryOptions.sort) {
-      const primaryProperty = await this._dataSource.getPrimaryPropertyId();
+      const primaryProperty = await this.#dataSource.getPrimaryPropertyId();
       if (primaryProperty) {
         queryOptions.sort = {
           direction: 'ascending',
@@ -156,12 +156,12 @@ class NotionDataSourceIterator<
     }
 
     const response = await queryDataSource(
-      this._dataSource.databaseId,
-      this._cursor,
+      this.#dataSource.databaseId,
+      this.#cursor,
       queryOptions,
     );
-    this._cursor = response.cursor;
-    if (!response.data.has_more) this._moreToFetch = false;
+    this.#cursor = response.cursor;
+    if (!response.data.has_more) this.#moreToFetch = false;
     return response.data.results as T[];
   }
 }
