@@ -153,13 +153,12 @@ class NotionDataSourceIterator<
       }
     }
 
-    const response = await queryDataSource(
-      this.#dataSource.databaseId,
-      this.#cursor,
-      queryOptions,
-    );
+    const response = await queryDataSource(this.#dataSource.databaseId, {
+      ...queryOptions,
+      cursor: this.#cursor,
+    });
     this.#cursor = response.cursor;
-    if (!response.data.has_more) this.#moreToFetch = false;
-    return response.data.results as T[];
+    if (!response.hasMore) this.#moreToFetch = false;
+    return response.results as T[];
   }
 }

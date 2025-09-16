@@ -1,4 +1,4 @@
-import { queryDataSourceFull, trashPage } from '../src';
+import { queryDataSource, trashPage } from '../src';
 
 export async function __cleanupOldDataSourcePages(opts: {
   databaseId: string;
@@ -11,11 +11,11 @@ export async function __cleanupOldDataSourcePages(opts: {
     today.getDate() - 7,
   );
 
-  const data = await queryDataSourceFull(opts.databaseId, {
+  const { results } = await queryDataSource(opts.databaseId, {
     notionToken: opts.apiKey,
   });
 
-  const promises = data
+  const promises = results
     .filter(
       (page) =>
         !(page as any).properties.Name.title
