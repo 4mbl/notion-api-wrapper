@@ -6,6 +6,7 @@ import type {
   PageObjectResponse,
   PartialPageObjectResponse,
 } from '../notion-types.js';
+import { validateApiVersion } from '../validation.js';
 
 export async function createPage(
   body: CreatePageParameters,
@@ -14,6 +15,8 @@ export async function createPage(
     notionVersion?: string;
   },
 ) {
+  validateApiVersion(options?.notionToken);
+
   const apiKey = getApiKey(options);
 
   const response = await fetch(`https://api.notion.com/v1/pages`, {

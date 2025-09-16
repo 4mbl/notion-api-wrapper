@@ -1,4 +1,5 @@
-import { E, ParameterValidationError } from './internal/errors.js';
+import { NOTION_VERSION } from './constants.js';
+import { E, ParameterValidationError, W } from './internal/errors.js';
 import type { SimpleDatabaseProperty } from './naw-types.js';
 
 export function isUrl(input: string) {
@@ -45,5 +46,11 @@ export function isObjectId(id: string) {
 export function validateObjectId(id: string) {
   if (!isObjectId(id)) {
     throw new ParameterValidationError(E.INVALID_OBJECT_ID);
+  }
+}
+
+export function validateApiVersion(notionVersion?: string) {
+  if (notionVersion && notionVersion !== NOTION_VERSION) {
+    console.warn(W.UNSUPPORTED_API_VERSION);
   }
 }

@@ -11,7 +11,7 @@ import type {
   QueryDatabaseResponse,
 } from '../notion-types.js';
 import { processQueryData, removeProps, simplifyProps } from '../util.js';
-import { validateObjectId } from '../validation.js';
+import { validateApiVersion, validateObjectId } from '../validation.js';
 
 export const DEFAULT_BATCH_SIZE = 100;
 
@@ -65,6 +65,7 @@ export async function queryDatabase(
   options?: QueryOptions,
 ) {
   validateObjectId(id);
+  validateApiVersion(options?.notionToken);
 
   const apiKey = getApiKey(options);
 

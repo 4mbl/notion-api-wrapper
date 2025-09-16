@@ -6,7 +6,7 @@ import type {
   PartialPageObjectResponse,
   UpdatePageParameters,
 } from '../notion-types.js';
-import { validateObjectId } from '../validation.js';
+import { validateApiVersion, validateObjectId } from '../validation.js';
 
 export async function updatePage(
   /** Notion page id. */
@@ -18,6 +18,7 @@ export async function updatePage(
   },
 ) {
   validateObjectId(id);
+  validateApiVersion(options?.notionToken);
 
   const apiKey = getApiKey(options);
 
