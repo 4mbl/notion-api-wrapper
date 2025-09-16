@@ -1,10 +1,10 @@
 import { NOTION_VERSION } from './constants.js';
 import { E, NotionError, ParameterValidationError } from './internal/errors.js';
 
-import { createPage } from './api/create.js';
-import { trashPage } from './api/delete.js';
-import { getPage } from './api/get.js';
-import { updatePage } from './api/update.js';
+import { createPage } from './api/pages/create.js';
+import { trashPage } from './api/pages/trash.js';
+import { retrievePage } from './api/pages/retrieve.js';
+import { updatePage } from './api/pages/update.js';
 import { getApiKey } from './auth.js';
 import type { EmojiRequest, TimeZoneRequest } from './naw-types.js';
 import type { Notion } from './notion-types.js';
@@ -391,7 +391,7 @@ export class PageBuilder {
     /** Notion page id. */
     id: string,
   ) {
-    const data = await getPage(id, {
+    const data = await retrievePage(id, {
       notionToken: this.notionToken,
       notionVersion: this.notionVersion,
     });

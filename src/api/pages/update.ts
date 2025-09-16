@@ -1,13 +1,13 @@
-import { getApiKey } from '../auth.js';
-import { NOTION_VERSION } from '../constants.js';
+import { getApiKey } from '../../auth.js';
+import { NOTION_VERSION } from '../../constants.js';
 import {
   E,
   NotionError,
   NotionRateLimitError,
   NotionUnauthorizedError,
-} from '../internal/errors.js';
-import type { Notion } from '../notion-types.js';
-import { validateApiVersion, validateObjectId } from '../validation.js';
+} from '../../internal/errors.js';
+import type { Notion } from '../../notion-types.js';
+import { validateApiVersion, validateObjectId } from '../../validation.js';
 
 export async function updatePage(
   /** Notion page id. */
@@ -43,11 +43,12 @@ export async function updatePage(
 
   if (!response.ok) {
     try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const errorData = (await response.json()) as any;
       throw new NotionError(
         `Error updating page: ${response.status} ${response.statusText} ${errorData.object === 'error' ? errorData.message : ''}`,
       );
-    } catch (e) {
+    } catch {
       throw new NotionError(
         `Error updating page: ${response.status} ${response.statusText}`,
       );

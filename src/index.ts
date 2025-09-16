@@ -1,9 +1,10 @@
-export * from './api/create.js';
-export * from './api/get.js';
-export * from './api/update.js';
-export * from './api/delete.js';
+// pages
+export * from './api/pages/create.js';
+export * from './api/pages/retrieve.js';
+export * from './api/pages/update.js';
+export * from './api/pages/trash.js';
+
 export * from './api/query.js';
-export * from './api/update.js';
 export * from './naw-types.js';
 export * from './filter-builder.js';
 export * from './page-builder.js';

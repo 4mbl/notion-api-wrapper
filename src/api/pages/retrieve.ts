@@ -1,33 +1,34 @@
-import { getApiKey } from '../auth.js';
-import { NOTION_VERSION } from '../constants.js';
+import { getApiKey } from '../../auth.js';
+import { NOTION_VERSION } from '../../constants.js';
 import {
   E,
   NotionError,
   NotionRateLimitError,
   NotionUnauthorizedError,
-} from '../internal/errors.js';
-import type { Notion } from '../notion-types.js';
-import { validateApiVersion } from '../validation.js';
+} from '../../internal/errors.js';
+import type { Notion } from '../../notion-types.js';
+import { validateApiVersion, validateObjectId } from '../../validation.js';
 
-export async function createPage(
-  body: Notion.CreatePageParameters,
+export async function retrievePage(
+  /** Notion page id. */
+  id: string,
   options?: {
     notionToken?: string;
     notionVersion?: string;
   },
 ) {
+  validateObjectId(id);
   validateApiVersion(options?.notionVersion);
 
   const apiKey = getApiKey(options);
 
-  const response = await fetch('https://api.notion.com/v1/pages', {
-    method: 'POST',
+  const response = await fetch(`https://api.notion.com/v1/pages/${id}`, {
+    method: 'GET',
     headers: {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${apiKey}`,
       'Notion-Version': options?.notionVersion ?? NOTION_VERSION,
     },
-    body: JSON.stringify(body),
   });
 
   if (response.status === 401) {
@@ -40,7 +41,7 @@ export async function createPage(
 
   if (!response.ok) {
     throw new NotionError(
-      `Failed to create page: ${response.status} ${response.statusText}`,
+      `Error fetching page: ${response.status} ${response.statusText}`,
     );
   }
 

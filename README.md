@@ -37,7 +37,12 @@ _Or your favorite package manager, in which case you probably know the command._
 This package provides helpers to create, update, trash, and fetch pages.
 
 ```ts
-import { createPage, getPage, updatePage, trashPage } from 'notion-api-wrapper';
+import {
+  createPage,
+  retrievePage,
+  updatePage,
+  trashPage,
+} from 'notion-api-wrapper';
 
 const newPage = await createPage({
   parent: {
@@ -54,7 +59,7 @@ const newPage = await createPage({
 
 const pageId = newPage.id;
 
-const existingPage = await getPage(pageId);
+const existingPage = await retrievePage(pageId);
 
 const updatedPage = await updatePage(pageId, { icon: { emoji: '🎁' } });
 

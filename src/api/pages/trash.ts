@@ -1,8 +1,8 @@
-import { getApiKey } from '../auth.js';
-import { NOTION_VERSION } from '../constants.js';
-import { E, NotionError, NotionRateLimitError, NotionUnauthorizedError } from '../internal/errors.js';
-import type { Notion } from '../notion-types.js';
-import { validateApiVersion, validateObjectId } from '../validation.js';
+import { getApiKey } from '../../auth.js';
+import { NOTION_VERSION } from '../../constants.js';
+import { E, NotionError, NotionRateLimitError, NotionUnauthorizedError } from '../../internal/errors.js';
+import type { Notion } from '../../notion-types.js';
+import { validateApiVersion, validateObjectId } from '../../validation.js';
 
 export async function trashPage(
   /** Notion page id. */
