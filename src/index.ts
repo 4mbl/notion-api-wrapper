@@ -7,6 +7,7 @@ export * from './api/pages/trash.js';
 // data sources
 export * from './api/data-sources/retrieve.js';
 export * from './api/data-sources/query.js';
+export * from './api/data-sources/search.js';
 
 export * from './naw-types.js';
 export * from './filter-builder.js';
