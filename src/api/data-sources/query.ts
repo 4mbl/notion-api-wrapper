@@ -1,61 +1,17 @@
-import type { GetDataSourceResponse } from '@notionhq/client/build/src/api-endpoints.js';
-import { getApiKey } from '../auth.js';
-import { NOTION_VERSION } from '../constants.js';
-import type { BuiltFilter } from '../filter-builder.js';
+import { getApiKey } from '../../auth.js';
+import { NOTION_VERSION } from '../../constants.js';
 import {
   E,
   NotionError,
   NotionRateLimitError,
   NotionUnauthorizedError,
-} from '../internal/errors.js';
-import type { Notion } from '../notion-types.js';
-import { processQueryData, removeProps, simplifyProps } from '../util.js';
-import { validateApiVersion, validateObjectId } from '../validation.js';
+} from '../../internal/errors.js';
+import type { QueryOptions } from '../../naw-types.js';
+import type { Notion } from '../../notion-types.js';
+import { processQueryData } from '../../util.js';
+import { validateApiVersion, validateObjectId } from '../../validation.js';
 
 export const DEFAULT_BATCH_SIZE = 100;
-
-export type PropOptions = {
-  remove?: {
-    /** Removes created by and last edited by user ids from the page(s). */
-    userIds?: boolean;
-    /** Removes created time and last edited time from the page(s). */
-    pageTimestamps?: boolean;
-    url?: boolean;
-    publicUrl?: boolean;
-    objectType?: boolean;
-    id?: boolean;
-    icon?: boolean;
-    cover?: boolean;
-    archived?: boolean;
-    parent?: boolean;
-    inTrash?: boolean;
-    customProps?: string[];
-  };
-  /** Allows only explicitly listed props to be kept. */
-  keep?: string[];
-  /** Moves nested properties to the top level of the page(s). */
-  simplifyProps?: boolean;
-  /** Makes the icon into an URL string no matter if it's an emoji or file. */
-  simpleIcon?: boolean;
-};
-
-export type SortOption = {
-  property: string;
-  direction: 'ascending' | 'descending';
-};
-
-export type QueryOptions = {
-  filter?: BuiltFilter;
-  propOptions?: PropOptions;
-  sort?: SortOption | SortOption[];
-  /** How many items to fetch at a time. Defaults to 100. */
-  batchSize?: number;
-  includeTrashed?: boolean;
-  includeArchived?: boolean;
-
-  notionToken?: string;
-  notionVersion?: string;
-};
 
 export async function queryDataSource(
   /** Notion data source id. */
@@ -135,43 +91,6 @@ export async function queryDataSourceFull(
     allResults.push(...response.data.results);
   } while (nextCursor);
   return allResults;
-}
-
-export async function retrieveDataSource(
-  /** Notion data source id. */
-  id: string,
-  options?: QueryOptions,
-) {
-  const apiKey = getApiKey(options);
-
-  const response = await fetch(`https://api.notion.com/v1/data_sources/${id}`, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${apiKey}`,
-      'Notion-Version': options?.notionVersion ?? NOTION_VERSION,
-    },
-  });
-
-  if (response.status === 401) {
-    throw new NotionUnauthorizedError(E.UNAUTHORIZED);
-  }
-
-  if (response.status === 429) {
-    throw new NotionRateLimitError(E.RATE_LIMIT);
-  }
-
-  if (!response.ok) {
-    throw new NotionError(
-      `Failed to get data source columns: ${response.status} ${response.statusText}`,
-    );
-  }
-
-  const data = (await response.json()) as GetDataSourceResponse;
-
-  return removeProps(
-    simplifyProps(data, options?.propOptions),
-  ) as Notion.DataSourceObjectResponse;
 }
 
 type SearchOptions = {

@@ -1,5 +1,5 @@
-import type { PropOptions } from './api/query.js';
 import type {
+  PropOptions,
   SimpleDatabasePage,
   SimpleProperty,
   VerboseProperty,

@@ -1,4 +1,48 @@
+import type { BuiltFilter } from './filter-builder.js';
 import type { Notion } from './notion-types.js';
+
+export type PropOptions = {
+  remove?: {
+    /** Removes created by and last edited by user ids from the page(s). */
+    userIds?: boolean;
+    /** Removes created time and last edited time from the page(s). */
+    pageTimestamps?: boolean;
+    url?: boolean;
+    publicUrl?: boolean;
+    objectType?: boolean;
+    id?: boolean;
+    icon?: boolean;
+    cover?: boolean;
+    archived?: boolean;
+    parent?: boolean;
+    inTrash?: boolean;
+    customProps?: string[];
+  };
+  /** Allows only explicitly listed props to be kept. */
+  keep?: string[];
+  /** Moves nested properties to the top level of the page(s). */
+  simplifyProps?: boolean;
+  /** Makes the icon into an URL string no matter if it's an emoji or file. */
+  simpleIcon?: boolean;
+};
+
+export type SortOption = {
+  property: string;
+  direction: 'ascending' | 'descending';
+};
+
+export type QueryOptions = {
+  filter?: BuiltFilter;
+  propOptions?: PropOptions;
+  sort?: SortOption | SortOption[];
+  /** How many items to fetch at a time. Defaults to 100. */
+  batchSize?: number;
+  includeTrashed?: boolean;
+  includeArchived?: boolean;
+
+  notionToken?: string;
+  notionVersion?: string;
+};
 
 export type VerboseProperty = Notion.PageObjectResponse['properties'][number];
 
