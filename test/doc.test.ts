@@ -42,7 +42,7 @@ visit(ast, 'code', (node) => {
   codeBlocks.push(node.value);
 });
 
-describe('Markdown TypeScript code blocks', () => {
+describe('Readme code blocks', () => {
   codeBlocks.forEach((code, index) => {
     it(`runs code block #${index + 1}`, () => {
       const tempPath = path.join(testDirectory, `t${index}.ts`);

@@ -22,7 +22,7 @@ afterEach(() => {
 
 /* END SETUP ============================== */
 
-test('DatabaseIterator - bare', async () => {
+test('NotionDataSource - bare', async () => {
   const db = new NotionDataSource(TESTING_DATA_SOURCE_ID, {
     notionToken: TESTING_TOKEN,
     batchSize: 10,
@@ -49,7 +49,7 @@ test('DatabaseIterator - bare', async () => {
   expect(respNoMore.value).toBeUndefined();
 });
 
-test('DatabaseIterator - batches', async () => {
+test('NotionDataSource - batches', async () => {
   const db = new NotionDataSource(TESTING_DATA_SOURCE_ID, {
     notionToken: TESTING_TOKEN,
     batchSize: 10,

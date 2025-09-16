@@ -1,5 +1,5 @@
 import {
-  getDataSourceColumns,
+  retrieveDataSource,
   queryDataSource,
   type QueryOptions,
 } from './api/query.js';
@@ -50,7 +50,7 @@ export class NotionDataSource<
 
   async getColumns() {
     try {
-      const data = await getDataSourceColumns(this._dataSourceId, {
+      const data = await retrieveDataSource(this._dataSourceId, {
         notionToken: this._queryOptions.notionToken,
       });
       this._columns = data.properties;

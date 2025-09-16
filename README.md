@@ -244,12 +244,12 @@ const data = await searchFromDataSource(process.env.NOTION_DATA_SOURCE_ID, {
 
 ### Data Source Metadata
 
-You can get Data Source metadata with the `getDataSourceColumns` function. This supports some of the same options as the query functions.
+You can get Data Source metadata with the `retrieveDataSource` function. This supports some of the same options as the query functions.
 
 ```ts
-import { getDataSourceColumns } from 'notion-api-wrapper';
+import { retrieveDataSource } from 'notion-api-wrapper';
 
-const columns = await getDataSourceColumns(process.env.NOTION_DATA_SOURCE_ID);
+const columns = await retrieveDataSource(process.env.NOTION_DATA_SOURCE_ID);
 ```
 
 ### Data Source Iterator

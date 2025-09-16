@@ -137,8 +137,7 @@ export async function queryDataSourceFull(
   return allResults;
 }
 
-// TODO: rename
-export async function getDataSourceColumns(
+export async function retrieveDataSource(
   /** Notion data source id. */
   id: string,
   options?: QueryOptions,

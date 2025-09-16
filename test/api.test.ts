@@ -4,7 +4,7 @@ import 'dotenv';
 import { afterEach, beforeEach } from 'node:test';
 import {
   FilterBuilder,
-  getDataSourceColumns,
+  retrieveDataSource,
   queryDataSource,
   queryDataSourceFull,
   searchFromDataSource,
@@ -27,7 +27,7 @@ afterEach(() => {
 
 /* END SETUP ============================== */
 
-test('queryDatabase with notionToken', async () => {
+test('queryDataSource with notionToken', async () => {
   const resp = await queryDataSource(TESTING_DATA_SOURCE_ID, undefined, {
     notionToken: TESTING_TOKEN,
     batchSize: 10,
@@ -35,7 +35,7 @@ test('queryDatabase with notionToken', async () => {
   expect(resp.data.results).toHaveLength(10);
 });
 
-test('queryDatabase with environment variable', async () => {
+test('queryDataSource with environment variable', async () => {
   // NOTE: this is the only test that uses the env variable and not explicit token argument
   process.env.NOTION_TOKEN = TESTING_TOKEN;
   const resp = await queryDataSource(TESTING_DATA_SOURCE_ID, undefined, {
@@ -56,7 +56,7 @@ test('queryDatabase with filter', async () => {
   expect(resp.data.results).toHaveLength(6);
 });
 
-test('queryDatabase with sort', async () => {
+test('queryDataSource with sort', async () => {
   const resp = await queryDataSource(TESTING_DATA_SOURCE_ID, undefined, {
     notionToken: TESTING_TOKEN,
     batchSize: 10,
@@ -76,7 +76,7 @@ test('queryDatabase with sort', async () => {
   ).toBe('Seven');
 });
 
-test('queryDatabase with prop options', async () => {
+test('queryDataSource with prop options', async () => {
   const resp = await queryDataSource(TESTING_DATA_SOURCE_ID, undefined, {
     notionToken: TESTING_TOKEN,
     batchSize: 10,
@@ -160,7 +160,7 @@ test('queryDatabase with prop options', async () => {
   expect(pageB.properties.Tags).toBeDefined();
 });
 
-test('queryDatabase with prop keep', async () => {
+test('queryDataSource with prop keep', async () => {
   const resp = await queryDataSource(TESTING_DATA_SOURCE_ID, undefined, {
     notionToken: TESTING_TOKEN,
     batchSize: 10,
@@ -180,7 +180,7 @@ test('queryDatabase with prop keep', async () => {
   expect(pageNine.properties.Tags).toBeUndefined();
 });
 
-test('queryDatabase with prop simplify', async () => {
+test('queryDataSource with prop simplify', async () => {
   const resp = await queryDataSource(TESTING_DATA_SOURCE_ID, undefined, {
     notionToken: TESTING_TOKEN,
     batchSize: 10,
@@ -200,7 +200,7 @@ test('queryDatabase with prop simplify', async () => {
   expect(pageThree.Tags[0]).toBe('A');
 });
 
-test('queryDatabase with pagination', async () => {
+test('queryDataSource with pagination', async () => {
   const resp = await queryDataSource(TESTING_DATA_SOURCE_ID, undefined, {
     notionToken: TESTING_TOKEN,
     batchSize: 10,
@@ -218,7 +218,7 @@ test('queryDatabase with pagination', async () => {
   expect(resp2.data.results).toHaveLength(10);
 });
 
-test('queryDatabaseFull', async () => {
+test('queryDataSourceFull', async () => {
   const resp = await queryDataSourceFull(TESTING_DATA_SOURCE_ID, {
     notionToken: TESTING_TOKEN,
     batchSize: 10,
@@ -226,7 +226,7 @@ test('queryDatabaseFull', async () => {
   expect(resp).toHaveLength(20);
 });
 
-test('searchFromDatabase', async () => {
+test('searchFromDataSource', async () => {
   const resp = await searchFromDataSource(
     TESTING_DATA_SOURCE_ID,
     { query: 'Thirteen' },
@@ -237,7 +237,7 @@ test('searchFromDatabase', async () => {
   expect(match.properties.Name.title[0].plain_text).toBe('Thirteen');
 });
 
-test('searchFromDatabase with custom prop', async () => {
+test('searchFromDataSource with custom prop', async () => {
   const resp = await searchFromDataSource(
     TESTING_DATA_SOURCE_ID,
     { query: '14th page', property: 'Description' },
@@ -250,8 +250,8 @@ test('searchFromDatabase with custom prop', async () => {
   expect(match.properties.Name.title[0].plain_text).toBe('Fourteen');
 });
 
-test('getDatabaseColumns', async () => {
-  const resp = await getDataSourceColumns(TESTING_DATA_SOURCE_ID, {
+test('retrieveDataSource', async () => {
+  const resp = await retrieveDataSource(TESTING_DATA_SOURCE_ID, {
     notionToken: TESTING_TOKEN,
   });
 
