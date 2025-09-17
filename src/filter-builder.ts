@@ -1,4 +1,4 @@
-import type { Notion } from './notion-types.js';
+import type * as Notion from './notion-types.js';
 
 export type BuiltFilter = Notion.QueryDataSourceParameters['filter'];
 

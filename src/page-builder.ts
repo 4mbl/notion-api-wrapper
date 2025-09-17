@@ -7,7 +7,7 @@ import { retrievePage } from './api/pages/retrieve.js';
 import { updatePage } from './api/pages/update.js';
 import { getApiKey } from './auth.js';
 import type { EmojiRequest, TimeZoneRequest } from './naw-types.js';
-import type { Notion } from './notion-types.js';
+import type * as Notion from './notion-types.js';
 import {
   isArrayOfStrings,
   isBoolean,

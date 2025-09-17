@@ -7,7 +7,7 @@ import {
   NotionUnauthorizedError,
 } from '../../internal/errors.js';
 import type { QueryOptions } from '../../naw-types.js';
-import type { Notion } from '../../notion-types.js';
+import type * as Notion from '../../notion-types.js';
 import { processQueryData } from '../../util.js';
 import { validateApiVersion, validateObjectId } from '../../validation.js';
 
