@@ -9,10 +9,16 @@ export * from './api/data-sources/retrieve.js';
 export * from './api/data-sources/query.js';
 export * from './api/data-sources/search.js';
 
+// client
 export * from './client.js';
 
-export * from './naw-types.js';
+// utils
 export * from './filter-builder.js';
 export * from './page-builder.js';
 export * from './data-iterator.js';
 export * from './util.js';
+
+// types
+export * from './naw-types.js';
+import * as NotionTypes from './notion-types.js';
+export type { NotionTypes };

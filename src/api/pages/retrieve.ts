@@ -6,7 +6,7 @@ import {
   NotionRateLimitError,
   NotionUnauthorizedError,
 } from '../../internal/errors.js';
-import type { Notion } from '../../notion-types.js';
+import type * as Notion from '../../notion-types.js';
 import { validateApiVersion, validateObjectId } from '../../validation.js';
 
 export async function retrievePage(

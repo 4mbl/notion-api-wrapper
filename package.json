@@ -1,7 +1,7 @@
 {
   "name": "notion-api-wrapper",
   "version": "6.0.0-beta.1",
-  "description": "Zero dependency Notion API client.",
+  "description": "Zero dependency Notion API client",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -17,6 +17,7 @@
     "notion api",
     "notion-api",
     "notion-api-wrapper",
+    "notion-client",
     "naw",
     "ntn"
   ],
@@ -27,6 +28,7 @@
     "build": "tsc",
     "test": "vitest",
     "lint": "eslint",
+    "sync-api": "echo '// NOTE: This file is vendored from @notionhq/client.\n// Licensed under MIT (https://github.com/makenotion/notion-sdk-js/blob/main/LICENSE).\n\n' > src/notion-types.ts && curl --silent https://raw.githubusercontent.com/makenotion/notion-sdk-js/refs/heads/main/src/api-endpoints.ts >> src/notion-types.ts",
     "format:write": "prettier --write ./src/**/*.ts",
     "format:check": "prettier --check ./src/**/*.ts",
     "publish:beta": "pnpm run build && changeset publish",
