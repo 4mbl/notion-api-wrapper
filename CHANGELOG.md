@@ -1,5 +1,11 @@
 # notion-api-wrapper
 
+## 6.0.0-beta.2
+
+### Minor Changes
+
+- 3eed435: Vendor Notion types
+
 ## 6.0.0-beta.1
 
 ### Major Changes
