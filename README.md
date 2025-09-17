@@ -220,7 +220,7 @@ const data = await searchFromDataSource(DATA_SOURCE_ID, {
 });
 ```
 
-By default the search uses the `Name` property, but you can specify a different property. By default the search looks for excact matches, but you can modify that behavior too.
+By default the search uses the `Name` property, but you can specify a different property. By default the search looks for exact matches, but you can modify that behavior too.
 
 ```ts
 import { searchFromDataSource } from 'notion-api-wrapper';
@@ -418,3 +418,4 @@ const builder = PageBuilder.from(existingPage);
 builder.title('Updated Title');
 await builder.update(existingPage.id);
 ```
+
