@@ -12,6 +12,6 @@ export function getApiKey(options?: { notionToken?: string }) {
 
   const apiKey = options?.notionToken ?? process.env.NOTION_TOKEN ?? OLD_ENV;
 
-  if (!apiKey) throw new AuthenticationError(E.NO_API_KEY);
+  if (!apiKey) throw new AuthenticationError(E.NO_API_TOKEN);
   return apiKey;
 }

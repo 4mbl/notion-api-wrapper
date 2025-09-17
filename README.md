@@ -4,16 +4,19 @@
 
 * [Installation](#installation)
 * [Getting Started](#getting-started)
-  * [Basic Page Operations](#basic-page-operations)
+* [Auth](#auth)
+* [Basics](#basics)
+  * [Page Operations](#page-operations)
   * [Querying Data Sources](#querying-data-sources)
   * [Filtering Results](#filtering-results)
   * [Sorting Results](#sorting-results)
   * [Field and Property Options](#field-and-property-options)
+  * [Data Source Search](#data-source-search)
+  * [Data Source Metadata](#data-source-metadata)
+* [Client](#client)
 * [Advanced Usage](#advanced-usage)
   * [Pagination](#pagination)
   * [Data Source Iterator](#data-source-iterator)
-  * [Data Source Search](#data-source-search)
-  * [Data Source Metadata](#data-source-metadata)
   * [Page Builder](#page-builder)
 
 ## Installation
@@ -32,7 +35,17 @@ _Or your favorite package manager, in which case you probably know the command._
 >
 > See [the docs](https://developers.notion.com/docs/upgrade-guide-2025-09-03) for more information.
 
-### Basic Page Operations
+## Auth
+
+1. Create new integration at <https://www.notion.so/my-integrations>. You will need it to authenticate the API requests that you make with this package. You can revoke the Notion API token at any time in the same URL.
+
+2. Give the integration permissions to read the databases or pages you want to access. You can do this in the databases or pages at: `⋯` → `Connection To` → `<Integration Name>`.
+
+3. Make the Notion API token available as an environment variable under the name `NOTION_TOKEN`. You may also pass it as a parameter to the functions using the `notionToken` parameter.
+
+## Basics
+
+### Page Operations
 
 This package provides helpers to retrieve, create, update, and trash pages.
 
@@ -46,7 +59,7 @@ import {
 
 const newPage = await createPage({
   parent: {
-    data_source_id: process.env.NOTION_DATA_SOURCE_ID,
+    data_source_id: DATA_SOURCE_ID,
   },
   properties: {},
   content: [
@@ -66,33 +79,23 @@ const trashedPage = await trashPage(newPage.id);
 
 ### Querying Data Sources
 
-1. Create new integration at <https://www.notion.so/my-integrations>. You will need it to authenticate the API requests that this package makes. You can revoke the Notion API token at any time in the URL above.
+You can find the Data Source ID from the settings of the database page on Notion.
 
-2. Give the integration permissions to read the database you want to query. You can do this in the database page: `⋯` → `Connection To` → `<Integration Name>`.
+```ts
+import { queryDataSource } from 'notion-api-wrapper';
 
-3. Make the Notion API token available as an environment variable under the name `NOTION_TOKEN`. You may also pass it as a parameter to the functions using the `notionToken` parameter. The examples below also assume that you have set a Data Source ID as an environment variable called `NOTION_DATA_SOURCE_ID`.
+const data = await queryDataSource(DATA_SOURCE_ID);
+```
 
-   You can find the Data Source ID from the settings of the database page on Notion.
+If you want to explicitly pass the Notion API token as a parameter, you can do so with the `notionToken` option. If `notionToken` is not provided, the `NOTION_TOKEN` environment variable will be used.
 
-   <!-- You can find the database ID in the URL of the database page. For instance, in the URL: `https://www.notion.so/<workspace>/00000000000000000000000000000000?v=1111111111111111111111111111111`, the database ID is `00000000000000000000000000000000`. -->
+```ts
+import { queryDataSource } from 'notion-api-wrapper';
 
-4. Query the Data Source.
-
-   ```ts
-   import { queryDataSource } from 'notion-api-wrapper';
-
-   const data = await queryDataSource(process.env.NOTION_DATA_SOURCE_ID);
-   ```
-
-   If you want to explicitly pass the Notion API token as a parameter, you can do so with the `notionToken` option. If `notionToken` is not provided, the `NOTION_TOKEN` environment variable will be used.
-
-   ```ts
-   import { queryDataSource } from 'notion-api-wrapper';
-
-   const data = await queryDataSource(process.env.NOTION_DATA_SOURCE_ID, {
-     notionToken: process.env.NOTION_TOKEN,
-   });
-   ```
+const data = await queryDataSource(DATA_SOURCE_ID, {
+  notionToken: NOTION_TOKEN,
+});
+```
 
 ### Filtering Results
 
@@ -131,7 +134,7 @@ const myFilter = new FilterBuilder()
 
 // property `Done` is true AND (property `Tags` contains `A` OR property `Tags` contains `B`)
 
-const data = await queryDataSource(process.env.NOTION_DATA_SOURCE_ID, {
+const data = await queryDataSource(DATA_SOURCE_ID, {
   filter: myFilter,
 });
 ```
@@ -143,7 +146,7 @@ You can sort the results by specifying the `sort` option.
 ```ts
 import { queryDataSource } from 'notion-api-wrapper';
 
-const data = await queryDataSource(process.env.NOTION_DATA_SOURCE_ID, {
+const data = await queryDataSource(DATA_SOURCE_ID, {
   sort: {
     direction: 'ascending',
     property: 'Name',
@@ -160,7 +163,7 @@ There are options to remove built-in fields and properties from the results. Her
 ```ts
 import { queryDataSource } from 'notion-api-wrapper';
 
-const data = await queryDataSource(process.env.NOTION_DATA_SOURCE_ID, {
+const data = await queryDataSource(DATA_SOURCE_ID, {
   propOptions: {
     remove: {
       userIds: true,
@@ -185,7 +188,7 @@ You can remove all properties except certain ones by using the `keep` option.
 ```ts
 import { queryDataSource } from 'notion-api-wrapper';
 
-const data = await queryDataSource(process.env.NOTION_DATA_SOURCE_ID, {
+const data = await queryDataSource(DATA_SOURCE_ID, {
   propOptions: {
     keep: ['Name', 'Tags', 'Done'],
   },
@@ -197,12 +200,82 @@ Notion API responses can be quite verbose, so there are options to simplify the 
 ```ts
 import { queryDataSource } from 'notion-api-wrapper';
 
-const data = await queryDataSource(process.env.NOTION_DATA_SOURCE_ID, {
+const data = await queryDataSource(DATA_SOURCE_ID, {
   propOptions: {
     simplifyProps: true,
     simpleIcon: true,
   },
 });
+```
+
+### Data Source Search
+
+You can easily search a Data Source for a matching page by using the `searchFromDataSource` function.
+
+```ts
+import { searchFromDataSource } from 'notion-api-wrapper';
+
+const data = await searchFromDataSource(DATA_SOURCE_ID, {
+  query: 'kiwi',
+});
+```
+
+By default the search uses the `Name` property, but you can specify a different property. By default the search looks for excact matches, but you can modify that behavior too.
+
+```ts
+import { searchFromDataSource } from 'notion-api-wrapper';
+
+const data = await searchFromDataSource(DATA_SOURCE_ID, {
+  query: 'Vegetab',
+  property: 'Name',
+  match: 'startsWith',
+});
+```
+
+### Data Source Metadata
+
+Data Source metadata can be obtained with the `retrieveDataSource` function. This supports some of the same options as the query functions.
+
+```ts
+import { retrieveDataSource } from 'notion-api-wrapper';
+
+const columns = await retrieveDataSource(DATA_SOURCE_ID);
+```
+
+## Client
+
+The `NotionClient` class provides an alternative way to access the functions described above.
+
+```ts
+import { NotionClient } from 'notion-api-wrapper';
+
+const notion = new NotionClient({
+  notionToken: NOTION_TOKEN,
+});
+
+const dataSource = await notion.dataSources.retrieve(DATA_SOURCE_ID);
+
+const data = await notion.dataSources.query(DATA_SOURCE_ID);
+
+const matches = await notion.dataSources.search(DATA_SOURCE_ID, {
+  query: 'kiwi',
+});
+
+const created = await notion.pages.create({
+  parent: {
+    data_source_id: DATA_SOURCE_ID,
+  },
+  properties: {},
+  children: [],
+});
+
+const retrieved = await notion.pages.retrieve(created.id);
+
+const updated = await notion.pages.update(created.id, {
+  icon: { emoji: '🎁' },
+});
+
+const trashed = await notion.pages.trash(created.id);
 ```
 
 ## Advanced Usage
@@ -216,14 +289,13 @@ By default `queryDataSource` returns all pages in the Data Source. This may resu
 ```ts
 import { queryDataSource } from 'notion-api-wrapper';
 
-const { data, cursor } = await queryDataSource(
-  process.env.NOTION_DATA_SOURCE_ID,
-  { limit: 100 },
-);
-const { data: data2 } = await queryDataSource(
-  process.env.NOTION_DATA_SOURCE_ID,
-  { limit: 100, cursor },
-);
+const { data, cursor } = await queryDataSource(DATA_SOURCE_ID, {
+  limit: 100,
+});
+const { data: data2 } = await queryDataSource(DATA_SOURCE_ID, {
+  limit: 100,
+  cursor,
+});
 ```
 
 ### Data Source Iterator
@@ -234,7 +306,7 @@ the `NotionDataSource` class provides a more convenient way to iterate over the 
 ```ts
 import { NotionDataSource } from 'notion-api-wrapper';
 
-const db = new NotionDataSource(process.env.NOTION_DATA_SOURCE_ID);
+const db = new NotionDataSource(DATA_SOURCE_ID);
 
 for await (const page of db.iterator()) {
   console.log(page.id);
@@ -246,7 +318,7 @@ By default the iterator yields each page individually. You can pass the `yieldSi
 ```ts
 import { NotionDataSource } from 'notion-api-wrapper';
 
-const db = new NotionDataSource(process.env.NOTION_DATA_SOURCE_ID);
+const db = new NotionDataSource(DATA_SOURCE_ID);
 
 for await (const chunk of db.iterator({ yieldSize: 10 })) {
   const firstPage = chunk[0];
@@ -259,7 +331,7 @@ The `batchSize` option controls the number of pages fetched at once from Notion.
 ```ts
 import { NotionDataSource } from 'notion-api-wrapper';
 
-const db = new NotionDataSource(process.env.NOTION_DATA_SOURCE_ID);
+const db = new NotionDataSource(DATA_SOURCE_ID);
 
 for await (const chunk of db.iterator({ batchSize: 10, yieldSize: 2 })) {
   chunk.map((page) => console.log(page.id));
@@ -275,45 +347,11 @@ type CustomType = PageObjectResponse & {
   properties: { Name: { title: { plain_text: string }[] } };
 };
 
-const db = new NotionDataSource<CustomType>(process.env.NOTION_DATA_SOURCE_ID);
+const db = new NotionDataSource<CustomType>(DATA_SOURCE_ID);
 
 for await (const page of db.iterator()) {
   /* ... */
 }
-```
-
-### Data Source Search
-
-You can easily search a Data Source for a matching page by using the `searchFromDataSource` function.
-
-```ts
-import { searchFromDataSource } from 'notion-api-wrapper';
-
-const data = await searchFromDataSource(process.env.NOTION_DATA_SOURCE_ID, {
-  query: 'kiwi',
-});
-```
-
-By default the search uses the `Name` property, but you can specify a different property. By default the search looks for excact matches, but you can modify that behavior too.
-
-```ts
-import { searchFromDataSource } from 'notion-api-wrapper';
-
-const data = await searchFromDataSource(process.env.NOTION_DATA_SOURCE_ID, {
-  query: 'Vegetab',
-  property: 'Name',
-  match: 'startsWith',
-});
-```
-
-### Data Source Metadata
-
-Data Source metadata can be obtained with the `retrieveDataSource` function. This supports some of the same options as the query functions.
-
-```ts
-import { retrieveDataSource } from 'notion-api-wrapper';
-
-const columns = await retrieveDataSource(process.env.NOTION_DATA_SOURCE_ID);
 ```
 
 ### Page Builder
@@ -323,7 +361,7 @@ The `PageBuilder` class that can be used to create pages in a Data Source.
 ```ts
 import { PageBuilder } from 'notion-api-wrapper';
 
-const builder = new PageBuilder(process.env.NOTION_DATA_SOURCE_ID)
+const builder = new PageBuilder(DATA_SOURCE_ID)
 
   .cover('https://example.com/image.png')
 
@@ -338,9 +376,9 @@ const builder = new PageBuilder(process.env.NOTION_DATA_SOURCE_ID)
   .files('Files & Media', 'https://example.com/image.png')
   .multiSelect('Multi-Select', ['Option 1', 'Option 2'])
   .number('Number', 42)
-  .people('People', process.env.PERSON_ID)
+  .people('People', PERSON_ID)
   .phoneNumber('Phone Number', '+1 (555) 555-5555')
-  .relation('Relation', process.env.RELATION_PAGE_ID)
+  .relation('Relation', RELATION_PAGE)
   .select('Select', 'Option A')
   .status('Status', 'Done')
   .url('URL', 'https://example.com');
@@ -355,13 +393,13 @@ import { PageBuilder, createPage } from 'notion-api-wrapper';
 
 const dummyPage = await createPage({
   parent: {
-    data_source_id: process.env.NOTION_DATA_SOURCE_ID,
+    data_source_id: DATA_SOURCE_ID,
   },
   properties: {},
   children: [],
 });
 
-const builder = new PageBuilder(process.env.NOTION_DATA_SOURCE_ID);
+const builder = new PageBuilder(DATA_SOURCE_ID);
 
 const existingPage = await builder.fetch(dummyPage.id);
 

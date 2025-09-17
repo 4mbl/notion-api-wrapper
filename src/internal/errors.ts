@@ -1,8 +1,8 @@
 import { NOTION_VERSION } from '../constants.js';
 
 export const E = {
-  NO_API_KEY:
-    'Notion API key not found. Please set the `NOTION_TOKEN` environment variable and make sure is is accessible by this process.',
+  NO_API_TOKEN:
+    'Notion API token not found. Please set the `NOTION_TOKEN` environment variable and make sure is is accessible by this process.',
   INVALID_VALUE: 'Invalid value.',
   UNAUTHORIZED: 'Unauthorized. API token is likely invalid.',
   RATE_LIMIT: 'Too many requests. Please try again later.',
