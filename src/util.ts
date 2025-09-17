@@ -1,21 +1,17 @@
-import type { PropOptions } from './api/query.js';
 import type {
-  SimpleDatabaseProperty,
-  VerboseDatabaseProperty,
+  PropOptions,
   SimpleDatabasePage,
+  SimpleProperty,
+  VerboseProperty,
 } from './naw-types.js';
-import type {
-  DatabaseObjectResponse,
-  QueryDatabaseResponse,
-  RichTextItemResponse,
-} from './notion-types.js';
+import type { Notion } from './notion-types.js';
 
 export function processQueryData(
-  data: QueryDatabaseResponse,
+  data: Notion.QueryDataSourceResponse,
   options?: PropOptions,
 ) {
   if (options?.remove || options?.keep)
-    data = removeProps(data, options) as QueryDatabaseResponse;
+    data = removeProps(data, options) as Notion.QueryDataSourceResponse;
 
   if (options?.simplifyProps) data = simplifyProps(data, options);
   return data;
@@ -25,7 +21,7 @@ export function removeProps(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   data: any,
   options?: PropOptions,
-): QueryDatabaseResponse | DatabaseObjectResponse {
+): Notion.QueryDataSourceResponse | Notion.DataSourceObjectResponse {
   const removeMetadata: string[] = [];
   const removeProps: string[] = [];
 
@@ -112,17 +108,17 @@ export function simplifyProps(data: any, options?: PropOptions) {
 }
 
 function simplifyProp(
-  prop: VerboseDatabaseProperty,
+  prop: VerboseProperty,
   options?: PropOptions,
-): SimpleDatabaseProperty {
+): SimpleProperty {
   switch (prop.type) {
     case 'title':
       return prop.title
-        .map((text: RichTextItemResponse) => text.plain_text)
+        .map((text: Notion.RichTextItemResponse) => text.plain_text)
         .join('');
     case 'rich_text':
       return prop.rich_text
-        .map((text: RichTextItemResponse) => text.plain_text)
+        .map((text: Notion.RichTextItemResponse) => text.plain_text)
         .join('');
     case 'number':
       return prop.number;
@@ -203,7 +199,7 @@ function emojiToHex(emoji: string) {
   return hexCode;
 }
 
-export function getIconUrl(icon: DatabaseObjectResponse['icon']) {
+export function getIconUrl(icon: Notion.DatabaseObjectResponse['icon']) {
   let iconUrl: string | undefined = undefined;
   if (icon?.type === 'external') iconUrl = icon?.external?.url;
   else if (icon?.type === 'file') iconUrl = icon?.file?.url;

@@ -1,19 +1,18 @@
 import { expect, test } from 'vitest';
-import {
-  getDatabaseColumns,
-  queryDatabase,
-  queryDatabaseFull,
-  searchFromDatabase,
-} from '../src/api/query';
-import dotenv from 'dotenv';
-import { FilterBuilder } from '../src';
+
+import 'dotenv';
 import { afterEach, beforeEach } from 'node:test';
-dotenv.config({ quiet: true });
+import {
+  FilterBuilder,
+  retrieveDataSource,
+  queryDataSource,
+  searchFromDataSource,
+} from '../src';
 
 const TESTING_TOKEN = process.env.TESTING_NOTION_TOKEN;
 if (!TESTING_TOKEN) throw new Error('TESTING_NOTION_TOKEN not set.');
 
-const TESTING_DATABASE_ID = '16004341ec564e0397bd75cbf6be6f91';
+const TESTING_DATA_SOURCE_ID = '8b00d89e35574a3780afa2e929d7a80c';
 
 /* Require the notion token to be passed explicitly to avoid using the wrong token accidentally */
 const initialEnvVars: Record<string, string | undefined> = {};
@@ -27,59 +26,58 @@ afterEach(() => {
 
 /* END SETUP ============================== */
 
-test('queryDatabase with notionToken', async () => {
-  const resp = await queryDatabase(TESTING_DATABASE_ID, undefined, {
+test('queryDataSource with notionToken', async () => {
+  const { results } = await queryDataSource(TESTING_DATA_SOURCE_ID, {
     notionToken: TESTING_TOKEN,
     batchSize: 10,
+    limit: 10,
   });
-  expect(resp.data.results).toHaveLength(10);
+  expect(results).toHaveLength(10);
 });
 
-test('queryDatabase with environment variable', async () => {
+test('queryDataSource with environment variable', async () => {
   // NOTE: this is the only test that uses the env variable and not explicit token argument
   process.env.NOTION_TOKEN = TESTING_TOKEN;
-  const resp = await queryDatabase(TESTING_DATABASE_ID, undefined, {
+  const { results } = await queryDataSource(TESTING_DATA_SOURCE_ID, {
     batchSize: 10,
+    limit: 10,
   });
-  expect(resp.data.results).toHaveLength(10);
+  expect(results).toHaveLength(10);
 });
 
 test('queryDatabase with filter', async () => {
   const fb = new FilterBuilder();
   fb.addFilter({ multi_select: { contains: 'A' }, property: 'Tags' });
 
-  const resp = await queryDatabase(TESTING_DATABASE_ID, undefined, {
+  const { results } = await queryDataSource(TESTING_DATA_SOURCE_ID, {
     notionToken: TESTING_TOKEN,
     batchSize: 10,
+    limit: 100,
     filter: fb.build('AND'),
   });
-  expect(resp.data.results).toHaveLength(6);
+  expect(results).toHaveLength(6);
 });
 
-test('queryDatabase with sort', async () => {
-  const resp = await queryDatabase(TESTING_DATABASE_ID, undefined, {
+test('queryDataSource with sort', async () => {
+  const { results } = await queryDataSource(TESTING_DATA_SOURCE_ID, {
     notionToken: TESTING_TOKEN,
     batchSize: 10,
+    limit: 100,
     sort: {
       direction: 'ascending',
       property: 'ID',
     },
   });
-  expect(
-    (resp.data.results[0] as any).properties.Name.title[0].plain_text,
-  ).toBe('One');
-  expect(
-    (resp.data.results[3] as any).properties.Name.title[0].plain_text,
-  ).toBe('Four');
-  expect(
-    (resp.data.results[6] as any).properties.Name.title[0].plain_text,
-  ).toBe('Seven');
+  expect((results[0] as any).properties.Name.title[0].plain_text).toBe('One');
+  expect((results[3] as any).properties.Name.title[0].plain_text).toBe('Four');
+  expect((results[6] as any).properties.Name.title[0].plain_text).toBe('Seven');
 });
 
-test('queryDatabase with prop options', async () => {
-  const resp = await queryDatabase(TESTING_DATABASE_ID, undefined, {
+test('queryDataSource with prop options', async () => {
+  const { results } = await queryDataSource(TESTING_DATA_SOURCE_ID, {
     notionToken: TESTING_TOKEN,
     batchSize: 10,
+    limit: 100,
     propOptions: {
       remove: {
         id: true,
@@ -98,7 +96,7 @@ test('queryDatabase with prop options', async () => {
     },
   });
 
-  const pageA = resp.data.results[0] as any;
+  const pageA = results[0] as any;
 
   expect(pageA.id).toBeUndefined();
   expect(pageA.created_by).toBeUndefined();
@@ -118,9 +116,10 @@ test('queryDatabase with prop options', async () => {
   expect(pageA.properties.Name).toBeDefined();
   expect(pageA.properties.Tags).toBeDefined();
 
-  const resp2 = await queryDatabase(TESTING_DATABASE_ID, undefined, {
+  const { results: results2 } = await queryDataSource(TESTING_DATA_SOURCE_ID, {
     notionToken: TESTING_TOKEN,
     batchSize: 10,
+    limit: 100,
     propOptions: {
       remove: {
         id: false,
@@ -139,7 +138,7 @@ test('queryDatabase with prop options', async () => {
     },
   });
 
-  const pageB = resp2.data.results[0] as any;
+  const pageB = results2[0] as any;
 
   expect(pageB.id).toBeDefined();
   expect(pageB.created_by).toBeDefined();
@@ -160,10 +159,11 @@ test('queryDatabase with prop options', async () => {
   expect(pageB.properties.Tags).toBeDefined();
 });
 
-test('queryDatabase with prop keep', async () => {
-  const resp = await queryDatabase(TESTING_DATABASE_ID, undefined, {
+test('queryDataSource with prop keep', async () => {
+  const { results } = await queryDataSource(TESTING_DATA_SOURCE_ID, {
     notionToken: TESTING_TOKEN,
     batchSize: 10,
+    limit: 100,
     sort: {
       direction: 'ascending',
       property: 'ID',
@@ -173,17 +173,18 @@ test('queryDatabase with prop keep', async () => {
     },
   });
 
-  const pageNine = resp.data.results[8] as any;
+  const pageNine = results[8] as any;
 
   expect(pageNine.properties.Name.title[0].plain_text).toBe('Nine');
   expect(pageNine.properties.ID).toBeUndefined();
   expect(pageNine.properties.Tags).toBeUndefined();
 });
 
-test('queryDatabase with prop simplify', async () => {
-  const resp = await queryDatabase(TESTING_DATABASE_ID, undefined, {
+test('queryDataSource with prop simplify', async () => {
+  const { results } = await queryDataSource(TESTING_DATA_SOURCE_ID, {
     notionToken: TESTING_TOKEN,
     batchSize: 10,
+    limit: 100,
     sort: {
       direction: 'ascending',
       property: 'ID',
@@ -194,72 +195,53 @@ test('queryDatabase with prop simplify', async () => {
     },
   });
 
-  const pageThree = resp.data.results[2] as any;
+  const pageThree = results[2] as any;
   expect(pageThree.Name).toBe('Three');
   expect(pageThree.ID).toBe('ID-3');
   expect(pageThree.Tags[0]).toBe('A');
 });
 
-test('queryDatabase with pagination', async () => {
-  const resp = await queryDatabase(TESTING_DATABASE_ID, undefined, {
+test('queryDataSource - full', async () => {
+  const { results } = await queryDataSource(TESTING_DATA_SOURCE_ID, {
     notionToken: TESTING_TOKEN,
     batchSize: 10,
   });
-  expect(resp.cursor).toBeDefined();
-  expect(resp.data.has_more).toBe(true);
-  expect(resp.data.results).toHaveLength(10);
-
-  const resp2 = await queryDatabase(TESTING_DATABASE_ID, resp.cursor, {
-    notionToken: TESTING_TOKEN,
-    batchSize: 10,
-  });
-  expect(resp2.cursor).toBeNull();
-  expect(resp2.data.has_more).toBe(false);
-  expect(resp2.data.results).toHaveLength(10);
+  expect(results).toHaveLength(20);
 });
 
-test('queryDatabaseFull', async () => {
-  const resp = await queryDatabaseFull(TESTING_DATABASE_ID, {
-    notionToken: TESTING_TOKEN,
-    batchSize: 10,
-  });
-  expect(resp).toHaveLength(20);
-});
-
-test('searchFromDatabase', async () => {
-  const resp = await searchFromDatabase(
-    TESTING_DATABASE_ID,
+test('searchFromDataSource', async () => {
+  const { results } = await searchFromDataSource(
+    TESTING_DATA_SOURCE_ID,
     { query: 'Thirteen' },
     { notionToken: TESTING_TOKEN },
   );
 
-  const match = resp.results[0] as any;
+  const match = results[0] as any;
   expect(match.properties.Name.title[0].plain_text).toBe('Thirteen');
 });
 
-test('searchFromDatabase with custom prop', async () => {
-  const resp = await searchFromDatabase(
-    TESTING_DATABASE_ID,
+test('searchFromDataSource - custom prop', async () => {
+  const { results } = await searchFromDataSource(
+    TESTING_DATA_SOURCE_ID,
     { query: '14th page', property: 'Description' },
     {
       notionToken: TESTING_TOKEN,
     },
   );
 
-  const match = resp.results[0] as any;
+  const match = results[0] as any;
   expect(match.properties.Name.title[0].plain_text).toBe('Fourteen');
 });
 
-test('getDatabaseColumns', async () => {
-  const resp = await getDatabaseColumns(TESTING_DATABASE_ID, {
+test('retrieveDataSource', async () => {
+  const results = await retrieveDataSource(TESTING_DATA_SOURCE_ID, {
     notionToken: TESTING_TOKEN,
   });
 
-  expect(resp.url).toBe('https://www.notion.so/' + TESTING_DATABASE_ID);
-  expect(resp.title[0].plain_text).toBe('NAW TESTING DATABASE');
-  expect(resp.description[0].plain_text).contains('NAW');
-  expect(resp.properties.Name).toBeDefined();
-  expect(resp.properties.ID).toBeDefined();
-  expect(resp.properties.Tags).toBeDefined();
-  expect(resp.properties.Description).toBeDefined();
+  expect(results.title[0].plain_text).toBe('NAW TESTING DATABASE');
+  expect(results.description[0].plain_text).contains('NAW');
+  expect(results.properties.Name).toBeDefined();
+  expect(results.properties.ID).toBeDefined();
+  expect(results.properties.Tags).toBeDefined();
+  expect(results.properties.Description).toBeDefined();
 });

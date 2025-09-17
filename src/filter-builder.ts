@@ -1,6 +1,6 @@
-import type { QueryDatabaseParameters } from './notion-types.js';
+import type { Notion } from './notion-types.js';
 
-export type BuiltFilter = QueryDatabaseParameters['filter'];
+export type BuiltFilter = Notion.QueryDataSourceParameters['filter'];
 
 type NestableFilter = Filter | BuiltFilter;
 

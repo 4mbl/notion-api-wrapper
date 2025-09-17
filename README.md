@@ -5,16 +5,16 @@
 * [Installation](#installation)
 * [Getting Started](#getting-started)
   * [Basic Page Operations](#basic-page-operations)
-  * [Querying Database](#querying-database)
+  * [Querying Data Sources](#querying-data-sources)
   * [Filtering Results](#filtering-results)
   * [Sorting Results](#sorting-results)
   * [Field and Property Options](#field-and-property-options)
 * [Advanced Usage](#advanced-usage)
   * [Pagination](#pagination)
-  * [Database Search](#database-search)
-  * [Database Metadata](#database-metadata)
-  * [Database Iterator](#database-iterator)
-  * [Database Builder](#database-builder)
+  * [Data Source Iterator](#data-source-iterator)
+  * [Data Source Search](#data-source-search)
+  * [Data Source Metadata](#data-source-metadata)
+  * [Page Builder](#page-builder)
 
 ## Installation
 
@@ -26,15 +26,28 @@ _Or your favorite package manager, in which case you probably know the command._
 
 ## Getting Started
 
+> [!NOTE]
+> Notion API version 2025-09-03 changed how databases work.
+> Data Sources are now the primary way to access structured data in Notion. This package supports this new API version.
+>
+> See [the docs](https://developers.notion.com/docs/upgrade-guide-2025-09-03) for more information.
+
 ### Basic Page Operations
 
-This package provides helpers to create, update, trash, and fetch pages.
+This package provides helpers to retrieve, create, update, and trash pages.
 
 ```ts
-import { createPage, getPage, updatePage, trashPage } from 'notion-api-wrapper';
+import {
+  createPage,
+  retrievePage,
+  updatePage,
+  trashPage,
+} from 'notion-api-wrapper';
 
 const newPage = await createPage({
-  parent: { database_id: process.env.NOTION_DATABASE_ID },
+  parent: {
+    data_source_id: process.env.NOTION_DATA_SOURCE_ID,
+  },
   properties: {},
   content: [
     {
@@ -44,51 +57,49 @@ const newPage = await createPage({
   ],
 });
 
-const pageId = newPage.id;
+const existingPage = await retrievePage(newPage.id);
 
-const existingPage = await getPage(pageId);
+const updatedPage = await updatePage(newPage.id, { icon: { emoji: '🎁' } });
 
-const updatedPage = await updatePage(pageId, { icon: { emoji: '🎁' } });
-
-const trashedPage = await trashPage(pageId);
+const trashedPage = await trashPage(newPage.id);
 ```
 
-### Querying Database
+### Querying Data Sources
 
-1. Create new integration at <https://www.notion.so/my-integrations>. Write down the secret key, you will need it to authenticate the API requests that this package makes. You can revoke the key at any time in the URL above.
+1. Create new integration at <https://www.notion.so/my-integrations>. You will need it to authenticate the API requests that this package makes. You can revoke the Notion API token at any time in the URL above.
 
 2. Give the integration permissions to read the database you want to query. You can do this in the database page: `⋯` → `Connection To` → `<Integration Name>`.
 
-3. Make the secret key available as an environment variable under the name `NOTION_TOKEN`. You may also pass it as a parameter to the functions using the `notionToken` parameter. The examples below also assume that you have set the database ID as an environment variable called `NOTION_DATABASE_ID`.
+3. Make the Notion API token available as an environment variable under the name `NOTION_TOKEN`. You may also pass it as a parameter to the functions using the `notionToken` parameter. The examples below also assume that you have set a Data Source ID as an environment variable called `NOTION_DATA_SOURCE_ID`.
 
-   You can find the database ID in the URL of the database page. For instance, in the URL: `https://www.notion.so/<workspace>/00000000000000000000000000000000?v=1111111111111111111111111111111`, the database ID is `00000000000000000000000000000000`.
+   You can find the Data Source ID from the settings of the database page on Notion.
 
-4. Query the database.
+   <!-- You can find the database ID in the URL of the database page. For instance, in the URL: `https://www.notion.so/<workspace>/00000000000000000000000000000000?v=1111111111111111111111111111111`, the database ID is `00000000000000000000000000000000`. -->
+
+4. Query the Data Source.
 
    ```ts
-   import { queryDatabaseFull } from 'notion-api-wrapper';
+   import { queryDataSource } from 'notion-api-wrapper';
 
-   const data = await queryDatabaseFull(process.env.NOTION_DATABASE_ID);
-   const json = JSON.stringify(data, null, 2);
-   console.log(json);
+   const data = await queryDataSource(process.env.NOTION_DATA_SOURCE_ID);
    ```
 
-   If you want to pass the secret key as a parameter, you can do so by passing the `notionToken` option.
+   If you want to explicitly pass the Notion API token as a parameter, you can do so with the `notionToken` option. If `notionToken` is not provided, the `NOTION_TOKEN` environment variable will be used.
 
    ```ts
-   import { queryDatabaseFull } from 'notion-api-wrapper';
+   import { queryDataSource } from 'notion-api-wrapper';
 
-   const data = await queryDatabaseFull(process.env.NOTION_DATABASE_ID, {
+   const data = await queryDataSource(process.env.NOTION_DATA_SOURCE_ID, {
      notionToken: process.env.NOTION_TOKEN,
    });
    ```
 
 ### Filtering Results
 
-You can also use the `FilterBuilder` to create filters that will be used in the query.
+You can use `FilterBuilder` to create filters that will be used in the query.
 
 ```ts
-import { queryDatabaseFull, FilterBuilder } from 'notion-api-wrapper';
+import { queryDataSource, FilterBuilder } from 'notion-api-wrapper';
 
 const filterA: Filter = {
   property: 'Done',
@@ -118,19 +129,21 @@ const myFilter = new FilterBuilder()
   )
   .build('AND');
 
-const data = await queryDatabaseFull(process.env.NOTION_DATABASE_ID, {
+// property `Done` is true AND (property `Tags` contains `A` OR property `Tags` contains `B`)
+
+const data = await queryDataSource(process.env.NOTION_DATA_SOURCE_ID, {
   filter: myFilter,
 });
 ```
 
 ### Sorting Results
 
-You can also sort the results by specifying the `sort` option.
+You can sort the results by specifying the `sort` option.
 
 ```ts
-import { queryDatabaseFull } from 'notion-api-wrapper';
+import { queryDataSource } from 'notion-api-wrapper';
 
-const data = await queryDatabaseFull(process.env.NOTION_DATABASE_ID, {
+const data = await queryDataSource(process.env.NOTION_DATA_SOURCE_ID, {
   sort: {
     direction: 'ascending',
     property: 'Name',
@@ -138,14 +151,16 @@ const data = await queryDatabaseFull(process.env.NOTION_DATABASE_ID, {
 });
 ```
 
+By default the primary (title) property will be used for sorting.
+
 ### Field and Property Options
 
-There is also options to remove built-in fields and properties from the results. Here is a kitchen sink example of that.
+There are options to remove built-in fields and properties from the results. Here is a kitchen sink example of that.
 
 ```ts
-import { queryDatabaseFull } from 'notion-api-wrapper';
+import { queryDataSource } from 'notion-api-wrapper';
 
-const data = await queryDatabaseFull(process.env.NOTION_DATABASE_ID, {
+const data = await queryDataSource(process.env.NOTION_DATA_SOURCE_ID, {
   propOptions: {
     remove: {
       userIds: true,
@@ -165,24 +180,24 @@ const data = await queryDatabaseFull(process.env.NOTION_DATABASE_ID, {
 });
 ```
 
-You can also remove all properties except certain ones by using the `keep` option.
+You can remove all properties except certain ones by using the `keep` option.
 
 ```ts
-import { queryDatabaseFull } from 'notion-api-wrapper';
+import { queryDataSource } from 'notion-api-wrapper';
 
-const data = await queryDatabaseFull(process.env.NOTION_DATABASE_ID, {
+const data = await queryDataSource(process.env.NOTION_DATA_SOURCE_ID, {
   propOptions: {
     keep: ['Name', 'Tags', 'Done'],
   },
 });
 ```
 
-Notion API responses can be quite verbose, so there is also options to simplify the results.
+Notion API responses can be quite verbose, so there are options to simplify the results.
 
 ```ts
-import { queryDatabaseFull } from 'notion-api-wrapper';
+import { queryDataSource } from 'notion-api-wrapper';
 
-const data = await queryDatabaseFull(process.env.NOTION_DATABASE_ID, {
+const data = await queryDataSource(process.env.NOTION_DATA_SOURCE_ID, {
   propOptions: {
     simplifyProps: true,
     simpleIcon: true,
@@ -194,116 +209,121 @@ const data = await queryDatabaseFull(process.env.NOTION_DATABASE_ID, {
 
 ### Pagination
 
-There is also a function to query the database in a paginated way. A single query returns at most 100 pages.
+There is a function to query the Data Source in a paginated way. A single query returns at most 100 pages.
+
+By default `queryDataSource` returns all pages in the Data Source. This may result in many requests to the Notion API. To avoid this, you can manually paginate the results.
 
 ```ts
-import { queryDatabase } from 'notion-api-wrapper';
+import { queryDataSource } from 'notion-api-wrapper';
 
-const { data, nextCursor } = await queryDatabase(
-  process.env.NOTION_DATABASE_ID,
+const { data, cursor } = await queryDataSource(
+  process.env.NOTION_DATA_SOURCE_ID,
+  { limit: 100 },
 );
-const { data2 } = await queryDatabase(
-  process.env.NOTION_DATABASE_ID,
-  nextCursor,
+const { data: data2 } = await queryDataSource(
+  process.env.NOTION_DATA_SOURCE_ID,
+  { limit: 100, cursor },
 );
 ```
 
-### Database Search
+### Data Source Iterator
 
-You can easily search a database for a matching page by using the `searchFromDatabase` function.
-
-```ts
-import { searchFromDatabase } from 'notion-api-wrapper';
-
-const data = await searchFromDatabase(process.env.NOTION_DATABASE_ID, {
-  query: 'kiwi',
-});
-```
-
-By default the search uses the `Name` property, but you can specify a different property. By default the search looks for excact matches, but you can modify this behavior too.
+While managing the pagination manually is possible,
+the `NotionDataSource` class provides a more convenient way to iterate over the Data Source.
 
 ```ts
-import { searchFromDatabase } from 'notion-api-wrapper';
+import { NotionDataSource } from 'notion-api-wrapper';
 
-const data = await searchFromDatabase(process.env.NOTION_DATABASE_ID, {
-  query: 'Vegetab',
-  property: 'Name', // title property
-  match: 'startsWith',
-});
-```
-
-### Database Metadata
-
-You can get database metadata with the `getDatabaseColumns` function. This supports some of the same options as the query functions.
-
-```ts
-import { getDatabaseColumns } from 'notion-api-wrapper';
-
-const columns = await getDatabaseColumns(process.env.NOTION_DATABASE_ID);
-```
-
-### Database Iterator
-
-This package also provides a `NotionDatabase` class that can be used to iterate over the database in a paginated way.
-
-```ts
-import { NotionDatabase } from 'notion-api-wrapper';
-
-const db = new NotionDatabase(process.env.NOTION_DATABASE_ID);
+const db = new NotionDataSource(process.env.NOTION_DATA_SOURCE_ID);
 
 for await (const page of db.iterator()) {
   console.log(page.id);
 }
 ```
 
-By default the iterator yields each page individually. You can pass the `yieldSize` option to control the number of pages that will be yielded at a time to the caller.
+By default the iterator yields each page individually. You can pass the `yieldSize` option to control the number of pages that will be yielded for each iteration. If you set `yieldSize` to a value other than the default of 1, you will get the results in an array instead of as a single object.
 
 ```ts
-import { NotionDatabase } from 'notion-api-wrapper';
+import { NotionDataSource } from 'notion-api-wrapper';
 
-const db = new NotionDatabase(process.env.NOTION_DATABASE_ID);
+const db = new NotionDataSource(process.env.NOTION_DATA_SOURCE_ID);
 
-for await (const page of db.iterator({ yieldSize: 10 })) {
-  console.log(page.id);
+for await (const chunk of db.iterator({ yieldSize: 10 })) {
+  const firstPage = chunk[0];
+  console.log(firstPage.id);
 }
 ```
 
-The `batchSize` option controls the number of pages fetched at once from Notion and `yieldSize` the number of pages that will be yielded at a time to the caller. By default both are set to 1. If you set `yieldSize` to a value other than the default of 1, you will get the results in an array instead of as a bare object as before.
+The `batchSize` option controls the number of pages fetched at once from Notion. This is set to 100 by default, which is also the maximum the Notion API allows.
 
 ```ts
-import { NotionDatabase } from 'notion-api-wrapper';
+import { NotionDataSource } from 'notion-api-wrapper';
 
-const db = new NotionDatabase(process.env.NOTION_DATABASE_ID);
+const db = new NotionDataSource(process.env.NOTION_DATA_SOURCE_ID);
 
 for await (const chunk of db.iterator({ batchSize: 10, yieldSize: 2 })) {
   chunk.map((page) => console.log(page.id));
 }
 ```
 
-You can also pass a custom response type to the `NotionDatabase` constructor. This can enable more specifc types with the cost of type safety.
+You can also pass a custom response type to the `NotionDataSource` constructor. This can enable more specifc types with the cost of type safety.
 
 ```ts
-import { NotionDatabase } from 'notion-api-wrapper';
+import { NotionDataSource } from 'notion-api-wrapper';
 
 type CustomType = PageObjectResponse & {
   properties: { Name: { title: { plain_text: string }[] } };
 };
 
-const db = new NotionDatabase<CustomType>(process.env.NOTION_DATABASE_ID);
+const db = new NotionDataSource<CustomType>(process.env.NOTION_DATA_SOURCE_ID);
 
 for await (const page of db.iterator()) {
   /* ... */
 }
 ```
 
-### Database Builder
+### Data Source Search
 
-This package also provides a `PageBuilder` class that can be used to create pages in a database.
+You can easily search a Data Source for a matching page by using the `searchFromDataSource` function.
+
+```ts
+import { searchFromDataSource } from 'notion-api-wrapper';
+
+const data = await searchFromDataSource(process.env.NOTION_DATA_SOURCE_ID, {
+  query: 'kiwi',
+});
+```
+
+By default the search uses the `Name` property, but you can specify a different property. By default the search looks for excact matches, but you can modify that behavior too.
+
+```ts
+import { searchFromDataSource } from 'notion-api-wrapper';
+
+const data = await searchFromDataSource(process.env.NOTION_DATA_SOURCE_ID, {
+  query: 'Vegetab',
+  property: 'Name',
+  match: 'startsWith',
+});
+```
+
+### Data Source Metadata
+
+Data Source metadata can be obtained with the `retrieveDataSource` function. This supports some of the same options as the query functions.
+
+```ts
+import { retrieveDataSource } from 'notion-api-wrapper';
+
+const columns = await retrieveDataSource(process.env.NOTION_DATA_SOURCE_ID);
+```
+
+### Page Builder
+
+The `PageBuilder` class that can be used to create pages in a Data Source.
 
 ```ts
 import { PageBuilder } from 'notion-api-wrapper';
 
-const builder = new PageBuilder(process.env.NOTION_DATABASE_ID)
+const builder = new PageBuilder(process.env.NOTION_DATA_SOURCE_ID)
 
   .cover('https://example.com/image.png')
 
@@ -328,18 +348,20 @@ const builder = new PageBuilder(process.env.NOTION_DATABASE_ID)
 const page = await builder.create();
 ```
 
-In addition to creating pages, you can also use the `PageBuilder` to fetch, update, and trash existing pages.
+In addition to creating pages, `PageBuilder` can be used to fetch, update, and trash existing pages.
 
 ```ts
 import { PageBuilder, createPage } from 'notion-api-wrapper';
 
 const dummyPage = await createPage({
-  parent: { database_id: process.env.NOTION_DATABASE_ID },
+  parent: {
+    data_source_id: process.env.NOTION_DATA_SOURCE_ID,
+  },
   properties: {},
-  content: [],
+  children: [],
 });
 
-const builder = new PageBuilder(process.env.NOTION_DATABASE_ID);
+const builder = new PageBuilder(process.env.NOTION_DATA_SOURCE_ID);
 
 const existingPage = await builder.fetch(dummyPage.id);
 
@@ -349,7 +371,7 @@ const updatedPage = await builder.update(dummyPage.id);
 const trashedPage = await builder.trash(dummyPage.id);
 ```
 
-You can also seed the builder directly from a page response (e.g., from the database iterator) so you only need to specify the properties you want to change. Existing properties and metadata will be preserved automatically:
+You can seed the builder directly from a page response (e.g., from the Data Source iterator) so you only need to specify the properties you want to change. Existing properties and metadata will be preserved automatically:
 
 ```ts skip-test
 import { PageBuilder } from 'notion-api-wrapper';
