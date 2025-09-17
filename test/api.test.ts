@@ -26,7 +26,7 @@ afterEach(() => {
 
 /* END SETUP ============================== */
 
-test('queryDataSource with notionToken', async () => {
+test('queryDataSource - notionToken', async () => {
   const { results } = await queryDataSource(TESTING_DATA_SOURCE_ID, {
     notionToken: TESTING_TOKEN,
     batchSize: 10,
@@ -35,7 +35,7 @@ test('queryDataSource with notionToken', async () => {
   expect(results).toHaveLength(10);
 });
 
-test('queryDataSource with environment variable', async () => {
+test('queryDataSource - environment variable', async () => {
   // NOTE: this is the only test that uses the env variable and not explicit token argument
   process.env.NOTION_TOKEN = TESTING_TOKEN;
   const { results } = await queryDataSource(TESTING_DATA_SOURCE_ID, {
@@ -58,7 +58,7 @@ test('queryDatabase with filter', async () => {
   expect(results).toHaveLength(6);
 });
 
-test('queryDataSource with sort', async () => {
+test('queryDataSource - sort', async () => {
   const { results } = await queryDataSource(TESTING_DATA_SOURCE_ID, {
     notionToken: TESTING_TOKEN,
     batchSize: 10,
@@ -73,7 +73,7 @@ test('queryDataSource with sort', async () => {
   expect((results[6] as any).properties.Name.title[0].plain_text).toBe('Seven');
 });
 
-test('queryDataSource with prop options', async () => {
+test('queryDataSource - prop options', async () => {
   const { results } = await queryDataSource(TESTING_DATA_SOURCE_ID, {
     notionToken: TESTING_TOKEN,
     batchSize: 10,
@@ -159,7 +159,7 @@ test('queryDataSource with prop options', async () => {
   expect(pageB.properties.Tags).toBeDefined();
 });
 
-test('queryDataSource with prop keep', async () => {
+test('queryDataSource - prop keep', async () => {
   const { results } = await queryDataSource(TESTING_DATA_SOURCE_ID, {
     notionToken: TESTING_TOKEN,
     batchSize: 10,
@@ -180,7 +180,7 @@ test('queryDataSource with prop keep', async () => {
   expect(pageNine.properties.Tags).toBeUndefined();
 });
 
-test('queryDataSource with prop simplify', async () => {
+test('queryDataSource - prop simplify', async () => {
   const { results } = await queryDataSource(TESTING_DATA_SOURCE_ID, {
     notionToken: TESTING_TOKEN,
     batchSize: 10,
