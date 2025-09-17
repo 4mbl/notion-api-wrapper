@@ -9,6 +9,8 @@ export * from './api/data-sources/retrieve.js';
 export * from './api/data-sources/query.js';
 export * from './api/data-sources/search.js';
 
+export * from './client.js';
+
 export * from './naw-types.js';
 export * from './filter-builder.js';
 export * from './page-builder.js';

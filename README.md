@@ -11,11 +11,12 @@
   * [Filtering Results](#filtering-results)
   * [Sorting Results](#sorting-results)
   * [Field and Property Options](#field-and-property-options)
+  * [Data Source Search](#data-source-search)
+  * [Data Source Metadata](#data-source-metadata)
+* [Client](#client)
 * [Advanced Usage](#advanced-usage)
   * [Pagination](#pagination)
   * [Data Source Iterator](#data-source-iterator)
-  * [Data Source Search](#data-source-search)
-  * [Data Source Metadata](#data-source-metadata)
   * [Page Builder](#page-builder)
 
 ## Installation
@@ -209,6 +210,79 @@ const data = await queryDataSource(process.env.NOTION_DATA_SOURCE_ID, {
 });
 ```
 
+### Data Source Search
+
+You can easily search a Data Source for a matching page by using the `searchFromDataSource` function.
+
+```ts
+import { searchFromDataSource } from 'notion-api-wrapper';
+
+const data = await searchFromDataSource(process.env.NOTION_DATA_SOURCE_ID, {
+  query: 'kiwi',
+});
+```
+
+By default the search uses the `Name` property, but you can specify a different property. By default the search looks for excact matches, but you can modify that behavior too.
+
+```ts
+import { searchFromDataSource } from 'notion-api-wrapper';
+
+const data = await searchFromDataSource(process.env.NOTION_DATA_SOURCE_ID, {
+  query: 'Vegetab',
+  property: 'Name',
+  match: 'startsWith',
+});
+```
+
+### Data Source Metadata
+
+Data Source metadata can be obtained with the `retrieveDataSource` function. This supports some of the same options as the query functions.
+
+```ts
+import { retrieveDataSource } from 'notion-api-wrapper';
+
+const columns = await retrieveDataSource(process.env.NOTION_DATA_SOURCE_ID);
+```
+
+## Client
+
+The `NotionClient` class provides an alternative way to access the functions described above.
+
+```ts
+import { NotionClient } from 'notion-api-wrapper';
+
+const notion = new NotionClient({
+  notionToken: process.env.NOTION_TOKEN,
+});
+
+const dataSource = await notion.dataSources.retrieve(
+  process.env.NOTION_DATA_SOURCE_ID,
+);
+
+const data = await notion.dataSources.query(process.env.NOTION_DATA_SOURCE_ID);
+
+const matches = await notion.dataSources.search(
+  process.env.NOTION_DATA_SOURCE_ID,
+  { query: 'kiwi' },
+);
+
+const created = await notion.pages.create({
+  parent: {
+    data_source_id: process.env.NOTION_DATA_SOURCE_ID,
+  },
+  properties: {},
+  children: [],
+});
+
+const retrieved = await notion.pages.retrieve(created.id);
+
+const updated = await notion.pages.update(created.id, {
+  icon: { emoji: '🎁' },
+});
+
+const trashed = await notion.pages.trash(created.id);
+```
+
 ## Advanced Usage
 
 ### Pagination
@@ -284,40 +358,6 @@ const db = new NotionDataSource<CustomType>(process.env.NOTION_DATA_SOURCE_ID);
 for await (const page of db.iterator()) {
   /* ... */
 }
-```
-
-### Data Source Search
-
-You can easily search a Data Source for a matching page by using the `searchFromDataSource` function.
-
-```ts
-import { searchFromDataSource } from 'notion-api-wrapper';
-
-const data = await searchFromDataSource(process.env.NOTION_DATA_SOURCE_ID, {
-  query: 'kiwi',
-});
-```
-
-By default the search uses the `Name` property, but you can specify a different property. By default the search looks for excact matches, but you can modify that behavior too.
-
-```ts
-import { searchFromDataSource } from 'notion-api-wrapper';
-
-const data = await searchFromDataSource(process.env.NOTION_DATA_SOURCE_ID, {
-  query: 'Vegetab',
-  property: 'Name',
-  match: 'startsWith',
-});
-```
-
-### Data Source Metadata
-
-Data Source metadata can be obtained with the `retrieveDataSource` function. This supports some of the same options as the query functions.
-
-```ts
-import { retrieveDataSource } from 'notion-api-wrapper';
-
-const columns = await retrieveDataSource(process.env.NOTION_DATA_SOURCE_ID);
 ```
 
 ### Page Builder
