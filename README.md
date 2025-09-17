@@ -81,9 +81,9 @@ const trashedPage = await trashPage(pageId);
 4. Query the data source.
 
    ```ts
-   import { queryDataSourceFull } from 'notion-api-wrapper';
+   import { queryDataSource } from 'notion-api-wrapper';
 
-   const data = await queryDataSourceFull(process.env.NOTION_DATA_SOURCE_ID);
+   const data = await queryDataSource(process.env.NOTION_DATA_SOURCE_ID);
    const json = JSON.stringify(data, null, 2);
    console.log(json);
    ```
@@ -91,9 +91,9 @@ const trashedPage = await trashPage(pageId);
    If you want to pass the secret key as a parameter, you can do so by passing the `notionToken` option.
 
    ```ts
-   import { queryDataSourceFull } from 'notion-api-wrapper';
+   import { queryDataSource } from 'notion-api-wrapper';
 
-   const data = await queryDataSourceFull(process.env.NOTION_DATA_SOURCE_ID, {
+   const data = await queryDataSource(process.env.NOTION_DATA_SOURCE_ID, {
      notionToken: process.env.NOTION_TOKEN,
    });
    ```
@@ -103,7 +103,7 @@ const trashedPage = await trashPage(pageId);
 You can also use the `FilterBuilder` to create filters that will be used in the query.
 
 ```ts
-import { queryDataSourceFull, FilterBuilder } from 'notion-api-wrapper';
+import { queryDataSource, FilterBuilder } from 'notion-api-wrapper';
 
 const filterA: Filter = {
   property: 'Done',
@@ -133,7 +133,7 @@ const myFilter = new FilterBuilder()
   )
   .build('AND');
 
-const data = await queryDataSourceFull(process.env.NOTION_DATA_SOURCE_ID, {
+const data = await queryDataSource(process.env.NOTION_DATA_SOURCE_ID, {
   filter: myFilter,
 });
 ```
@@ -143,9 +143,9 @@ const data = await queryDataSourceFull(process.env.NOTION_DATA_SOURCE_ID, {
 You can also sort the results by specifying the `sort` option.
 
 ```ts
-import { queryDataSourceFull } from 'notion-api-wrapper';
+import { queryDataSource } from 'notion-api-wrapper';
 
-const data = await queryDataSourceFull(process.env.NOTION_DATA_SOURCE_ID, {
+const data = await queryDataSource(process.env.NOTION_DATA_SOURCE_ID, {
   sort: {
     direction: 'ascending',
     property: 'Name',
@@ -158,9 +158,9 @@ const data = await queryDataSourceFull(process.env.NOTION_DATA_SOURCE_ID, {
 There is also options to remove built-in fields and properties from the results. Here is a kitchen sink example of that.
 
 ```ts
-import { queryDataSourceFull } from 'notion-api-wrapper';
+import { queryDataSource } from 'notion-api-wrapper';
 
-const data = await queryDataSourceFull(process.env.NOTION_DATA_SOURCE_ID, {
+const data = await queryDataSource(process.env.NOTION_DATA_SOURCE_ID, {
   propOptions: {
     remove: {
       userIds: true,
@@ -183,9 +183,9 @@ const data = await queryDataSourceFull(process.env.NOTION_DATA_SOURCE_ID, {
 You can also remove all properties except certain ones by using the `keep` option.
 
 ```ts
-import { queryDataSourceFull } from 'notion-api-wrapper';
+import { queryDataSource } from 'notion-api-wrapper';
 
-const data = await queryDataSourceFull(process.env.NOTION_DATA_SOURCE_ID, {
+const data = await queryDataSource(process.env.NOTION_DATA_SOURCE_ID, {
   propOptions: {
     keep: ['Name', 'Tags', 'Done'],
   },
@@ -195,9 +195,9 @@ const data = await queryDataSourceFull(process.env.NOTION_DATA_SOURCE_ID, {
 Notion API responses can be quite verbose, so there is also options to simplify the results.
 
 ```ts
-import { queryDataSourceFull } from 'notion-api-wrapper';
+import { queryDataSource } from 'notion-api-wrapper';
 
-const data = await queryDataSourceFull(process.env.NOTION_DATA_SOURCE_ID, {
+const data = await queryDataSource(process.env.NOTION_DATA_SOURCE_ID, {
   propOptions: {
     simplifyProps: true,
     simpleIcon: true,

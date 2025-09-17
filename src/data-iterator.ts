@@ -71,7 +71,7 @@ export class NotionDataSource<
     return this.#primaryProperty;
   }
 
-  get databaseId() {
+  get dataSourceId() {
     return this.#dataSourceId;
   }
 }
@@ -137,6 +137,10 @@ class NotionDataSourceIterator<
   }
 
   async #fetchNext(): Promise<T[] | undefined> {
+    if (!this.#moreToFetch) {
+      return undefined;
+    }
+
     if (this.#cursor === null) {
       this.#moreToFetch = false;
       return undefined;
@@ -153,7 +157,7 @@ class NotionDataSourceIterator<
       }
     }
 
-    const response = await queryDataSource(this.#dataSource.databaseId, {
+    const response = await queryDataSource(this.#dataSource.dataSourceId, {
       ...queryOptions,
       cursor: this.#cursor,
     });

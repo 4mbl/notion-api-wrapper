@@ -23,6 +23,8 @@ export async function queryDataSource(
 
   const apiKey = getApiKey(options);
 
+  const limit = options?.limit ?? Infinity;
+
   const doQuery = async (cursor: string | null | undefined) => {
     const body = {
       start_cursor: cursor,
@@ -84,11 +86,7 @@ export async function queryDataSource(
     nextCursor = response.cursor ?? undefined;
     hasMore = response.hasMore;
     allResults.push(...response.data.results);
-  } while (
-    options?.cursor &&
-    hasMore &&
-    allResults.length < (options?.limit ?? Infinity)
-  );
+  } while (hasMore && allResults.length < limit);
 
   return { results: allResults, hasMore: hasMore, cursor: nextCursor };
 }

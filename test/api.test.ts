@@ -30,7 +30,7 @@ test('queryDataSource with notionToken', async () => {
   const { results } = await queryDataSource(TESTING_DATA_SOURCE_ID, {
     notionToken: TESTING_TOKEN,
     batchSize: 10,
-    limit: 100,
+    limit: 10,
   });
   expect(results).toHaveLength(10);
 });
@@ -40,7 +40,7 @@ test('queryDataSource with environment variable', async () => {
   process.env.NOTION_TOKEN = TESTING_TOKEN;
   const { results } = await queryDataSource(TESTING_DATA_SOURCE_ID, {
     batchSize: 10,
-    limit: 100,
+    limit: 10,
   });
   expect(results).toHaveLength(10);
 });
