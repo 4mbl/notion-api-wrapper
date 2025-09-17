@@ -4,7 +4,9 @@
 
 * [Installation](#installation)
 * [Getting Started](#getting-started)
-  * [Basic Page Operations](#basic-page-operations)
+* [Auth](#auth)
+* [Basics](#basics)
+  * [Page Operations](#page-operations)
   * [Querying Data Sources](#querying-data-sources)
   * [Filtering Results](#filtering-results)
   * [Sorting Results](#sorting-results)
@@ -32,7 +34,19 @@ _Or your favorite package manager, in which case you probably know the command._
 >
 > See [the docs](https://developers.notion.com/docs/upgrade-guide-2025-09-03) for more information.
 
-### Basic Page Operations
+## Auth
+
+1. Create new integration at <https://www.notion.so/my-integrations>. You will need it to authenticate the API requests that you make with this package. You can revoke the Notion API token at any time in the same URL.
+
+2. Give the integration permissions to read the databases or pages you want to access. You can do this in the databases or pages at: `⋯` → `Connection To` → `<Integration Name>`.
+
+3. Make the Notion API token available as an environment variable under the name `NOTION_TOKEN`. You may also pass it as a parameter to the functions using the `notionToken` parameter. The examples below assume that you have set a Data Source ID as an environment variable called `NOTION_DATA_SOURCE_ID`.
+
+<!-- You can find the database ID in the URL of the database page. For instance, in the URL: `https://www.notion.so/<workspace>/00000000000000000000000000000000?v=1111111111111111111111111111111`, the database ID is `00000000000000000000000000000000`. -->
+
+## Basics
+
+### Page Operations
 
 This package provides helpers to retrieve, create, update, and trash pages.
 
@@ -66,33 +80,23 @@ const trashedPage = await trashPage(newPage.id);
 
 ### Querying Data Sources
 
-1. Create new integration at <https://www.notion.so/my-integrations>. You will need it to authenticate the API requests that this package makes. You can revoke the Notion API token at any time in the URL above.
+You can find the Data Source ID from the settings of the database page on Notion.
 
-2. Give the integration permissions to read the database you want to query. You can do this in the database page: `⋯` → `Connection To` → `<Integration Name>`.
+```ts
+import { queryDataSource } from 'notion-api-wrapper';
 
-3. Make the Notion API token available as an environment variable under the name `NOTION_TOKEN`. You may also pass it as a parameter to the functions using the `notionToken` parameter. The examples below also assume that you have set a Data Source ID as an environment variable called `NOTION_DATA_SOURCE_ID`.
+const data = await queryDataSource(process.env.NOTION_DATA_SOURCE_ID);
+```
 
-   You can find the Data Source ID from the settings of the database page on Notion.
+If you want to explicitly pass the Notion API token as a parameter, you can do so with the `notionToken` option. If `notionToken` is not provided, the `NOTION_TOKEN` environment variable will be used.
 
-   <!-- You can find the database ID in the URL of the database page. For instance, in the URL: `https://www.notion.so/<workspace>/00000000000000000000000000000000?v=1111111111111111111111111111111`, the database ID is `00000000000000000000000000000000`. -->
+```ts
+import { queryDataSource } from 'notion-api-wrapper';
 
-4. Query the Data Source.
-
-   ```ts
-   import { queryDataSource } from 'notion-api-wrapper';
-
-   const data = await queryDataSource(process.env.NOTION_DATA_SOURCE_ID);
-   ```
-
-   If you want to explicitly pass the Notion API token as a parameter, you can do so with the `notionToken` option. If `notionToken` is not provided, the `NOTION_TOKEN` environment variable will be used.
-
-   ```ts
-   import { queryDataSource } from 'notion-api-wrapper';
-
-   const data = await queryDataSource(process.env.NOTION_DATA_SOURCE_ID, {
-     notionToken: process.env.NOTION_TOKEN,
-   });
-   ```
+const data = await queryDataSource(process.env.NOTION_DATA_SOURCE_ID, {
+  notionToken: process.env.NOTION_TOKEN,
+});
+```
 
 ### Filtering Results
 
