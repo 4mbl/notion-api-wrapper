@@ -1,5 +1,16 @@
 # notion-api-wrapper
 
+## 6.0.0-beta.1
+
+### Major Changes
+
+- dc1a229: Refactor the package API to support Data Sources from the new Notion API version.
+- dc1a229: Combine queryDataSource and queryDataSourceFull.
+
+### Minor Changes
+
+- b4c5f91: Expose NotionClient class as an alternative way to use the API.
+
 ## 6.0.0-beta.0
 
 ### Major Changes
