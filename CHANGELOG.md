@@ -1,5 +1,11 @@
 # notion-api-wrapper
 
+## 6.0.0-beta.3
+
+### Minor Changes
+
+- 8b8a26a: Allow title property key override in `PageBuilder.title` method.
+
 ## 6.0.0-beta.2
 
 ### Minor Changes
