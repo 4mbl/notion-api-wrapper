@@ -16,6 +16,10 @@ export class NotionClient {
   #notionToken?: string;
   #notionVersion: string;
 
+  get notionVersion() {
+    return this.#notionVersion;
+  }
+
   constructor(options?: NotionClientOptions) {
     this.#notionToken = options?.notionToken;
     this.#notionVersion = options?.notionVersion ?? NOTION_VERSION;
