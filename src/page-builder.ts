@@ -1,9 +1,9 @@
 import { NOTION_VERSION } from './constants.js';
-import { E, NotionError, ParameterValidationError } from './internal/errors.js';
+import { E, ParameterValidationError } from './internal/errors.js';
 
 import { createPage } from './api/pages/create.js';
-import { trashPage } from './api/pages/trash.js';
 import { retrievePage } from './api/pages/retrieve.js';
+import { trashPage } from './api/pages/trash.js';
 import { updatePage } from './api/pages/update.js';
 import { getApiKey } from './auth.js';
 import type { EmojiRequest, TimeZoneRequest } from './naw-types.js';
@@ -235,7 +235,7 @@ export class PageBuilder {
     }
   }
 
-  title(value: string, key='Name') {
+  title(value: string, key = 'Name') {
     this.#data.properties[key] = {
       title: [
         {
@@ -374,10 +374,6 @@ export class PageBuilder {
       notionVersion: this.notionVersion,
     });
 
-    if (!data.id) {
-      throw new NotionError('No page ID returned from Notion API.');
-    }
-
     this.#updateMetadata(data as Notion.PageObjectResponse);
 
     // don't return the page object if it is a partial response
@@ -395,10 +391,6 @@ export class PageBuilder {
       notionToken: this.notionToken,
       notionVersion: this.notionVersion,
     });
-
-    if (!data.id) {
-      throw new NotionError('No page ID returned from Notion API.');
-    }
 
     this.#updateMetadata(data as Notion.PageObjectResponse);
 

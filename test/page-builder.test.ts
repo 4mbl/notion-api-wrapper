@@ -356,7 +356,7 @@ test('PageBuilder.from - update existing page', async () => {
   expect(updated.properties['Status'].status.name).toEqual('In progress');
 });
 
-test('PageBuilder.from - update page from DatabaseIterator', async () => {
+test('PageBuilder.from - update page from data iterator', async () => {
   const createPage = async () => {
     const initialBuilder = new PageBuilder(BUILDER_TESTING_DATA_SOURCE_ID, {
       notionToken: TESTING_TOKEN,

@@ -1,10 +1,8 @@
 import { getApiKey } from '../../auth.js';
 import { NOTION_VERSION } from '../../constants.js';
 import {
-  E,
   NotionError,
-  NotionRateLimitError,
-  NotionUnauthorizedError,
+  type NotionErrorResponse
 } from '../../internal/errors.js';
 import type { QueryOptions } from '../../naw-types.js';
 import type * as Notion from '../../notion-types.js';
@@ -50,18 +48,10 @@ export async function queryDataSource(
       },
     );
 
-    if (response.status === 401) {
-      throw new NotionUnauthorizedError(E.UNAUTHORIZED);
-    }
-
-    if (response.status === 429) {
-      throw new NotionRateLimitError(E.RATE_LIMIT);
-    }
-
     if (!response.ok) {
-      throw new NotionError(
-        `Failed to query data source: ${response.status} ${response.statusText}`,
-      );
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const errorJson: NotionErrorResponse = (await response.json()) as any;
+      throw new NotionError(errorJson);
     }
 
     const data = (await response.json()) as Notion.QueryDataSourceResponse;

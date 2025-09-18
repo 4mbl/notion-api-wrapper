@@ -1,6 +1,5 @@
 import { queryDataSource } from './api/data-sources/query.js';
 import { retrieveDataSource } from './api/data-sources/retrieve.js';
-import { NotionError } from './internal/errors.js';
 import type { QueryOptions } from './naw-types.js';
 import type * as Notion from './notion-types.js';
 import { validateObjectId } from './validation.js';
@@ -47,14 +46,10 @@ export class NotionDataSource<
   }
 
   async getColumns() {
-    try {
-      const data = await retrieveDataSource(this.#dataSourceId, {
-        notionToken: this.#queryOptions.notionToken,
-      });
-      this.#columns = data.properties;
-    } catch (e) {
-      throw new NotionError(`Error fetching columns: ${(e as Error).message}`);
-    }
+    const data = await retrieveDataSource(this.#dataSourceId, {
+      notionToken: this.#queryOptions.notionToken,
+    });
+    this.#columns = data.properties;
   }
 
   async getPrimaryPropertyId() {

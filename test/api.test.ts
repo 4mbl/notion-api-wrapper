@@ -7,7 +7,9 @@ import {
   retrieveDataSource,
   queryDataSource,
   searchFromDataSource,
+  createPage,
 } from '../src';
+import { NotionError } from '../src/internal/errors';
 
 const TESTING_TOKEN = process.env.TESTING_NOTION_TOKEN;
 if (!TESTING_TOKEN) throw new Error('TESTING_NOTION_TOKEN not set.');
@@ -25,6 +27,33 @@ afterEach(() => {
 });
 
 /* END SETUP ============================== */
+
+test('create page - error - invalid property', async () => {
+  try {
+    await createPage(
+      {
+        parent: { data_source_id: TESTING_DATA_SOURCE_ID },
+        properties: {
+          'Invalid Property Name': {
+            rich_text: [{ text: { content: '...' } }],
+          },
+        },
+        content: [],
+      },
+      { notionToken: TESTING_TOKEN },
+    );
+    throw new Error('Expected createPage to fail, but it succeeded');
+  } catch (err: any) {
+    expect(err).toBeInstanceOf(NotionError);
+    if (err instanceof NotionError) {
+      expect(err.status).toBe(400);
+      expect(err.code).toBe('validation_error');
+      expect(err.message).toMatch(
+        /Invalid Property Name is not a property that exists/,
+      );
+    }
+  }
+});
 
 test('queryDataSource - notionToken', async () => {
   const { results } = await queryDataSource(TESTING_DATA_SOURCE_ID, {
@@ -45,7 +74,7 @@ test('queryDataSource - environment variable', async () => {
   expect(results).toHaveLength(10);
 });
 
-test('queryDatabase with filter', async () => {
+test('queryDataSource - filter', async () => {
   const fb = new FilterBuilder();
   fb.addFilter({ multi_select: { contains: 'A' }, property: 'Tags' });
 
