@@ -76,11 +76,15 @@ export class PageBuilder {
     in_trash?: boolean;
     archived?: boolean;
   };
-  notionToken: string;
-  notionVersion: string;
+  #notionToken: string;
+  #notionVersion: string;
 
   get data() {
     return this.#data;
+  }
+
+  get notionToken() {
+    return this.#notionToken;
   }
 
   constructor(
@@ -91,9 +95,9 @@ export class PageBuilder {
 
     const apiKey = getApiKey(options);
 
-    this.notionToken = apiKey;
+    this.#notionToken = apiKey;
 
-    this.notionVersion = options?.notionVersion ?? NOTION_VERSION;
+    this.#notionVersion = options?.notionVersion ?? NOTION_VERSION;
 
     this.#data = {
       parent: {
@@ -370,8 +374,8 @@ export class PageBuilder {
   /** Creates a new page in the parent data source with the data provided via the builder methods. */
   async create() {
     const data = await createPage(this.#data, {
-      notionToken: this.notionToken,
-      notionVersion: this.notionVersion,
+      notionToken: this.#notionToken,
+      notionVersion: this.#notionVersion,
     });
 
     this.#updateMetadata(data as Notion.PageObjectResponse);
@@ -388,8 +392,8 @@ export class PageBuilder {
     id: string,
   ) {
     const data = await retrievePage(id, {
-      notionToken: this.notionToken,
-      notionVersion: this.notionVersion,
+      notionToken: this.#notionToken,
+      notionVersion: this.#notionVersion,
     });
 
     this.#updateMetadata(data as Notion.PageObjectResponse);
@@ -403,8 +407,8 @@ export class PageBuilder {
     id: string,
   ) {
     const data = await updatePage(id, this.#data, {
-      notionToken: this.notionToken,
-      notionVersion: this.notionVersion,
+      notionToken: this.#notionToken,
+      notionVersion: this.#notionVersion,
     });
 
     if (!this.#isPartialPageObjectResponse(data)) {
@@ -420,8 +424,8 @@ export class PageBuilder {
     id: string,
   ) {
     const data = await trashPage(id, {
-      notionToken: this.notionToken,
-      notionVersion: this.notionVersion,
+      notionToken: this.#notionToken,
+      notionVersion: this.#notionVersion,
     });
 
     this.#updateMetadata(data as Notion.PageObjectResponse);
