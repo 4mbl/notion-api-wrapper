@@ -1,10 +1,8 @@
 import { getApiKey } from '../../auth.js';
 import { NOTION_VERSION } from '../../constants.js';
 import {
-  E,
   NotionError,
-  NotionRateLimitError,
-  NotionUnauthorizedError,
+  type NotionErrorResponse,
 } from '../../internal/errors.js';
 import type * as Notion from '../../notion-types.js';
 import { validateApiVersion } from '../../validation.js';
@@ -30,18 +28,10 @@ export async function createPage(
     body: JSON.stringify(body),
   });
 
-  if (response.status === 401) {
-    throw new NotionUnauthorizedError(E.UNAUTHORIZED);
-  }
-
-  if (response.status === 429) {
-    throw new NotionRateLimitError(E.RATE_LIMIT);
-  }
-
   if (!response.ok) {
-    throw new NotionError(
-      `Failed to create page: ${response.status} ${response.statusText}`,
-    );
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const errorJson: NotionErrorResponse = (await response.json()) as any;
+    throw new NotionError(errorJson);
   }
 
   return response.json() as Promise<

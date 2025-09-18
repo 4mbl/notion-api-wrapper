@@ -4,8 +4,6 @@ export const E = {
   NO_API_TOKEN:
     'Notion API token not found. Please set the `NOTION_TOKEN` environment variable and make sure is is accessible by this process.',
   INVALID_VALUE: 'Invalid value.',
-  UNAUTHORIZED: 'Unauthorized. API token is likely invalid.',
-  RATE_LIMIT: 'Too many requests. Please try again later.',
   INVALID_OBJECT_ID:
     'Invalid id. Should be 32 character alphanumeric string with optional dashes.',
 } as const;
@@ -34,32 +32,36 @@ export class AuthenticationError extends Error {
   }
 }
 
+export type NotionErrorResponse = {
+  object: 'error';
+  status: number;
+  code: string;
+  message: string;
+  request_id: string;
+};
+
 export class NotionError extends Error {
-  override name: string;
-  override message: string;
-  constructor(message: string) {
-    super(message);
-    this.name = 'NotionError';
-    this.message = message;
-  }
-}
+  override name = 'NotionError';
+  status: number;
+  code: string;
+  requestId: string;
+  raw: NotionErrorResponse;
 
-export class NotionUnauthorizedError extends NotionError {
-  override name: string;
-  override message: string;
-  constructor(message: string) {
-    super(message);
-    this.name = 'NotionUnauthorizedError';
-    this.message = message;
+  constructor(error: NotionErrorResponse) {
+    const formatted = `[${error.status} ${error.code}] ${error.message} (request_id: ${error.request_id})`;
+    super(formatted);
+    this.message = formatted;
+    this.status = error.status;
+    this.code = error.code;
+    this.requestId = error.request_id;
+    this.raw = error;
   }
-}
 
-export class NotionRateLimitError extends NotionError {
-  override name: string;
-  override message: string;
-  constructor(message: string) {
-    super(message);
-    this.name = 'NotionRateLimitError';
-    this.message = message;
+  toJSON() {
+    return this.raw;
+  }
+
+  override toString() {
+    return `[${this.status} ${this.code}] ${this.raw.message} (request_id: ${this.requestId})`;
   }
 }
