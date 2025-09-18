@@ -5,28 +5,32 @@ export type BuiltFilter = Notion.QueryDataSourceParameters['filter'];
 type NestableFilter = Filter | BuiltFilter;
 
 export class FilterBuilder {
-  filters: NestableFilter[];
+  #filters: NestableFilter[];
+
+  get filters() {
+    return this.#filters;
+  }
 
   constructor() {
-    this.filters = [];
+    this.#filters = [];
   }
 
   addFilter(filter: NestableFilter | undefined) {
-    if (filter) this.filters.push(filter);
+    if (filter) this.#filters.push(filter);
     return this;
   }
 
   build(operator: 'AND' | 'OR'): BuiltFilter | undefined {
-    if (this.filters.length === 0) {
+    if (this.#filters.length === 0) {
       return {} as BuiltFilter;
     }
 
-    if (this.filters.length === 1) {
-      return this.filters[0];
+    if (this.#filters.length === 1) {
+      return this.#filters[0];
     }
 
     return {
-      [operator.toLowerCase()]: this.filters,
+      [operator.toLowerCase()]: this.#filters,
     } as BuiltFilter;
   }
 }
