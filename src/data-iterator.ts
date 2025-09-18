@@ -17,7 +17,7 @@ export class NotionDataSource<
   #dataSourceId: string;
   #queryOptions: QueryOptions;
   #primaryProperty: string | undefined;
-  #columns: Notion.GetDataSourceResponse['properties'] | undefined;
+  properties: Notion.GetDataSourceResponse['properties'] | undefined;
   #yieldSize: number | undefined;
 
   constructor(dataSourceId: string, options?: DataSourceOptions) {
@@ -45,20 +45,20 @@ export class NotionDataSource<
     });
   }
 
-  async getColumns() {
+  async getProperties() {
     const data = await retrieveDataSource(this.#dataSourceId, {
       notionToken: this.#queryOptions.notionToken,
     });
-    this.#columns = data.properties;
+    this.properties = data.properties;
   }
 
   async getPrimaryPropertyId() {
     if (this.#primaryProperty) return this.#primaryProperty;
-    if (!this.#columns) await this.getColumns();
-    if (!this.#columns) return undefined;
+    if (!this.properties) await this.getProperties();
+    if (!this.properties) return undefined;
 
-    const columnsArray = Object.keys(this.#columns).map((key) => ({
-      ...this.#columns![key],
+    const columnsArray = Object.keys(this.properties).map((key) => ({
+      ...this.properties![key],
     })) as Notion.GetDataSourceResponse['properties'][string][];
 
     const primary = columnsArray.find((col) => col.type === 'title');
