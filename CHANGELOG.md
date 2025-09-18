@@ -1,5 +1,15 @@
 # notion-api-wrapper
 
+## 6.0.0-beta.4
+
+### Major Changes
+
+- 6f9c48a: Make NotionDataSource.properties read-only
+- 6f9c48a: Make notionToken private, make notionVersion read-only in PageBuilder and NotionClient
+- 6f9c48a: Rename NotionDataSource.getColumns -> NotionDataSource.getProperties
+- c53b24c: Expose Notion API error messages and combine error classes.
+- 6f9c48a: Make FilterBuilder.filters read-only
+
 ## 6.0.0-beta.3
 
 ### Minor Changes
