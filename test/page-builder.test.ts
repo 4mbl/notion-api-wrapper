@@ -197,7 +197,7 @@ test('PageBuilder - create - complete data - alternative data', async () => {
 
   builder.icon('😀');
 
-  builder.title('Test Page with all data - using alternative data');
+  builder.title('Test Page with all data - using alternative data', 'Name');
   builder.checkbox('Checkbox', true);
   builder.date(
     'Date',

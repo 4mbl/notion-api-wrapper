@@ -172,7 +172,7 @@ export class PageBuilder {
       case 'title':
         if (!isString(value))
           throw new ParameterValidationError(E.INVALID_VALUE);
-        return this.title(value);
+        return this.title(value, key);
       case 'rich_text':
         if (!isString(value))
           throw new ParameterValidationError(E.INVALID_VALUE);
@@ -235,8 +235,8 @@ export class PageBuilder {
     }
   }
 
-  title(value: string) {
-    this.#data.properties.Name = {
+  title(value: string, key='Name') {
+    this.#data.properties[key] = {
       title: [
         {
           text: {
