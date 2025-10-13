@@ -1,5 +1,11 @@
 # notion-api-wrapper
 
+## 6.0.0-beta.5
+
+### Patch Changes
+
+- 947cc9e: Setup npm trusted publishing
+
 ## 6.0.0-beta.4
 
 ### Major Changes
