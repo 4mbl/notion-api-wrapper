@@ -14,7 +14,7 @@ on:
 #     - cron: '0 0 * * 3' # weekly on wednesdays at 00:00
 
 env:
-  NODE_VERSION: '22'
+  NODE_VERSION: '24'
 
 jobs:
   ci:
