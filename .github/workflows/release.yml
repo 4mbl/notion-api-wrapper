@@ -5,7 +5,8 @@ on:
     branches: [v5]
 
 env:
-  NODE_VERSION: '22'
+  # npm 11.5.1+ required for trusted publishing
+  NODE_VERSION: '24.5.0'
 
 permissions:
   contents: write
@@ -49,7 +50,6 @@ jobs:
           title: '[beta] Version Packages'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Create Release Pull Request or Publish to npm (stable)
         if: ${{ github.ref_name != 'main' }}
@@ -60,4 +60,3 @@ jobs:
           title: ${{ format('[{0}] Version Packages', github.ref_name) }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
