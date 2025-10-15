@@ -2,22 +2,23 @@
 
 > Zero dependency Notion API client.
 
-* [Installation](#installation)
-* [Getting Started](#getting-started)
-* [Auth](#auth)
-* [Basics](#basics)
-  * [Page Operations](#page-operations)
-  * [Querying Data Sources](#querying-data-sources)
-  * [Filtering Results](#filtering-results)
-  * [Sorting Results](#sorting-results)
-  * [Field and Property Options](#field-and-property-options)
-  * [Data Source Search](#data-source-search)
-  * [Data Source Metadata](#data-source-metadata)
-* [Client](#client)
-* [Advanced Usage](#advanced-usage)
-  * [Pagination](#pagination)
-  * [Data Source Iterator](#data-source-iterator)
-  * [Page Builder](#page-builder)
+- [Installation](#installation)
+- [Getting Started](#getting-started)
+- [Auth](#auth)
+- [CLI](#cli)
+- [Basics](#basics)
+  - [Page Operations](#page-operations)
+  - [Querying Data Sources](#querying-data-sources)
+  - [Filtering Results](#filtering-results)
+  - [Sorting Results](#sorting-results)
+  - [Field and Property Options](#field-and-property-options)
+  - [Data Source Search](#data-source-search)
+  - [Data Source Metadata](#data-source-metadata)
+- [Client](#client)
+- [Advanced Usage](#advanced-usage)
+  - [Pagination](#pagination)
+  - [Data Source Iterator](#data-source-iterator)
+  - [Page Builder](#page-builder)
 
 ## Installation
 
@@ -37,11 +38,33 @@ _Or your favorite package manager, in which case you probably know the command._
 
 ## Auth
 
-1. Create new integration at <https://www.notion.so/my-integrations>. You will need it to authenticate the API requests that you make with this package. You can revoke the Notion API token at any time in the same URL.
+Requests to the Notion API require an API token to authenticate.
 
-2. Give the integration permissions to read the databases or pages you want to access. You can do this in the databases or pages at: `⋯` → `Connection To` → `<Integration Name>`.
+1. Create new integration at <https://www.notion.so/profile/integrations>. You can revoke the Notion API token at any time in the same URL.
 
-3. Make the Notion API token available as an environment variable under the name `NOTION_TOKEN`. You may also pass it as a parameter to the functions using the `notionToken` parameter.
+2. Give the integration permissions to read the databases and/or pages you want to access. You can do this in the databases or pages at: `⋯` → `Connections` → → `Add connection` → `<Integration Name>`.
+
+3. Make the Notion API token available as an environment variable under the name `NOTION_TOKEN`. You may also pass it as a parameter to the functions using the `notionToken` option.
+
+## CLI
+
+To make obtaining block, page, database, and data source IDs easier, this package provides a CLI tool. Using the CLI is optional, you can also get the IDs from the URLs directly or data source IDs from the Notion app from database settings: `Manage data sources`.
+
+```bash
+npm install -g notion-api-wrapper
+```
+
+You can then use the `naw` command to fetch block, page, database, and data source IDs from a URL or database ID.
+
+```bash
+naw get page-id https://www.notion.so/a-page
+naw get database-id https://www.notion.so/a-database
+naw get block-id https://www.notion.so/a-page#a-block
+
+naw fetch datasources https://www.notion.so/my-database
+```
+
+The `naw fetch datasources` command is the only one that requires authentication (NOTION_TOKEN environment variable), other commands just parse the URL.
 
 ## Basics
 
@@ -306,9 +329,9 @@ the `NotionDataSource` class provides a more convenient way to iterate over the 
 ```ts
 import { NotionDataSource } from 'notion-api-wrapper';
 
-const db = new NotionDataSource(DATA_SOURCE_ID);
+const ds = new NotionDataSource(DATA_SOURCE_ID);
 
-for await (const page of db.iterator()) {
+for await (const page of ds.iterator()) {
   console.log(page.id);
 }
 ```
@@ -318,9 +341,9 @@ By default the iterator yields each page individually. You can pass the `yieldSi
 ```ts
 import { NotionDataSource } from 'notion-api-wrapper';
 
-const db = new NotionDataSource(DATA_SOURCE_ID);
+const ds = new NotionDataSource(DATA_SOURCE_ID);
 
-for await (const chunk of db.iterator({ yieldSize: 10 })) {
+for await (const chunk of ds.iterator({ yieldSize: 10 })) {
   const firstPage = chunk[0];
   console.log(firstPage.id);
 }
@@ -331,9 +354,9 @@ The `batchSize` option controls the number of pages fetched at once from Notion.
 ```ts
 import { NotionDataSource } from 'notion-api-wrapper';
 
-const db = new NotionDataSource(DATA_SOURCE_ID);
+const ds = new NotionDataSource(DATA_SOURCE_ID);
 
-for await (const chunk of db.iterator({ batchSize: 10, yieldSize: 2 })) {
+for await (const chunk of ds.iterator({ batchSize: 10, yieldSize: 2 })) {
   chunk.map((page) => console.log(page.id));
 }
 ```
@@ -347,9 +370,9 @@ type CustomType = PageObjectResponse & {
   properties: { Name: { title: { plain_text: string }[] } };
 };
 
-const db = new NotionDataSource<CustomType>(DATA_SOURCE_ID);
+const ds = new NotionDataSource<CustomType>(DATA_SOURCE_ID);
 
-for await (const page of db.iterator()) {
+for await (const page of ds.iterator()) {
   /* ... */
 }
 ```

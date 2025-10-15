@@ -1,7 +1,7 @@
 import { queryDataSource, trashPage } from '../src';
 
 export async function __cleanupOldDataSourcePages(opts: {
-  databaseId: string;
+  dataSourceId: string;
   apiKey: string;
 }) {
   const today = new Date();
@@ -11,7 +11,7 @@ export async function __cleanupOldDataSourcePages(opts: {
     today.getDate() - 7,
   );
 
-  const { results } = await queryDataSource(opts.databaseId, {
+  const { results } = await queryDataSource(opts.dataSourceId, {
     notionToken: opts.apiKey,
   });
 

@@ -119,7 +119,7 @@ export class PageBuilder {
       !page.parent.data_source_id
     ) {
       throw new ParameterValidationError(
-        'PageBuilder.from only supports pages with a database parent.',
+        'PageBuilder.from only supports pages with a data source parent.',
       );
     }
 

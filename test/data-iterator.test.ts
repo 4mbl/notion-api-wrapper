@@ -23,7 +23,7 @@ afterEach(() => {
 /* END SETUP ============================== */
 
 test('NotionDataSource - bare', async () => {
-  const db = new NotionDataSource(TESTING_DATA_SOURCE_ID, {
+  const ds = new NotionDataSource(TESTING_DATA_SOURCE_ID, {
     notionToken: TESTING_TOKEN,
     batchSize: 10,
     sort: {
@@ -32,14 +32,14 @@ test('NotionDataSource - bare', async () => {
     },
   });
 
-  const interator = db.iterator();
+  const interator = ds.iterator();
 
   const resp1 = await interator.next();
   expect(resp1.done).toBe(false);
   expect(resp1.value.length).toBeUndefined();
   expect(resp1.value.properties.Name.title[0].plain_text).toBe('One');
 
-  // database should have 20 values, so 19 left
+  // data source should have 20 values, so 19 left
   for (let i = 0; i < 19; i++) {
     await interator.next();
   }
@@ -50,7 +50,7 @@ test('NotionDataSource - bare', async () => {
 });
 
 test('NotionDataSource - batches', async () => {
-  const db = new NotionDataSource(TESTING_DATA_SOURCE_ID, {
+  const ds = new NotionDataSource(TESTING_DATA_SOURCE_ID, {
     notionToken: TESTING_TOKEN,
     batchSize: 10,
     yieldSize: 5,
@@ -60,7 +60,7 @@ test('NotionDataSource - batches', async () => {
     },
   });
 
-  const interator = db.iterator();
+  const interator = ds.iterator();
 
   const resp1 = await interator.next();
   expect(resp1.done).toBe(false);

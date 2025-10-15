@@ -28,7 +28,7 @@ afterEach(async () => {
 
 afterAll(async () => {
   await __cleanupOldDataSourcePages({
-    databaseId: BUILDER_TESTING_DATA_SOURCE_ID,
+    dataSourceId: BUILDER_TESTING_DATA_SOURCE_ID,
     apiKey: TESTING_TOKEN!,
   });
 });
@@ -375,10 +375,10 @@ test('PageBuilder.from - update page from data iterator', async () => {
   const created = await createPage();
   expect(created).toBeDefined();
 
-  const db = new NotionDataSource(BUILDER_TESTING_DATA_SOURCE_ID, {
+  const ds = new NotionDataSource(BUILDER_TESTING_DATA_SOURCE_ID, {
     notionToken: TESTING_TOKEN,
   });
-  for await (const page of db.iterator()) {
+  for await (const page of ds.iterator()) {
     if (page.id !== created.id) continue;
 
     const builderFrom = PageBuilder.from(page, {
