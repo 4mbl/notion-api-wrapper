@@ -5,6 +5,9 @@
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "bin": {
+    "naw": "dist/cli/entry.js"
+  },
   "author": "4mbl",
   "license": "MIT",
   "homepage": "https://github.com/4mbl/notion-api-wrapper#readme",
