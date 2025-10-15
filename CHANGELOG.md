@@ -1,5 +1,52 @@
 # notion-api-wrapper
 
+## 6.0.0
+
+### Major Changes
+
+- 6f9c48a: Make NotionDataSource.properties read-only
+- 19b613b: Change default yieldSize to 1
+- 6f9c48a: Make notionToken private, make notionVersion read-only in PageBuilder and NotionClient
+- 19b613b: Return the bare result when DatabaseIterator yieldSize is 1
+- 6f9c48a: Rename NotionDataSource.getColumns -> NotionDataSource.getProperties
+- 19b613b: Use actual date objects for date props instead of strings
+- dc1a229: Refactor the package API to support Data Sources from the new Notion API version.
+- c53b24c: Expose Notion API error messages and combine error classes.
+- dc1a229: Combine queryDataSource and queryDataSourceFull.
+- 19b613b: Refactor DatabaseIterator and rename it to NotionDatabase
+- 19b613b: Change environment variable to look for from `NOTION_API_KEY` to `NOTION_TOKEN`
+- 19b613b: Switch to modern ESM output
+- 19b613b: Set minimum supported node version to 20
+- 6f9c48a: Make FilterBuilder.filters read-only
+
+### Minor Changes
+
+- 19b613b: Validate page and database ids
+- 9c0cdce: Sync Notion types
+- 19b613b: Allow chaining with page builder
+- 2a0e74b: Add retrieveDatabase
+- 8b8a26a: Allow title property key override in `PageBuilder.title` method.
+- 19b613b: Improve error consistency
+- 2a0e74b: Add cli to extract page, database, and block ids from urls, as well as to fetch datasource ids
+- 19b613b: Expose getter for page builder data
+- 19b613b: Add fetch, update, trash support to PageBuilder
+- b4c5f91: Expose NotionClient class as an alternative way to use the API.
+- 19b613b: Implement PageBuilder
+- 3eed435: Vendor Notion types
+- 19b613b: Implement trashPage
+- 19b613b: Expose get and update functions
+- 19b613b: Expose create page function
+- 19b613b: Implement PageBuilder.from
+
+### Patch Changes
+
+- 947cc9e: Setup npm trusted publishing
+- 19b613b: Update examples
+- 19b613b: Pass auth options to get page and create page from page builder
+- 19b613b: Improve typings
+- 19b613b: Improve database iterator typing
+- 19b613b: Default end date to null in page builder
+
 ## 6.0.0-beta.7
 
 ### Minor Changes
