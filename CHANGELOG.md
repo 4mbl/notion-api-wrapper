@@ -1,5 +1,12 @@
 # notion-api-wrapper
 
+## 6.0.0-beta.6
+
+### Minor Changes
+
+- 2a0e74b: Add retrieveDatabase
+- 2a0e74b: Add cli to extract page, database, and block ids from urls, as well as to fetch datasource ids
+
 ## 6.0.0-beta.5
 
 ### Patch Changes
