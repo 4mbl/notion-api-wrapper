@@ -38,6 +38,7 @@ function showHelp() {
 
 function main() {
   const [, , cmd, subcmd, arg] = argv;
+  if (!cmd) return showHelp();
   const key = [cmd, subcmd].filter(Boolean).join(' ');
   const command = commands[key];
 
