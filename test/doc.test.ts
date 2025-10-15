@@ -36,7 +36,7 @@ afterAll(async () => {
     fs.rmSync(testDirectory, { recursive: true });
   }
   await __cleanupOldDataSourcePages({
-    databaseId: DOCTEST_TESTING_DATA_SOURCE_ID,
+    dataSourceId: DOCTEST_TESTING_DATA_SOURCE_ID,
     apiKey: process.env.TESTING_NOTION_TOKEN!,
   });
 });
