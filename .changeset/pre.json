@@ -2,7 +2,7 @@
   "mode": "pre",
   "tag": "beta",
   "initialVersions": {
-    "notion-api-wrapper": "5.0.3"
+    "notion-api-wrapper": "6.0.0"
   },
   "changesets": [
     "bitter-heads-melt",
