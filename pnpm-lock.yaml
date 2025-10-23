@@ -14,9 +14,6 @@ importers:
       '@eslint/js':
         specifier: ^9.31.0
         version: 9.38.0
-      '@notionhq/client':
-        specifier: ^5.1.0
-        version: 5.3.0
       '@types/node':
         specifier: ^24.2.0
         version: 24.8.1
@@ -354,10 +351,6 @@ packages:
   '@nodelib/fs.walk@1.2.8':
     resolution: {integrity: sha512-oGB+UxlgWcgQkgwo8GcEGwemoTFt3FIO9ababBmaGwXIoBKZ+GTy0pP185beGg7Llih/NSHSV2XAs1lnznocSg==}
     engines: {node: '>= 8'}
-
-  '@notionhq/client@5.3.0':
-    resolution: {integrity: sha512-pISuJLrP6XwxnmMZ79jT2XkMHFtbQvslfs6Rqdd29ge0KAmJOuhtWZxE1WXO7h03cj/gVAL2PiAjpFuIWrWJ3w==}
-    engines: {node: '>=18'}
 
   '@rollup/rollup-android-arm-eabi@4.50.2':
     resolution: {integrity: sha512-uLN8NAiFVIRKX9ZQha8wy6UUs06UNSZ32xj6giK/rmMXAgKahwExvK6SsmgU5/brh4w/nSgj8e0k3c1HBQpa0A==}
@@ -1802,8 +1795,6 @@ snapshots:
     dependencies:
       '@nodelib/fs.scandir': 2.1.5
       fastq: 1.19.1
-
-  '@notionhq/client@5.3.0': {}
 
   '@rollup/rollup-android-arm-eabi@4.50.2':
     optional: true
