@@ -1,6 +1,5 @@
 // NOTE: This file is vendored from @notionhq/client.
 // Licensed under MIT (https://github.com/makenotion/notion-sdk-js/blob/main/LICENSE).
-
 // cspell:disable-file
 // Note: This is a generated file. DO NOT EDIT!
 
