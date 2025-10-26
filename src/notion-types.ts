@@ -1,7 +1,6 @@
 // NOTE: This file is vendored from @notionhq/client.
 // Licensed under MIT (https://github.com/makenotion/notion-sdk-js/blob/main/LICENSE).
 
-
 // cspell:disable-file
 // Note: This is a generated file. DO NOT EDIT!
 
@@ -3592,6 +3591,13 @@ type UpdatePageBodyParameters = {
   // Whether the page should be locked from editing in the Notion app UI. If not provided,
   // the locked state will not be updated.
   is_locked?: boolean
+  template?:
+    | { type: "default" }
+    | { type: "template_id"; template_id: IdRequest }
+  // Whether to erase all existing content from the page. When used with a template, the
+  // template content replaces the existing content. When used without a template, simply
+  // clears the page content.
+  erase_content?: boolean
   archived?: boolean
   in_trash?: boolean
 }
@@ -3613,6 +3619,8 @@ export const updatePage = {
     "icon",
     "cover",
     "is_locked",
+    "template",
+    "erase_content",
     "archived",
     "in_trash",
   ],
@@ -4912,8 +4920,18 @@ type ListDataSourceTemplatesPathParameters = {
   data_source_id: IdRequest
 }
 
+type ListDataSourceTemplatesQueryParameters = {
+  // Filter templates by name (case-insensitive substring match).
+  name?: string
+  // If supplied, this endpoint will return a page of results starting after the cursor
+  // provided. If not supplied, this endpoint will return the first page of results.
+  start_cursor?: string
+  // The number of items from the full list desired in the response. Maximum: 100
+  page_size?: number
+}
+
 export type ListDataSourceTemplatesParameters =
-  ListDataSourceTemplatesPathParameters
+  ListDataSourceTemplatesPathParameters & ListDataSourceTemplatesQueryParameters
 
 export type ListDataSourceTemplatesResponse = {
   // Array of templates available in this data source.
@@ -4925,6 +4943,10 @@ export type ListDataSourceTemplatesResponse = {
     // Whether this template is the default template for the data source.
     is_default: boolean
   }>
+  // Whether there are more templates available beyond this page.
+  has_more: boolean
+  // Cursor to use for the next page of results. Null if there are no more results.
+  next_cursor: IdResponse | null
 }
 
 /**
@@ -4933,7 +4955,7 @@ export type ListDataSourceTemplatesResponse = {
 export const listDataSourceTemplates = {
   method: "get",
   pathParams: ["data_source_id"],
-  queryParams: [],
+  queryParams: ["name", "start_cursor", "page_size"],
   bodyParams: [],
 
   path: (p: ListDataSourceTemplatesPathParameters): string =>
