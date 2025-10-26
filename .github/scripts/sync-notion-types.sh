@@ -26,6 +26,7 @@ for branch in $branches; do
 // NOTE: This file is vendored from @notionhq/client.
 // Licensed under MIT (https://github.com/makenotion/notion-sdk-js/blob/main/LICENSE).
 EOF
+  echo -e "\n\n" >> "$out_file"
 
   curl --silent https://raw.githubusercontent.com/makenotion/notion-sdk-js/refs/heads/main/src/api-endpoints.ts >> "$out_file"
   echo "synced $out_file"
@@ -56,7 +57,7 @@ EOF
     else
       gh pr create \
         --title "[$branch] Sync Notion Types" \
-        --body "This PR was automatically created." \
+        --body "Merge this PR to sync the types. A new PR will be created automatically when types are updated." \
         --base "$branch" \
         --head "$new_branch"
     fi
