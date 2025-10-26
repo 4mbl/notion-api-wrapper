@@ -31,11 +31,5 @@ jobs:
       - name: Fetch all branches
         run: git fetch --all
 
-      - name: Get major version branches
-        id: branches
-        run: |
-          branches=$(git branch -r | grep -E 'origin/v[0-9]+$' | sed 's|origin/||')
-          echo "branches=$branches" >> $GITHUB_OUTPUT
-
       - name: Run sync script
         run: .github/scripts/sync-notion.sh

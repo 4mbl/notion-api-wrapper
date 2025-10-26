@@ -1,11 +1,13 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-branches=$(git branch -r | grep -E 'origin/v[0-9]+$' | sed 's|origin/||')
+git fetch --all
+
+branches=$(git branch -r | grep -E 'origin/v[0-9]+$' | sed 's|origin/||' | xargs)
 
 for branch in $branches; do
   echo "Processing $branch"
-  git checkout $branch
+  git checkout -B "$branch" "origin/$branch"
   pnpm install
   pnpm run sync-api
 
