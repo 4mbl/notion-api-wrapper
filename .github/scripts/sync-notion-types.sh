@@ -8,8 +8,15 @@ branches=$(git branch -r | grep -E 'origin/v[0-9]+$' | sed 's|origin/||' | xargs
 for branch in $branches; do
   echo "Processing $branch"
   git checkout -B "$branch" "origin/$branch"
-  pnpm install
-  pnpm run sync-api
+
+  out_file="src/notion-types.ts"
+  cat <<'EOF' > "$out_file"
+// NOTE: This file is vendored from @notionhq/client.
+// Licensed under MIT (https://github.com/makenotion/notion-sdk-js/blob/main/LICENSE).
+
+EOF
+  curl --silent https://raw.githubusercontent.com/makenotion/notion-sdk-js/refs/heads/main/src/api-endpoints.ts >> "$out_file"
+  echo "synced $out_file"
 
   if [[ -n $(git status --porcelain) ]]; then
     new_branch="sync-notion-types-${branch}"
