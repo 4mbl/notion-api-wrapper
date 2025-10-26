@@ -4,6 +4,7 @@ set -euo pipefail
 git fetch --all
 
 branches=$(git branch -r | grep -E 'origin/v[0-9]+$' | sed 's|origin/||' | xargs)
+branches+=" main"
 
 for branch in $branches; do
   echo "Processing $branch"
