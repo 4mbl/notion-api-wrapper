@@ -38,7 +38,8 @@ EOF
       git commit -m "docs(changeset): Sync Notion types"
     fi
 
-    git push origin "$new_branch"
+    git fetch origin "$new_branch"
+    git push --force-with-lease origin "$new_branch"
 
     gh pr create \
       --title "[$branch] Sync Notion Types" \
