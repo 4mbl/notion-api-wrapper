@@ -3,6 +3,7 @@ name: Sync Notion Types
 on:
   schedule:
     - cron: '0 12 * * 5' # weekly on friday at 12:00 UTC
+  workflow_dispatch: {}
 
 env:
   NODE_VERSION: '24'
