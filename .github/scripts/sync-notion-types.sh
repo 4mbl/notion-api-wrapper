@@ -7,10 +7,7 @@ branches="$(git branch -r | grep -E 'origin/v[0-9]+$' | sed 's|origin/||' | xarg
 
 for branch in $branches; do
   echo "Processing $branch"
-
   git checkout -B "$branch" "origin/$branch" --force
-  git reset --hard
-  git clean -fd
 
   new_branch="sync-notion-types-${branch}"
 
