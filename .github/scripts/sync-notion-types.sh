@@ -7,8 +7,15 @@ branches="$(git branch -r | grep -E 'origin/v[0-9]+$' | sed 's|origin/||' | xarg
 
 for branch in $branches; do
   echo "Processing $branch"
-
   git checkout -B "$branch" "origin/$branch" --force
+
+  new_branch="sync-notion-types-${branch}"
+
+  if git show-ref --verify --quiet "refs/remotes/origin/$new_branch"; then
+    git checkout -B "$new_branch" "origin/$new_branch" --force
+  else
+    git checkout -b "$new_branch"
+  fi
 
   git reset --hard
   git clean -fd
@@ -24,14 +31,6 @@ EOF
   echo "synced $out_file"
 
   if [[ -n $(git status --porcelain) ]]; then
-    new_branch="sync-notion-types-${branch}"
-
-    if git show-ref --verify --quiet "refs/remotes/origin/$new_branch"; then
-      git checkout -B "$new_branch" "origin/$new_branch" --force
-    else
-      git checkout -b "$new_branch"
-    fi
-
     git add src/notion-types.ts
     git commit -m "sync notion types"
 
