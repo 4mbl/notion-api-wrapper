@@ -25,8 +25,9 @@ for branch in $branches; do
   cat <<'EOF' > "$out_file"
 // NOTE: This file is vendored from @notionhq/client.
 // Licensed under MIT (https://github.com/makenotion/notion-sdk-js/blob/main/LICENSE).
+
+
 EOF
-  echo -e "\n\n" >> "$out_file"
 
   curl --silent https://raw.githubusercontent.com/makenotion/notion-sdk-js/refs/heads/main/src/api-endpoints.ts >> "$out_file"
   echo "synced $out_file"
