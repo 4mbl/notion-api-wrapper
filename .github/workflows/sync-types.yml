@@ -26,3 +26,5 @@ jobs:
 
       - name: Run sync script
         run: .github/scripts/sync-notion-types.sh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
