@@ -1,0 +1,41 @@
+name: Sync Notion Types
+
+on:
+  schedule:
+    - cron: '0 12 * * 5' # weekly on friday at 12:00 UTC
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+  pull-requests: write
+
+env:
+  NODE_VERSION: '24'
+
+jobs:
+  sync-notion-types:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@41ff72655975bd51cab0327fa583b6e92b6d3061 # v4.2.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@2028fbc5c25fe9cf00d9f06a71cc4710d4507903 # v6.0.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Fetch all branches
+        run: git fetch --all
+
+      - name: Get major version branches
+        id: branches
+        run: |
+          branches=$(git branch -r | grep -E 'origin/v[0-9]+$' | sed 's|origin/||')
+          echo "branches=$branches" >> $GITHUB_OUTPUT
+
+      - name: Run sync script
+        run: .github/scripts/sync-notion.sh
