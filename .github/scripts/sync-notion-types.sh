@@ -57,7 +57,7 @@ EOF
     else
       gh pr create \
         --title "[$branch] Sync Notion Types" \
-        --body "This PR was automatically created." \
+        --body "Merge this PR to sync the types. A new PR will be created automatically when types are updated." \
         --base "$branch" \
         --head "$new_branch"
     fi
