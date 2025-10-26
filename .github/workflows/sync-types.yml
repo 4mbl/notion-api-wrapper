@@ -32,4 +32,4 @@ jobs:
         run: git fetch --all
 
       - name: Run sync script
-        run: .github/scripts/sync-notion.sh
+        run: .github/scripts/sync-notion-types.sh
