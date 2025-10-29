@@ -50,7 +50,7 @@
     "typescript-eslint": "^8.38.0",
     "unified": "^11.0.5",
     "unist-util-visit": "^5.0.0",
-    "vitest": "^3.2.4"
+    "vitest": "^4.0.3"
   },
   "packageManager": "pnpm@10.18.3",
   "engines": {
