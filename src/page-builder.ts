@@ -71,7 +71,8 @@ type PropertyValueType<T extends PropertyType> = T extends 'title'
                           : never;
 
 export class PageBuilder {
-  #data: Omit<Notion.CreatePageParameters, 'properties'> & {
+  // TODO: omitting 'template' here might not be ideal
+  #data: Omit<Notion.CreatePageParameters, 'properties' | 'template'> & {
     properties: NonNullable<Notion.CreatePageParameters['properties']>;
     in_trash?: boolean;
     archived?: boolean;
