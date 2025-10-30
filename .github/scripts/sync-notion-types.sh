@@ -52,8 +52,6 @@ EOF
 
     git push --force-with-lease origin "$new_branch"
 
-    gh workflow run ci.yml --ref "$new_branch" --repo "$GITHUB_REPOSITORY" --field "branch=$new_branch"
-
     existing_pr=$(gh pr list --head "$new_branch" --json number --jq '.[0].number')
     if [[ -n "$existing_pr" ]]; then
       echo "Skipping PR creation. Updated existing PR #$existing_pr"
