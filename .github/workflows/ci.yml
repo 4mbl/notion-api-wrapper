@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - '**'
+  pull_request:
+    types: [opened, synchronize, reopened]
   workflow_dispatch:
   schedule:
     - cron: '0 0 * * 3' # weekly on wednesdays at 00:00
