@@ -9,9 +9,6 @@ permissions:
   contents: write
   pull-requests: write
 
-env:
-  NODE_VERSION: '24'
-
 jobs:
   sync-notion-types:
     runs-on: ubuntu-latest
