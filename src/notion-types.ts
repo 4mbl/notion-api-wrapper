@@ -930,6 +930,13 @@ type ContentPositionSchema =
 
 type ContentWithExpressionRequest = { expression: string }
 
+type ContentWithRichTextAndColorAndListResponse = {
+  rich_text: Array<RichTextItemResponse>
+  color: ApiColor
+  list_start_index?: number
+  list_format?: NumberedListFormat
+}
+
 type ContentWithRichTextAndColorRequest = {
   rich_text: Array<RichTextItemRequest>
   color?: ApiColor
@@ -2245,9 +2252,11 @@ type NumberSimplePropertyValueResponse = {
   number: number | null
 }
 
+type NumberedListFormat = "numbers" | "letters" | "roman"
+
 export type NumberedListItemBlockObjectResponse = {
   type: "numbered_list_item"
-  numbered_list_item: ContentWithRichTextAndColorResponse
+  numbered_list_item: ContentWithRichTextAndColorAndListResponse
   parent: ParentForBlockBasedObjectResponse
   object: "block"
   id: string
