@@ -41,7 +41,7 @@ jobs:
       - name: Create Release Pull Request or Publish to npm (beta)
         if: ${{ github.ref_name == 'main' }}
         id: changesets-beta
-        uses: changesets/action@e0145edc7d9d8679003495b11f87bd8ef63c0cba # v1.5.3
+        uses: changesets/action@c48e67d110a68bc90ccf1098e9646092baacaa87 # v1.6.0
         with:
           publish: pnpm run publish:beta
           title: '[beta] Version Packages'
@@ -51,7 +51,7 @@ jobs:
       - name: Create Release Pull Request or Publish to npm (stable)
         if: ${{ github.ref_name != 'main' }}
         id: changesets-stable
-        uses: changesets/action@e0145edc7d9d8679003495b11f87bd8ef63c0cba # v1.5.3
+        uses: changesets/action@c48e67d110a68bc90ccf1098e9646092baacaa87 # v1.6.0
         with:
           publish: pnpm run publish:stable
           title: ${{ format('[{0}] Version Packages', github.ref_name) }}
