@@ -29,7 +29,8 @@
   ],
   "scripts": {
     "build": "tsc",
-    "test": "vitest",
+    "test": "vitest run",
+    "test:watch": "vitest watch",
     "lint": "eslint",
     "format:write": "prettier --write ./src/**/*.ts",
     "format:check": "prettier --check ./src/**/*.ts",
