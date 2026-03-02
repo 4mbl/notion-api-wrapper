@@ -1,5 +1,11 @@
 # notion-api-wrapper
 
+## 6.1.0-beta.0
+
+### Minor Changes
+
+- e12f304: Sync Notion types
+
 ## 6.0.0-beta.7
 
 ### Minor Changes
