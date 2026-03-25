@@ -2,6 +2,7 @@ import { queryDataSource } from './api/data-sources/query.js';
 import { retrieveDataSource } from './api/data-sources/retrieve.js';
 import { searchFromDataSource } from './api/data-sources/search.js';
 import { createPage } from './api/pages/create.js';
+import { movePage } from './api/pages/move.js';
 import { retrievePage } from './api/pages/retrieve.js';
 import { trashPage } from './api/pages/trash.js';
 import { updatePage } from './api/pages/update.js';
@@ -77,6 +78,16 @@ export class NotionClient {
       body: Parameters<typeof updatePage>[1],
     ) => {
       return updatePage(id, body, {
+        notionToken: this.#notionToken,
+        notionVersion: this.#notionVersion,
+      });
+    },
+
+    move: (
+      id: Parameters<typeof movePage>[0],
+      body: Parameters<typeof movePage>[1],
+    ) => {
+      return movePage(id, body, {
         notionToken: this.#notionToken,
         notionVersion: this.#notionVersion,
       });

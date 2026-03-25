@@ -1,5 +1,6 @@
 // pages
 export * from './api/pages/create.js';
+export * from './api/pages/move.js';
 export * from './api/pages/retrieve.js';
 export * from './api/pages/update.js';
 export * from './api/pages/trash.js';
