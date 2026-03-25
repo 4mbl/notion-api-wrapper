@@ -1,1 +1,1 @@
-export const NOTION_VERSION = '2025-09-03' as const;
+export const NOTION_VERSION = '2026-03-11' as const;
