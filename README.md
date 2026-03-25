@@ -4,8 +4,8 @@
 
 - [Installation](#installation)
 - [Getting Started](#getting-started)
-- [Auth](#auth)
-- [CLI](#cli)
+  - [Auth](#auth)
+  - [CLI](#cli)
 - [Basics](#basics)
   - [Page Operations](#page-operations)
   - [Querying Data Sources](#querying-data-sources)
@@ -31,12 +31,19 @@ _Or your favorite package manager, in which case you probably know the command._
 ## Getting Started
 
 > [!NOTE]
+> Notion API version 2026-03-11 removed the `archived` field in favor of `in_trash`. This package only supports API versions past this update.
+>
+> See the [Notion docs](https://developers.notion.com/guides/get-started/upgrade-guide-2026-03-11) for more information.
+
+---
+
+> [!NOTE]
 > Notion API version 2025-09-03 changed how databases work.
 > Data Sources are now the primary way to access structured data in Notion. This package supports this new API version.
 >
-> See [the docs](https://developers.notion.com/docs/upgrade-guide-2025-09-03) for more information.
+> See the [Notion docs](https://developers.notion.com/docs/upgrade-guide-2025-09-03) for more information.
 
-## Auth
+### Auth
 
 Requests to the Notion API require an API token to authenticate.
 
@@ -46,7 +53,7 @@ Requests to the Notion API require an API token to authenticate.
 
 3. Make the Notion API token available as an environment variable under the name `NOTION_TOKEN`. You may also pass it as a parameter to the functions using the `notionToken` option.
 
-## CLI
+### CLI
 
 To make obtaining block, page, database, and data source IDs easier, this package provides a CLI tool. Using the CLI is optional, you can also get the IDs from the URLs directly or data source IDs from the Notion app from database settings: `Manage data sources`.
 
@@ -197,7 +204,6 @@ const data = await queryDataSource(DATA_SOURCE_ID, {
       id: true,
       icon: true,
       cover: true,
-      archived: true,
       parent: true,
       inTrash: true,
       customProps: ['Description', 'Priority'],

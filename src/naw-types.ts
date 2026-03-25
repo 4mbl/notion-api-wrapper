@@ -13,7 +13,6 @@ export type PropOptions = {
     id?: boolean;
     icon?: boolean;
     cover?: boolean;
-    archived?: boolean;
     parent?: boolean;
     inTrash?: boolean;
     customProps?: string[];
@@ -38,7 +37,6 @@ export type QueryOptions = {
   /** How many items to fetch at a time. Defaults to 100. */
   batchSize?: number;
   includeTrashed?: boolean;
-  includeArchived?: boolean;
 
   notionToken?: string;
   notionVersion?: string;
@@ -56,7 +54,6 @@ export type SimpleDatabasePage = {
   cover?: string;
   icon?: string;
   parent?: { type: 'database_source_id'; database_source_id: string };
-  archived?: boolean;
   url?: string;
   publicUrl?: string;
   in_trash?: boolean;

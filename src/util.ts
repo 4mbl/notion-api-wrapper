@@ -35,7 +35,6 @@ export function removeProps(
   if (options?.remove?.id) removeMetadata.push('id');
   if (options?.remove?.icon) removeMetadata.push('icon');
   if (options?.remove?.cover) removeMetadata.push('cover');
-  if (options?.remove?.archived) removeMetadata.push('archived');
   if (options?.remove?.parent) removeMetadata.push('parent');
   if (options?.remove?.inTrash) removeMetadata.push('in_trash');
 
