@@ -82,6 +82,7 @@ This package provides helpers to retrieve, create, update, and trash pages.
 ```ts
 import {
   createPage,
+  movePage,
   retrievePage,
   updatePage,
   trashPage,
@@ -103,6 +104,10 @@ const newPage = await createPage({
 const existingPage = await retrievePage(newPage.id);
 
 const updatedPage = await updatePage(newPage.id, { icon: { emoji: '🎁' } });
+
+const movedPage = await movePage(newPage.id, {
+  parent: { page_id: PAGE_ID, type: 'page_id' },
+});
 
 const trashedPage = await trashPage(newPage.id);
 ```
