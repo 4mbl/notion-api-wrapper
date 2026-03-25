@@ -63,6 +63,7 @@ export async function queryDataSource(
   };
 
   let nextCursor: string | undefined = options?.cursor ?? undefined;
+  // eslint-disable-next-line no-useless-assignment
   let hasMore = true;
   const allResults: Array<
     | Notion.PageObjectResponse
@@ -77,5 +78,5 @@ export async function queryDataSource(
     allResults.push(...response.data.results);
   } while (hasMore && allResults.length < limit);
 
-  return { results: allResults, hasMore: hasMore, cursor: nextCursor };
+  return { results: allResults, hasMore, cursor: nextCursor };
 }
