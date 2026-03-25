@@ -57,6 +57,13 @@ type ApiColor =
   | "pink_background"
   | "red_background"
 
+type ApiTranscriptionStatus =
+  | "transcription_not_started"
+  | "transcription_paused"
+  | "transcription_in_progress"
+  | "summary_in_progress"
+  | "notes_ready"
+
 type ArrayBasedPropertyValueResponse =
   | TitleArrayBasedPropertyValueResponse
   | RichTextArrayBasedPropertyValueResponse
@@ -80,8 +87,9 @@ export type AudioBlockObjectResponse = {
   last_edited_time: string
   last_edited_by: PartialUserObjectResponse
   has_children: boolean
-  archived: boolean
   in_trash: boolean
+  /** @deprecated Use `in_trash` instead. Present for backwards compatibility with API versions prior to 2026-03-11. */
+  archived: boolean
 }
 
 type BlockIdCommentParentResponse = {
@@ -452,6 +460,8 @@ export type BlockObjectResponse =
   | LinkToPageBlockObjectResponse
   | TableBlockObjectResponse
   | TableRowBlockObjectResponse
+  | MeetingNotesBlockObjectResponse
+  | TranscriptionBlockObjectResponse
   | EmbedBlockObjectResponse
   | BookmarkBlockObjectResponse
   | ImageBlockObjectResponse
@@ -614,6 +624,47 @@ type BlockObjectWithSingleLevelOfChildrenRequest =
       object?: "block"
     }
 
+type BoardViewConfigRequest = {
+  // The view type. Must be "board".
+  type: "board"
+  // Group-by configuration for board columns.
+  group_by: GroupByConfigRequest
+  // Secondary group-by configuration for sub-grouping within columns. Pass null to remove
+  // sub-grouping.
+  sub_group_by?: GroupByConfigRequest | null
+  // Property visibility and display configuration on cards. Pass null to clear.
+  properties?: Array<ViewPropertyConfigRequest> | null
+  // Cover image configuration for cards. Pass null to clear.
+  cover?: CoverConfigRequest | null
+  // Size of the cover image on cards. Pass null to clear.
+  cover_size?: "small" | "medium" | "large" | null
+  // Aspect ratio mode for cover images. "contain" fits the image, "cover" fills the area.
+  // Pass null to clear.
+  cover_aspect?: "contain" | "cover" | null
+  // Card layout mode. "list" shows full cards, "compact" shows condensed cards. Pass null
+  // to clear.
+  card_layout?: "list" | "compact" | null
+}
+
+type BoardViewConfigResponse = {
+  // The view configuration type.
+  type: "board"
+  // Column (horizontal) grouping - required for board view.
+  group_by: GroupByConfigResponse
+  // Sub-grouping (vertical swimlanes within columns).
+  sub_group_by?: GroupByConfigResponse
+  // Properties to display on each card.
+  properties?: Array<ViewPropertyConfigResponse>
+  // Card cover/preview image configuration.
+  cover?: CoverConfigResponse
+  // Cover image size.
+  cover_size?: "small" | "medium" | "large"
+  // Cover image aspect ratio.
+  cover_aspect?: "contain" | "cover"
+  // Card layout mode (list shows all properties, compact shows inline).
+  card_layout?: "list" | "compact"
+}
+
 export type BookmarkBlockObjectResponse = {
   type: "bookmark"
   bookmark: MediaContentWithUrlAndCaptionResponse
@@ -625,8 +676,9 @@ export type BookmarkBlockObjectResponse = {
   last_edited_time: string
   last_edited_by: PartialUserObjectResponse
   has_children: boolean
-  archived: boolean
   in_trash: boolean
+  /** @deprecated Use `in_trash` instead. Present for backwards compatibility with API versions prior to 2026-03-11. */
+  archived: boolean
 }
 
 type BooleanFormulaPropertyResponse = {
@@ -704,8 +756,9 @@ export type BreadcrumbBlockObjectResponse = {
   last_edited_time: string
   last_edited_by: PartialUserObjectResponse
   has_children: boolean
-  archived: boolean
   in_trash: boolean
+  /** @deprecated Use `in_trash` instead. Present for backwards compatibility with API versions prior to 2026-03-11. */
+  archived: boolean
 }
 
 export type BulletedListItemBlockObjectResponse = {
@@ -719,8 +772,9 @@ export type BulletedListItemBlockObjectResponse = {
   last_edited_time: string
   last_edited_by: PartialUserObjectResponse
   has_children: boolean
-  archived: boolean
   in_trash: boolean
+  /** @deprecated Use `in_trash` instead. Present for backwards compatibility with API versions prior to 2026-03-11. */
+  archived: boolean
 }
 
 type ButtonPropertyConfigurationRequest = {
@@ -742,6 +796,35 @@ type ButtonSimplePropertyValueResponse = {
   button: EmptyObject
 }
 
+type CalendarViewConfigRequest = {
+  // The view type. Must be "calendar".
+  type: "calendar"
+  // Property ID of the date property used to position items on the calendar.
+  date_property_id: string
+  // Property visibility and display configuration on calendar cards. Pass null to clear.
+  properties?: Array<ViewPropertyConfigRequest> | null
+  // Default calendar range. "week" shows a week view, "month" shows a month view. Pass
+  // null to clear.
+  view_range?: "week" | "month" | null
+  // Whether to show weekend days. Pass null to clear.
+  show_weekends?: boolean | null
+}
+
+type CalendarViewConfigResponse = {
+  // The view configuration type.
+  type: "calendar"
+  // Date property used to position items on the calendar - required.
+  date_property_id: string
+  // Date property name (convenience field).
+  date_property_name?: string
+  // Properties to display on calendar event cards.
+  properties?: Array<ViewPropertyConfigResponse>
+  // Calendar view range.
+  view_range?: "week" | "month"
+  // Whether to show weekend days.
+  show_weekends?: boolean
+}
+
 export type CalloutBlockObjectResponse = {
   type: "callout"
   callout: {
@@ -757,14 +840,296 @@ export type CalloutBlockObjectResponse = {
   last_edited_time: string
   last_edited_by: PartialUserObjectResponse
   has_children: boolean
-  archived: boolean
   in_trash: boolean
+  /** @deprecated Use `in_trash` instead. Present for backwards compatibility with API versions prior to 2026-03-11. */
+  archived: boolean
+}
+
+type ChartAggregationRequest = {
+  // The aggregation operator. "count" counts all rows and does not require a property_id.
+  // All other operators require a property_id.
+  aggregator:
+    | "count"
+    | "count_values"
+    | "sum"
+    | "average"
+    | "median"
+    | "min"
+    | "max"
+    | "range"
+    | "unique"
+    | "empty"
+    | "not_empty"
+    | "percent_empty"
+    | "percent_not_empty"
+    | "checked"
+    | "unchecked"
+    | "percent_checked"
+    | "percent_unchecked"
+    | "earliest_date"
+    | "latest_date"
+    | "date_range"
+  // The property to aggregate on. Required for all operators except "count".
+  property_id?: string
+}
+
+type ChartAggregationResponse = {
+  // The aggregation operator. "count" counts all rows and does not require a property_id.
+  // All other operators require a property_id.
+  aggregator:
+    | "count"
+    | "count_values"
+    | "sum"
+    | "average"
+    | "median"
+    | "min"
+    | "max"
+    | "range"
+    | "unique"
+    | "empty"
+    | "not_empty"
+    | "percent_empty"
+    | "percent_not_empty"
+    | "checked"
+    | "unchecked"
+    | "percent_checked"
+    | "percent_unchecked"
+    | "earliest_date"
+    | "latest_date"
+    | "date_range"
+  // The property to aggregate on. Required for all operators except "count".
+  property_id?: string
+}
+
+type ChartReferenceLineRequest = {
+  // The y-axis value where the reference line is drawn.
+  value: number
+  // Label displayed alongside the reference line.
+  label: string
+  // Color of the reference line.
+  color:
+    | "gray"
+    | "lightgray"
+    | "brown"
+    | "yellow"
+    | "orange"
+    | "green"
+    | "blue"
+    | "purple"
+    | "pink"
+    | "red"
+  // Line style: "solid" for a continuous line, "dash" for a dashed line.
+  dash_style: "solid" | "dash"
+  // Unique identifier for the reference line. Auto-generated if omitted.
+  id?: string
+}
+
+type ChartReferenceLineResponse = {
+  // Unique identifier for the reference line.
+  id: string
+  // The y-axis value where the reference line is drawn.
+  value: number
+  // Label displayed alongside the reference line.
+  label: string
+  // Color of the reference line.
+  color:
+    | "gray"
+    | "lightgray"
+    | "brown"
+    | "yellow"
+    | "orange"
+    | "green"
+    | "blue"
+    | "purple"
+    | "pink"
+    | "red"
+  // Line style: "solid" for a continuous line, "dash" for a dashed line.
+  dash_style: "solid" | "dash"
+}
+
+type ChartViewConfigRequest = {
+  // The view type. Must be "chart".
+  type: "chart"
+  // The chart type.
+  chart_type: "column" | "bar" | "line" | "donut" | "number"
+  // X-axis grouping configuration for grouped data mode. Pass null to clear.
+  x_axis?: GroupByConfigRequest | null
+  // Y-axis aggregation for grouped data mode. Pass null to clear.
+  y_axis?: ChartAggregationRequest | null
+  // Property ID for x-axis values in results mode. Pass null to clear.
+  x_axis_property_id?: string | null
+  // Property ID for y-axis values in results mode. Pass null to clear.
+  y_axis_property_id?: string | null
+  // Aggregation for number charts. Pass null to clear.
+  value?: ChartAggregationRequest | null
+  // Sort order for chart data. Pass null to clear.
+  sort?:
+    | "manual"
+    | "x_ascending"
+    | "x_descending"
+    | "y_ascending"
+    | "y_descending"
+    | null
+  // Color theme. Pass null to clear.
+  color_theme?:
+    | "gray"
+    | "blue"
+    | "yellow"
+    | "green"
+    | "purple"
+    | "teal"
+    | "orange"
+    | "pink"
+    | "red"
+    | "auto"
+    | "colorful"
+    | null
+  // Chart height. Pass null to clear.
+  height?: "small" | "medium" | "large" | "extra_large" | null
+  // Whether to hide groups with no data. Pass null to clear.
+  hide_empty_groups?: boolean | null
+  // Legend position. Pass null to clear.
+  legend_position?: "off" | "bottom" | "side" | null
+  // Whether to show data labels. Pass null to clear.
+  show_data_labels?: boolean | null
+  // Which axis labels to show. Pass null to clear.
+  axis_labels?: "none" | "x_axis" | "y_axis" | "both" | null
+  // Which grid lines to show. Pass null to clear.
+  grid_lines?: "none" | "horizontal" | "vertical" | "both" | null
+  // Cumulative values (line only). Pass null to clear.
+  cumulative?: boolean | null
+  // Smooth line curves (line only). Pass null to clear.
+  smooth_line?: boolean | null
+  // Hide area fill (line only). Pass null to clear.
+  hide_line_fill_area?: boolean | null
+  // Grouped/stacked bar display style. Pass null to clear.
+  group_style?: "normal" | "percent" | "side_by_side" | null
+  // Custom y-axis minimum. Pass null to clear.
+  y_axis_min?: number | null
+  // Custom y-axis maximum. Pass null to clear.
+  y_axis_max?: number | null
+  // Donut slice labels. Pass null to clear.
+  donut_labels?: "none" | "value" | "name" | "name_and_value" | null
+  // Hide title (number only). Pass null to clear.
+  hide_title?: boolean | null
+  // Stack-by grouping for stacked/grouped bar charts. Pass null to clear.
+  stack_by?: GroupByConfigRequest | null
+  // Reference lines on the chart. Pass null to clear.
+  reference_lines?: Array<ChartReferenceLineRequest> | null
+  // Chart caption text. Pass null to clear.
+  caption?: string | null
+  // Whether to color chart elements by their numeric value (gradient coloring). Pass null
+  // to clear.
+  color_by_value?: boolean | null
+}
+
+type ChartViewConfigResponse = {
+  // The view configuration type.
+  type: "chart"
+  // The chart type: column (vertical bars), bar (horizontal bars), line, donut, or number
+  // (single value display).
+  chart_type: "column" | "bar" | "line" | "donut" | "number"
+  // X-axis grouping configuration for column/bar/line/donut charts using grouped data.
+  // Null when using results (raw property values) mode.
+  x_axis?: GroupByConfigResponse | null
+  // Y-axis aggregation for column/bar/line/donut charts using grouped data. Null when
+  // using results mode.
+  y_axis?: ChartAggregationResponse | null
+  // Property ID for the x-axis name values when using results (raw property values) mode.
+  x_axis_property_id?: string
+  // Property ID for the y-axis numeric values when using results (raw property values)
+  // mode.
+  y_axis_property_id?: string
+  // Aggregation configuration for number charts (single value display).
+  value?: ChartAggregationResponse
+  // Sort order for chart data.
+  sort?:
+    | "manual"
+    | "x_ascending"
+    | "x_descending"
+    | "y_ascending"
+    | "y_descending"
+  // Color theme for the chart.
+  color_theme?:
+    | "gray"
+    | "blue"
+    | "yellow"
+    | "green"
+    | "purple"
+    | "teal"
+    | "orange"
+    | "pink"
+    | "red"
+    | "auto"
+    | "colorful"
+  // Chart height.
+  height?: "small" | "medium" | "large" | "extra_large"
+  // Whether to hide groups with no data on the x-axis.
+  hide_empty_groups?: boolean
+  // Legend display position. "off" hides the legend.
+  legend_position?: "off" | "bottom" | "side"
+  // Whether to show data value labels on chart elements.
+  show_data_labels?: boolean
+  // Which axis labels to display.
+  axis_labels?: "none" | "x_axis" | "y_axis" | "both"
+  // Which grid lines to display.
+  grid_lines?: "none" | "horizontal" | "vertical" | "both"
+  // Whether to show cumulative values (line charts only).
+  cumulative?: boolean
+  // Whether to use smooth curves (line charts only).
+  smooth_line?: boolean
+  // Whether to hide the shaded area under the line (line charts only).
+  hide_line_fill_area?: boolean
+  // How grouped/stacked bars are displayed. "normal" stacks values, "percent" normalizes
+  // to 100%, "side_by_side" places bars next to each other.
+  group_style?: "normal" | "percent" | "side_by_side"
+  // Custom minimum value for the y-axis. Null clears the override.
+  y_axis_min?: number | null
+  // Custom maximum value for the y-axis. Null clears the override.
+  y_axis_max?: number | null
+  // What to display on donut chart slices.
+  donut_labels?: "none" | "value" | "name" | "name_and_value"
+  // Whether to hide the title label (number charts only).
+  hide_title?: boolean
+  // Stack-by grouping configuration for stacked/grouped bar charts (column/bar/line only).
+  // Null when not stacked.
+  stack_by?: GroupByConfigResponse | null
+  // Reference lines drawn on the chart. Null when no reference lines are configured.
+  reference_lines?: Array<ChartReferenceLineResponse> | null
+  // Text caption displayed below the chart. Null when no caption is shown.
+  caption?: string | null
+  // Whether chart elements are colored by their numeric value (gradient coloring).
+  color_by_value?: boolean
 }
 
 type CheckboxDatabasePropertyConfigResponse = {
   // Always `checkbox`
   type: "checkbox"
   checkbox: EmptyObject
+}
+
+type CheckboxGroupByConfigRequest = {
+  // The property type for grouping.
+  type: "checkbox"
+  // Property ID to group by.
+  property_id: string
+  // Sort order for groups.
+  sort: GroupSortRequest
+  // Whether to hide groups that have no items.
+  hide_empty_groups?: boolean
+}
+
+type CheckboxGroupByConfigResponse = {
+  // The property type for grouping.
+  type: "checkbox"
+  // Property ID to group by.
+  property_id: string
+  // Sort order for groups (only manual for checkbox).
+  sort: GroupSortResponse
+  // Property name (convenience field).
+  property_name?: string
+  // Whether to hide groups that have no items.
+  hide_empty_groups?: boolean
 }
 
 type CheckboxPropertyConfigurationRequest = {
@@ -799,8 +1164,9 @@ export type ChildDatabaseBlockObjectResponse = {
   last_edited_time: string
   last_edited_by: PartialUserObjectResponse
   has_children: boolean
-  archived: boolean
   in_trash: boolean
+  /** @deprecated Use `in_trash` instead. Present for backwards compatibility with API versions prior to 2026-03-11. */
+  archived: boolean
 }
 
 export type ChildPageBlockObjectResponse = {
@@ -814,8 +1180,9 @@ export type ChildPageBlockObjectResponse = {
   last_edited_time: string
   last_edited_by: PartialUserObjectResponse
   has_children: boolean
-  archived: boolean
   in_trash: boolean
+  /** @deprecated Use `in_trash` instead. Present for backwards compatibility with API versions prior to 2026-03-11. */
+  archived: boolean
 }
 
 export type CodeBlockObjectResponse = {
@@ -833,8 +1200,9 @@ export type CodeBlockObjectResponse = {
   last_edited_time: string
   last_edited_by: PartialUserObjectResponse
   has_children: boolean
-  archived: boolean
   in_trash: boolean
+  /** @deprecated Use `in_trash` instead. Present for backwards compatibility with API versions prior to 2026-03-11. */
+  archived: boolean
 }
 
 export type ColumnBlockObjectResponse = {
@@ -848,8 +1216,9 @@ export type ColumnBlockObjectResponse = {
   last_edited_time: string
   last_edited_by: PartialUserObjectResponse
   has_children: boolean
-  archived: boolean
   in_trash: boolean
+  /** @deprecated Use `in_trash` instead. Present for backwards compatibility with API versions prior to 2026-03-11. */
+  archived: boolean
 }
 
 type ColumnBlockWithChildrenRequest = {
@@ -869,8 +1238,9 @@ export type ColumnListBlockObjectResponse = {
   last_edited_time: string
   last_edited_by: PartialUserObjectResponse
   has_children: boolean
-  archived: boolean
   in_trash: boolean
+  /** @deprecated Use `in_trash` instead. Present for backwards compatibility with API versions prior to 2026-03-11. */
+  archived: boolean
 }
 
 type ColumnListRequest = { children: Array<ColumnBlockWithChildrenRequest> }
@@ -923,7 +1293,19 @@ type CommentParentResponse =
   | PageIdCommentParentResponse
   | BlockIdCommentParentResponse
 
+type ContentPositionSchema =
+  | { type: "after_block"; after_block: { id: IdRequest } }
+  | { type: "start" }
+  | { type: "end" }
+
 type ContentWithExpressionRequest = { expression: string }
+
+type ContentWithRichTextAndColorAndListResponse = {
+  rich_text: Array<RichTextItemResponse>
+  color: ApiColor
+  list_start_index?: number
+  list_format?: NumberedListFormat
+}
 
 type ContentWithRichTextAndColorRequest = {
   rich_text: Array<RichTextItemRequest>
@@ -952,6 +1334,80 @@ type ContentWithTableResponse = {
 type ContentWithTableRowRequest = { cells: Array<Array<RichTextItemRequest>> }
 
 type ContentWithTableRowResponse = { cells: Array<Array<RichTextItemResponse>> }
+
+type CoverConfigRequest = {
+  // Source of the cover image.
+  type: "page_cover" | "page_content" | "property"
+  // Property ID when type is "property".
+  property_id?: string
+}
+
+type CoverConfigResponse = {
+  // Source of the cover image.
+  type: "page_cover" | "page_content" | "page_content_first" | "property"
+  // Property ID when type is "property".
+  property_id?: string
+}
+
+type CreateDatabaseForViewRequest = {
+  // The parent page for the new linked database block.
+  parent: {
+    // The parent type. Must be "page_id".
+    type: "page_id"
+    // The ID of the page to create the database on.
+    page_id: IdRequest
+  }
+  // Where to place the new database block within the parent page. Defaults to appending at
+  // the end.
+  position?: {
+    // Position type. "after_block" places the new database after the specified block in the
+    // page.
+    type: "after_block"
+    // The ID of an existing block in the page. The new database will be placed after this
+    // block.
+    block_id: IdRequest
+  }
+}
+
+type CreateViewQueryRequest = {
+  // The number of results to return per page. Maximum: 100
+  page_size?: number
+}
+
+type CreateViewRequest = {
+  // The ID of the data source this view should be scoped to.
+  data_source_id: IdRequest
+  // The name of the view.
+  name: string
+  // The type of view to create.
+  type: ViewTypeRequest
+  // The ID of the database to create a view in. Mutually exclusive with view_id and
+  // create_database.
+  database_id?: IdRequest
+  // The ID of a dashboard view to add this view to as a widget. Mutually exclusive with
+  // database_id and create_database.
+  view_id?: IdRequest
+  // Filter to apply to the view. Uses the same format as the data source query filter.
+  filter?: ViewFilterRequest
+  // Sorts to apply to the view. Uses the same format as the data source query sorts.
+  sorts?: ViewSortsRequest
+  // Quick filters to pin in the view's filter bar. Keys are property names or IDs. Values
+  // are filter conditions (same shape as a property filter but without the property
+  // field). Each quick filter appears as a clickable pill above the view, independent of
+  // the advanced filter.
+  quick_filters?: Record<string, QuickFilterConditionRequest>
+  // Create a new linked database block on a page and add the view to it. Mutually
+  // exclusive with database_id and view_id.
+  create_database?: CreateDatabaseForViewRequest
+  // View presentation configuration. The type field must match the view type.
+  configuration?: ViewConfigRequest
+  // Where to place the new view in the database's view tab bar. Only applicable when
+  // database_id is provided. Defaults to "end" (append).
+  position?: ViewPositionRequest
+  // Where to place the new widget in a dashboard view. Only applicable when view_id is
+  // provided. Defaults to creating a new row at the end.
+  placement?: WidgetPlacementRequest
+}
 
 type CreatedByDatabasePropertyConfigResponse = {
   // Always `created_by`
@@ -1032,6 +1488,35 @@ type CustomEmojiResponse = {
   url: string
 }
 
+export type DashboardRowResponse = {
+  // The ID of this row module.
+  id: string
+  // The widget modules within this row.
+  widgets: Array<DashboardWidgetResponse>
+  // Fixed height of the row in pixels.
+  height?: number
+}
+
+type DashboardViewConfigResponse = {
+  // The view configuration type.
+  type: "dashboard"
+  // The rows that make up the dashboard layout. Each row contains one or more widget
+  // modules.
+  rows: Array<DashboardRowResponse>
+}
+
+export type DashboardWidgetResponse = {
+  // The ID of this widget module.
+  id: string
+  // The ID of the collection view rendered by this widget.
+  view_id: string
+  // Width of the widget in a 12-column grid (1-12). 12 means full width.
+  width?: number
+  // The 0-based index of the row this widget belongs to. Widgets in the same row share the
+  // same row_index.
+  row_index?: number
+}
+
 export type DataSourceObjectResponse = {
   // The data source object type name.
   object: "data_source"
@@ -1048,10 +1533,10 @@ export type DataSourceObjectResponse = {
   database_parent: ParentOfDatabaseResponse
   // Whether the data source is inline.
   is_inline: boolean
-  // Whether the data source is archived.
-  archived: boolean
   // Whether the data source is in the trash.
   in_trash: boolean
+  /** @deprecated Use `in_trash` instead. Present for backwards compatibility with API versions prior to 2026-03-11. */
+  archived: boolean
   // The time when the data source was created.
   created_time: string
   // The time when the data source was last edited.
@@ -1088,6 +1573,61 @@ type DataSourceReferenceResponse = {
   name: string
 }
 
+export type DataSourceViewObjectResponse = {
+  // The object type name.
+  object: "view"
+  // The ID of the view.
+  id: IdResponse
+  // The parent database of the view.
+  parent: DatabaseParentResponse
+  // The name of the view.
+  name: string
+  // The view type.
+  type:
+    | "table"
+    | "board"
+    | "list"
+    | "calendar"
+    | "timeline"
+    | "gallery"
+    | "form"
+    | "chart"
+    | "map"
+    | "dashboard"
+  // The time when the view was created.
+  created_time: string
+  // The time when the view was last edited.
+  last_edited_time: string
+  // Canonical deep link to the view in Notion.
+  url: string
+  // The ID of the data source this view is scoped to, or null for dashboard views.
+  data_source_id?: string | null
+  // The user who created the view, or null if not available.
+  created_by?: PartialUserObjectResponse | null
+  // The user who last edited the view, or null if not available.
+  last_edited_by?: PartialUserObjectResponse | null
+  // The filter applied to this view (same shape as data source query filter).
+  filter?: ViewFilterResponse | null
+  // The sorts applied to this view (same shape as data source query sorts).
+  sorts?: Array<ViewSortResponse> | null
+  // Quick filters pinned to the view's filter bar. Keys are property IDs. Values are
+  // filter conditions (same shape as a property filter without the property field). Null
+  // when no quick filters are set.
+  quick_filters?: Record<string, QuickFilterConditionResponse> | null
+  // View presentation configuration.
+  configuration?: ViewConfigResponse | null
+  // For dashboard widget views, the ID of the parent dashboard view. Only present when
+  // this view is a widget inside a dashboard.
+  dashboard_view_id?: string
+}
+
+type DataSourceViewReferenceResponse = {
+  // The object type name.
+  object: "view"
+  // The ID of the view.
+  id: IdResponse
+}
+
 export type DatabaseObjectResponse = {
   // The database object type name.
   object: "database"
@@ -1104,6 +1644,8 @@ export type DatabaseObjectResponse = {
   is_inline: boolean
   // Whether the database is in the trash.
   in_trash: boolean
+  /** @deprecated Use `in_trash` instead. Present for backwards compatibility with API versions prior to 2026-03-11. */
+  archived: boolean
   // Whether the database is locked from editing in the Notion app UI.
   is_locked: boolean
   // The time when the database was created.
@@ -1189,6 +1731,38 @@ type DateFormulaPropertyValueResponse = {
   date: DateResponse | null
 }
 
+type DateGroupByConfigRequest = {
+  // The property type for grouping.
+  type: "date" | "created_time" | "last_edited_time"
+  // Property ID to group by.
+  property_id: string
+  // Granularity for date grouping.
+  group_by: "relative" | "day" | "week" | "month" | "year"
+  // Sort order for groups.
+  sort: GroupSortRequest
+  // Whether to hide groups that have no items.
+  hide_empty_groups?: boolean
+  // Start day of week for week grouping (0 = Sunday, 1 = Monday).
+  start_day_of_week?: 0 | 1
+}
+
+type DateGroupByConfigResponse = {
+  // The property type for grouping.
+  type: "date" | "created_time" | "last_edited_time"
+  // Property ID to group by.
+  property_id: string
+  // Granularity for date grouping.
+  group_by: "relative" | "day" | "week" | "month" | "year"
+  // Sort order for groups (no manual sort for dates).
+  sort: GroupSortResponse
+  // Property name (convenience field).
+  property_name?: string
+  // Whether to hide groups that have no items.
+  hide_empty_groups?: boolean
+  // Start day of week for week grouping (0 = Sunday, 1 = Monday).
+  start_day_of_week?: 0 | 1
+}
+
 type DatePartialRollupValueResponse = {
   // Always `date`
   type: "date"
@@ -1248,6 +1822,15 @@ type DateSimplePropertyValueResponse = {
   date: DateResponse | null
 }
 
+export type DeletedViewQueryResponse = {
+  // The object type.
+  object: "view_query"
+  // The ID of the deleted view query.
+  id: IdResponse
+  // Whether the view query was deleted.
+  deleted: boolean
+}
+
 export type DividerBlockObjectResponse = {
   type: "divider"
   divider: EmptyObject
@@ -1259,8 +1842,9 @@ export type DividerBlockObjectResponse = {
   last_edited_time: string
   last_edited_by: PartialUserObjectResponse
   has_children: boolean
-  archived: boolean
   in_trash: boolean
+  /** @deprecated Use `in_trash` instead. Present for backwards compatibility with API versions prior to 2026-03-11. */
+  archived: boolean
 }
 
 type DualPropertyDatabasePropertyRelationConfigResponse = {
@@ -1305,8 +1889,9 @@ export type EmbedBlockObjectResponse = {
   last_edited_time: string
   last_edited_by: PartialUserObjectResponse
   has_children: boolean
-  archived: boolean
   in_trash: boolean
+  /** @deprecated Use `in_trash` instead. Present for backwards compatibility with API versions prior to 2026-03-11. */
+  archived: boolean
 }
 
 type EmojiPageIconRequest = {
@@ -1338,8 +1923,9 @@ export type EquationBlockObjectResponse = {
   last_edited_time: string
   last_edited_by: PartialUserObjectResponse
   has_children: boolean
-  archived: boolean
   in_trash: boolean
+  /** @deprecated Use `in_trash` instead. Present for backwards compatibility with API versions prior to 2026-03-11. */
+  archived: boolean
 }
 
 type EquationRichTextItemRequest = {
@@ -1443,8 +2029,9 @@ export type FileBlockObjectResponse = {
   last_edited_time: string
   last_edited_by: PartialUserObjectResponse
   has_children: boolean
-  archived: boolean
   in_trash: boolean
+  /** @deprecated Use `in_trash` instead. Present for backwards compatibility with API versions prior to 2026-03-11. */
+  archived: boolean
 }
 
 type FileInternalOrExternalFileWithNameResponse = {
@@ -1494,6 +2081,8 @@ export type FileUploadObjectResponse = {
     type: "person" | "bot" | "agent"
   }
   last_edited_time: string
+  in_trash: boolean
+  /** @deprecated Use `in_trash` instead. Present for backwards compatibility with API versions prior to 2026-03-11. */
   archived: boolean
   expiry_time: string | null
   // One of: `pending`, `uploaded`, `expired`, `failed`
@@ -1588,10 +2177,134 @@ type FilesSimplePropertyValueResponse = {
   files: Array<InternalOrExternalFileWithNameResponse>
 }
 
+type FormViewConfigRequest = {
+  // The view type. Must be "form".
+  type: "form"
+  // Whether the form is closed for submissions. Pass null to clear.
+  is_form_closed?: boolean | null
+  // Whether anonymous (non-logged-in) submissions are allowed. Pass null to clear.
+  anonymous_submissions?: boolean | null
+  // Permission level granted to the submitter on the created page after form submission.
+  // Pass null to clear.
+  submission_permissions?:
+    | "none"
+    | "comment_only"
+    | "reader"
+    | "read_and_write"
+    | "editor"
+    | null
+}
+
+type FormViewConfigResponse = {
+  // The view configuration type.
+  type: "form"
+  // Whether the form is closed for submissions.
+  is_form_closed?: boolean
+  // Whether anonymous (non-logged-in) submissions are allowed.
+  anonymous_submissions?: boolean
+  // Permission level granted to the submitter on the created page after form submission.
+  submission_permissions?:
+    | "none"
+    | "comment_only"
+    | "reader"
+    | "read_and_write"
+    | "editor"
+}
+
+type FormulaCheckboxSubGroupByRequest = {
+  // The formula result type for grouping.
+  type: "checkbox"
+  // Sort order for groups.
+  sort: GroupSortRequest
+}
+
+type FormulaCheckboxSubGroupByResponse = {
+  // The formula result type for grouping.
+  type: "checkbox"
+  // Sort order for groups (only manual for checkbox).
+  sort: GroupSortResponse
+}
+
 type FormulaDatabasePropertyConfigResponse = {
   // Always `formula`
   type: "formula"
   formula: { expression: string }
+}
+
+type FormulaDateSubGroupByRequest = {
+  // The formula result type for grouping.
+  type: "date"
+  // Granularity for date grouping.
+  group_by: "relative" | "day" | "week" | "month" | "year"
+  // Sort order for groups.
+  sort: GroupSortRequest
+  // Start day of week for week grouping (0 = Sunday, 1 = Monday).
+  start_day_of_week?: 0 | 1
+}
+
+type FormulaDateSubGroupByResponse = {
+  // The formula result type for grouping.
+  type: "date"
+  // Granularity for date grouping.
+  group_by: "relative" | "day" | "week" | "month" | "year"
+  // Sort order for groups.
+  sort: GroupSortResponse
+  // Start day of week for week grouping (0 = Sunday, 1 = Monday).
+  start_day_of_week?: 0 | 1
+}
+
+type FormulaGroupByConfigRequest = {
+  // The property type for grouping.
+  type: "formula"
+  // Property ID of the formula to group by.
+  property_id: string
+  // Sub-group-by configuration based on the formula result type.
+  group_by:
+    | FormulaDateSubGroupByRequest
+    | FormulaTextSubGroupByRequest
+    | FormulaNumberSubGroupByRequest
+    | FormulaCheckboxSubGroupByRequest
+  // Whether to hide groups that have no items.
+  hide_empty_groups?: boolean
+}
+
+type FormulaGroupByConfigResponse = {
+  // The property type for grouping.
+  type: "formula"
+  // Property ID of the formula to group by.
+  property_id: string
+  // Sub-group-by configuration based on the formula result type.
+  group_by: FormulaSubGroupByResponse
+  // Property name (convenience field).
+  property_name?: string
+  // Whether to hide groups that have no items.
+  hide_empty_groups?: boolean
+}
+
+type FormulaNumberSubGroupByRequest = {
+  // The formula result type for grouping.
+  type: "number"
+  // Sort order for groups.
+  sort: GroupSortRequest
+  // Start of the range for number grouping buckets.
+  range_start?: number
+  // End of the range for number grouping buckets.
+  range_end?: number
+  // Size of each bucket in number grouping.
+  range_size?: number
+}
+
+type FormulaNumberSubGroupByResponse = {
+  // The formula result type for grouping.
+  type: "number"
+  // Sort order for groups (ascending or descending only).
+  sort: GroupSortResponse
+  // Start of the range for number grouping buckets.
+  range_start?: number
+  // End of the range for number grouping buckets.
+  range_end?: number
+  // Size of each bucket in number grouping.
+  range_size?: number
 }
 
 type FormulaPropertyConfigurationRequest = {
@@ -1631,6 +2344,93 @@ type FormulaSimplePropertyValueResponse = {
   formula: FormulaPropertyValueResponse
 }
 
+/**
+ * Sub-group-by configuration for formula properties based on result type.
+ */
+type FormulaSubGroupByResponse =
+  | FormulaDateSubGroupByResponse
+  | FormulaTextSubGroupByResponse
+  | FormulaNumberSubGroupByResponse
+  | FormulaCheckboxSubGroupByResponse
+
+type FormulaTextSubGroupByRequest = {
+  // The formula result type for grouping.
+  type: "text"
+  // How to group text values. "exact" = exact match, "alphabet_prefix" = first letter.
+  group_by: "exact" | "alphabet_prefix"
+  // Sort order for groups.
+  sort: GroupSortRequest
+}
+
+type FormulaTextSubGroupByResponse = {
+  // The formula result type for grouping.
+  type: "text"
+  // How to group text values. "exact" = exact match, "alphabet_prefix" = first letter.
+  group_by: "exact" | "alphabet_prefix"
+  // Sort order for groups.
+  sort: GroupSortResponse
+}
+
+type GalleryViewConfigRequest = {
+  // The view type. Must be "gallery".
+  type: "gallery"
+  // Property visibility and display configuration on gallery cards. Pass null to clear.
+  properties?: Array<ViewPropertyConfigRequest> | null
+  // Cover image configuration for cards. Pass null to clear.
+  cover?: CoverConfigRequest | null
+  // Size of the cover image on cards. Pass null to clear.
+  cover_size?: "small" | "medium" | "large" | null
+  // Aspect ratio mode for cover images. "contain" fits the image, "cover" fills the area.
+  // Pass null to clear.
+  cover_aspect?: "contain" | "cover" | null
+  // Card layout mode. "list" shows full cards, "compact" shows condensed cards. Pass null
+  // to clear.
+  card_layout?: "list" | "compact" | null
+}
+
+type GalleryViewConfigResponse = {
+  // The view configuration type.
+  type: "gallery"
+  // Properties to display on gallery cards.
+  properties?: Array<ViewPropertyConfigResponse>
+  // Card cover/preview image configuration.
+  cover?: CoverConfigResponse
+  // Cover image size.
+  cover_size?: "small" | "medium" | "large"
+  // Cover image aspect ratio.
+  cover_aspect?: "contain" | "cover"
+  // Card layout mode (list shows all properties, compact shows inline).
+  card_layout?: "list" | "compact"
+}
+
+/**
+ * Group-by configuration based on property type.
+ */
+type GroupByConfigRequest =
+  | SelectGroupByConfigRequest
+  | StatusGroupByConfigRequest
+  | PersonGroupByConfigRequest
+  | RelationGroupByConfigRequest
+  | DateGroupByConfigRequest
+  | TextGroupByConfigRequest
+  | NumberGroupByConfigRequest
+  | CheckboxGroupByConfigRequest
+  | FormulaGroupByConfigRequest
+
+/**
+ * Group-by configuration based on property type.
+ */
+type GroupByConfigResponse =
+  | SelectGroupByConfigResponse
+  | StatusGroupByConfigResponse
+  | PersonGroupByConfigResponse
+  | RelationGroupByConfigResponse
+  | DateGroupByConfigResponse
+  | TextGroupByConfigResponse
+  | NumberGroupByConfigResponse
+  | CheckboxGroupByConfigResponse
+  | FormulaGroupByConfigResponse
+
 type GroupFilterOperatorArray = Array<
   | PropertyOrTimestampFilter
   | { or: PropertyOrTimestampFilterArray }
@@ -1650,6 +2450,16 @@ export type GroupObjectResponse = {
   object: "group"
   // The name of the group.
   name: string | null
+}
+
+type GroupSortRequest = {
+  // Sort direction for groups.
+  type: "manual" | "ascending" | "descending"
+}
+
+type GroupSortResponse = {
+  // Sort direction for groups.
+  type: "manual" | "ascending" | "descending"
 }
 
 type HeaderContentWithRichTextAndColorRequest = {
@@ -1682,8 +2492,9 @@ export type Heading1BlockObjectResponse = {
   last_edited_time: string
   last_edited_by: PartialUserObjectResponse
   has_children: boolean
-  archived: boolean
   in_trash: boolean
+  /** @deprecated Use `in_trash` instead. Present for backwards compatibility with API versions prior to 2026-03-11. */
+  archived: boolean
 }
 
 export type Heading2BlockObjectResponse = {
@@ -1697,8 +2508,9 @@ export type Heading2BlockObjectResponse = {
   last_edited_time: string
   last_edited_by: PartialUserObjectResponse
   has_children: boolean
-  archived: boolean
   in_trash: boolean
+  /** @deprecated Use `in_trash` instead. Present for backwards compatibility with API versions prior to 2026-03-11. */
+  archived: boolean
 }
 
 export type Heading3BlockObjectResponse = {
@@ -1712,8 +2524,9 @@ export type Heading3BlockObjectResponse = {
   last_edited_time: string
   last_edited_by: PartialUserObjectResponse
   has_children: boolean
-  archived: boolean
   in_trash: boolean
+  /** @deprecated Use `in_trash` instead. Present for backwards compatibility with API versions prior to 2026-03-11. */
+  archived: boolean
 }
 
 type IdObjectResponse = { id: string }
@@ -1733,8 +2546,9 @@ export type ImageBlockObjectResponse = {
   last_edited_time: string
   last_edited_by: PartialUserObjectResponse
   has_children: boolean
-  archived: boolean
   in_trash: boolean
+  /** @deprecated Use `in_trash` instead. Present for backwards compatibility with API versions prior to 2026-03-11. */
+  archived: boolean
 }
 
 type InitialDataSourceRequest = {
@@ -1951,8 +2765,9 @@ export type LinkPreviewBlockObjectResponse = {
   last_edited_time: string
   last_edited_by: PartialUserObjectResponse
   has_children: boolean
-  archived: boolean
   in_trash: boolean
+  /** @deprecated Use `in_trash` instead. Present for backwards compatibility with API versions prior to 2026-03-11. */
+  archived: boolean
 }
 
 type LinkPreviewMentionResponse = {
@@ -1974,14 +2789,54 @@ export type LinkToPageBlockObjectResponse = {
   last_edited_time: string
   last_edited_by: PartialUserObjectResponse
   has_children: boolean
-  archived: boolean
   in_trash: boolean
+  /** @deprecated Use `in_trash` instead. Present for backwards compatibility with API versions prior to 2026-03-11. */
+  archived: boolean
+}
+
+type ListViewConfigRequest = {
+  // The view type. Must be "list".
+  type: "list"
+  // Property visibility and display configuration. Pass null to clear.
+  properties?: Array<ViewPropertyConfigRequest> | null
+}
+
+type ListViewConfigResponse = {
+  // The view configuration type.
+  type: "list"
+  // Properties to display in list items.
+  properties?: Array<ViewPropertyConfigResponse>
 }
 
 type LocationPropertyConfigurationRequest = {
   // Always `location`
   type?: "location"
   location: EmptyObject
+}
+
+type MapViewConfigRequest = {
+  // The view type. Must be "map".
+  type: "map"
+  // Map display height. Pass null to clear.
+  height?: "small" | "medium" | "large" | "extra_large" | null
+  // Property ID of the location property used to position items on the map. Pass null to
+  // clear.
+  map_by?: string | null
+  // Property visibility and display configuration on map pin cards. Pass null to clear.
+  properties?: Array<ViewPropertyConfigRequest> | null
+}
+
+type MapViewConfigResponse = {
+  // The view configuration type.
+  type: "map"
+  // Map display height.
+  height?: "small" | "medium" | "large" | "extra_large"
+  // Property ID of the location property used to position items on the map.
+  map_by?: string
+  // Map-by property name (convenience field).
+  map_by_property_name?: string
+  // Properties to display on map pin cards.
+  properties?: Array<ViewPropertyConfigResponse>
 }
 
 type MediaContentWithFileAndCaptionRequest =
@@ -2029,6 +2884,41 @@ type MediaContentWithUrlAndCaptionResponse = {
 }
 
 type MediaContentWithUrlResponse = { url: TextRequest }
+
+/**
+ * @deprecated Use MeetingNotesBlockObjectResponse instead. Renamed in API version 2026-03-11.
+ */
+export type TranscriptionBlockObjectResponse = {
+  type: "transcription"
+  transcription: TranscriptionBlockResponse
+  parent: ParentForBlockBasedObjectResponse
+  object: "block"
+  id: string
+  created_time: string
+  created_by: PartialUserObjectResponse
+  last_edited_time: string
+  last_edited_by: PartialUserObjectResponse
+  has_children: boolean
+  in_trash: boolean
+  /** @deprecated Use `in_trash` instead. Present for backwards compatibility with API versions prior to 2026-03-11. */
+  archived: boolean
+}
+
+export type MeetingNotesBlockObjectResponse = {
+  type: "meeting_notes"
+  meeting_notes: TranscriptionBlockResponse
+  parent: ParentForBlockBasedObjectResponse
+  object: "block"
+  id: string
+  created_time: string
+  created_by: PartialUserObjectResponse
+  last_edited_time: string
+  last_edited_by: PartialUserObjectResponse
+  has_children: boolean
+  in_trash: boolean
+  /** @deprecated Use `in_trash` instead. Present for backwards compatibility with API versions prior to 2026-03-11. */
+  archived: boolean
+}
 
 type MentionRichTextItemRequest = {
   // Always `mention`
@@ -2206,6 +3096,42 @@ type NumberFormulaPropertyValueResponse = {
   number: number | null
 }
 
+type NumberGroupByConfigRequest = {
+  // The property type for grouping.
+  type: "number"
+  // Property ID to group by.
+  property_id: string
+  // Sort order for groups.
+  sort: GroupSortRequest
+  // Whether to hide groups that have no items.
+  hide_empty_groups?: boolean
+  // Start of the range for number grouping buckets.
+  range_start?: number
+  // End of the range for number grouping buckets.
+  range_end?: number
+  // Size of each bucket in number grouping.
+  range_size?: number
+}
+
+type NumberGroupByConfigResponse = {
+  // The property type for grouping.
+  type: "number"
+  // Property ID to group by.
+  property_id: string
+  // Sort order for groups (ascending or descending only).
+  sort: GroupSortResponse
+  // Property name (convenience field).
+  property_name?: string
+  // Whether to hide groups that have no items.
+  hide_empty_groups?: boolean
+  // Start of the range for number grouping buckets.
+  range_start?: number
+  // End of the range for number grouping buckets.
+  range_end?: number
+  // Size of each bucket in number grouping.
+  range_size?: number
+}
+
 type NumberPartialRollupValueResponse = {
   // Always `number`
   type: "number"
@@ -2240,9 +3166,11 @@ type NumberSimplePropertyValueResponse = {
   number: number | null
 }
 
+type NumberedListFormat = "numbers" | "letters" | "roman"
+
 export type NumberedListItemBlockObjectResponse = {
   type: "numbered_list_item"
-  numbered_list_item: ContentWithRichTextAndColorResponse
+  numbered_list_item: ContentWithRichTextAndColorAndListResponse
   parent: ParentForBlockBasedObjectResponse
   object: "block"
   id: string
@@ -2251,8 +3179,9 @@ export type NumberedListItemBlockObjectResponse = {
   last_edited_time: string
   last_edited_by: PartialUserObjectResponse
   has_children: boolean
-  archived: boolean
   in_trash: boolean
+  /** @deprecated Use `in_trash` instead. Present for backwards compatibility with API versions prior to 2026-03-11. */
+  archived: boolean
 }
 
 type PageCoverRequest = FileUploadPageCoverRequest | ExternalPageCoverRequest
@@ -2284,6 +3213,20 @@ type PageIdParentForBlockBasedObjectResponse = {
   page_id: IdResponse
 }
 
+type PageMarkdownResponse = {
+  // The type of object, always 'page_markdown'.
+  object: "page_markdown"
+  // The ID of the page or block.
+  id: IdResponse
+  // The page content rendered as enhanced Markdown.
+  markdown: string
+  // Whether the content was truncated due to exceeding the record count limit.
+  truncated: boolean
+  // Block IDs that could not be loaded (appeared as <unknown> tags in the markdown). Pass
+  // these IDs back to this endpoint to fetch their content separately.
+  unknown_block_ids: Array<IdResponse>
+}
+
 export type PageObjectResponse = {
   // The page object type name.
   object: "page"
@@ -2293,10 +3236,12 @@ export type PageObjectResponse = {
   created_time: string
   // Date and time when this page was last edited.
   last_edited_time: string
-  // Whether the page has been archived.
-  archived: boolean
   // Whether the page is in trash.
   in_trash: boolean
+  /** @deprecated Use `in_trash` instead. Present for backwards compatibility with API versions prior to 2026-03-11. */
+  archived: boolean
+  // Whether the page has been archived.
+  is_archived: boolean
   // Whether the page is locked from editing in the Notion app UI.
   is_locked: boolean
   // The URL of the Notion page.
@@ -2317,8 +3262,20 @@ export type PageObjectResponse = {
   last_edited_by: PartialUserObjectResponse
 }
 
+type PagePositionSchema =
+  | { type: "after_block"; after_block: { id: IdRequest } }
+  | { type: "page_start" }
+  | { type: "page_end" }
+
 type PagePropertyValueWithIdResponse = IdObjectResponse &
   (SimpleOrArrayPropertyValueResponse | PartialRollupPropertyResponse)
+
+type PageReferenceResponse = {
+  // The object type.
+  object: string
+  // The object ID.
+  id: IdResponse
+}
 
 export type ParagraphBlockObjectResponse = {
   type: "paragraph"
@@ -2331,8 +3288,9 @@ export type ParagraphBlockObjectResponse = {
   last_edited_time: string
   last_edited_by: PartialUserObjectResponse
   has_children: boolean
-  archived: boolean
   in_trash: boolean
+  /** @deprecated Use `in_trash` instead. Present for backwards compatibility with API versions prior to 2026-03-11. */
+  archived: boolean
 }
 
 type ParentForBlockBasedObjectResponse =
@@ -2380,6 +3338,27 @@ export type PartialDataSourceObjectResponse = {
   id: IdResponse
   // The properties schema of the data source.
   properties: Record<string, DatabasePropertyConfigResponse>
+}
+
+export type PartialDataSourceViewObjectResponse = {
+  // The object type name.
+  object: "view"
+  // The ID of the view.
+  id: IdResponse
+  // The parent database of the view.
+  parent: DatabaseParentResponse
+  // The view type.
+  type:
+    | "table"
+    | "board"
+    | "list"
+    | "calendar"
+    | "timeline"
+    | "gallery"
+    | "form"
+    | "chart"
+    | "map"
+    | "dashboard"
 }
 
 export type PartialDatabaseObjectResponse = {
@@ -2458,8 +3437,9 @@ export type PdfBlockObjectResponse = {
   last_edited_time: string
   last_edited_by: PartialUserObjectResponse
   has_children: boolean
-  archived: boolean
   in_trash: boolean
+  /** @deprecated Use `in_trash` instead. Present for backwards compatibility with API versions prior to 2026-03-11. */
+  archived: boolean
 }
 
 type PeopleArrayBasedPropertyValueResponse = {
@@ -2490,6 +3470,30 @@ export type PeoplePropertyItemObjectResponse = {
   people: PartialUserObjectResponse | UserObjectResponse
   object: "property_item"
   id: string
+}
+
+type PersonGroupByConfigRequest = {
+  // The property type for grouping.
+  type: "person" | "created_by" | "last_edited_by"
+  // Property ID to group by.
+  property_id: string
+  // Sort order for groups.
+  sort: GroupSortRequest
+  // Whether to hide groups that have no items.
+  hide_empty_groups?: boolean
+}
+
+type PersonGroupByConfigResponse = {
+  // The property type for grouping.
+  type: "person" | "created_by" | "last_edited_by"
+  // Property ID to group by.
+  property_id: string
+  // Sort order for groups (only manual supported).
+  sort: GroupSortResponse
+  // Property name (convenience field).
+  property_name?: string
+  // Whether to hide groups that have no items.
+  hide_empty_groups?: boolean
 }
 
 export type PersonUserObjectResponse = {
@@ -2734,6 +3738,26 @@ type PropertyOrTimestampFilter = PropertyFilter | TimestampFilter
 
 type PropertyOrTimestampFilterArray = Array<PropertyOrTimestampFilter>
 
+type PropertySortResponse = {
+  // The name or ID of the property to sort by.
+  property: string
+  // Sort direction.
+  direction: "ascending" | "descending"
+}
+
+/**
+ * A property filter condition. Same shape as a property filter but without the
+ * "property" field (the hashmap key identifies the property). For example: { "select": {
+ * "equals": "High" } }.
+ */
+type QuickFilterConditionRequest = Record<string, never>
+
+/**
+ * A property filter condition. Same shape as a property filter but without the
+ * "property" field. For example: { "select": { "equals": "High" } }.
+ */
+type QuickFilterConditionResponse = Record<string, never>
+
 export type QuoteBlockObjectResponse = {
   type: "quote"
   quote: ContentWithRichTextAndColorResponse
@@ -2745,8 +3769,9 @@ export type QuoteBlockObjectResponse = {
   last_edited_time: string
   last_edited_by: PartialUserObjectResponse
   has_children: boolean
-  archived: boolean
   in_trash: boolean
+  /** @deprecated Use `in_trash` instead. Present for backwards compatibility with API versions prior to 2026-03-11. */
+  archived: boolean
 }
 
 type RelationArrayBasedPropertyValueResponse = {
@@ -2759,6 +3784,30 @@ type RelationDatabasePropertyConfigResponse = {
   // Always `relation`
   type: "relation"
   relation: DatabasePropertyRelationConfigResponse
+}
+
+type RelationGroupByConfigRequest = {
+  // The property type for grouping.
+  type: "relation"
+  // Property ID to group by.
+  property_id: string
+  // Sort order for groups.
+  sort: GroupSortRequest
+  // Whether to hide groups that have no items.
+  hide_empty_groups?: boolean
+}
+
+type RelationGroupByConfigResponse = {
+  // The property type for grouping.
+  type: "relation"
+  // Property ID to group by.
+  property_id: string
+  // Sort order for groups.
+  sort: GroupSortResponse
+  // Property name (convenience field).
+  property_name?: string
+  // Whether to hide groups that have no items.
+  hide_empty_groups?: boolean
 }
 
 type RelationItemPropertyValueResponse = { id: IdRequest }
@@ -2960,6 +4009,30 @@ type SelectDatabasePropertyConfigResponse = {
   select: { options: Array<SelectPropertyResponse> }
 }
 
+type SelectGroupByConfigRequest = {
+  // The property type for grouping.
+  type: "select" | "multi_select"
+  // Property ID to group by.
+  property_id: string
+  // Sort order for groups.
+  sort: GroupSortRequest
+  // Whether to hide groups that have no items.
+  hide_empty_groups?: boolean
+}
+
+type SelectGroupByConfigResponse = {
+  // The property type for grouping.
+  type: "select" | "multi_select"
+  // Property ID to group by.
+  property_id: string
+  // Sort order for groups.
+  sort: GroupSortResponse
+  // Property name (convenience field).
+  property_name?: string
+  // Whether to hide groups that have no items.
+  hide_empty_groups?: boolean
+}
+
 type SelectPropertyConfigurationRequest = {
   // Always `select`
   type?: "select"
@@ -3028,6 +4101,11 @@ type SinglePropertyDatabasePropertyRelationConfigResponse = {
   single_property: EmptyObject
 }
 
+/**
+ * One of: `ascending`, `descending`
+ */
+type SortDirectionRequest = "ascending" | "descending"
+
 type StatusDatabasePropertyConfigResponse = {
   // Always `status`
   type: "status"
@@ -3048,10 +4126,59 @@ type StatusDatabasePropertyConfigResponse = {
   }
 }
 
+type StatusGroupByConfigRequest = {
+  // The property type for grouping.
+  type: "status"
+  // Property ID to group by.
+  property_id: string
+  // How to group status values. "group" groups by status group (To Do/In Progress/Done),
+  // "option" groups by individual option.
+  group_by: "group" | "option"
+  // Sort order for groups.
+  sort: GroupSortRequest
+  // Whether to hide groups that have no items.
+  hide_empty_groups?: boolean
+}
+
+type StatusGroupByConfigResponse = {
+  // The property type for grouping.
+  type: "status"
+  // Property ID to group by.
+  property_id: string
+  // How to group status values. "group" groups by status group (To Do/In Progress/Done),
+  // "option" groups by individual option.
+  group_by: "group" | "option"
+  // Sort order for groups.
+  sort: GroupSortResponse
+  // Property name (convenience field).
+  property_name?: string
+  // Whether to hide groups that have no items.
+  hide_empty_groups?: boolean
+}
+
+type StatusPropertyConfigRequest = {
+  // The initial status options. If not provided, defaults are created.
+  options?: Array<{
+    name: string
+    color?: SelectColor
+    description?: string | null
+  }>
+}
+
+type StatusPropertyConfigUpdateRequest = {
+  // Status options to add or update. New options are assigned to the To-do group.
+  options?: Array<
+    { color?: SelectColor; description?: string | null } & (
+      | { name: string; id?: string }
+      | { id: string; name?: string }
+    )
+  >
+}
+
 type StatusPropertyConfigurationRequest = {
   // Always `status`
   type?: "status"
-  status: EmptyObject
+  status: StatusPropertyConfigRequest
 }
 
 type StatusPropertyFilter =
@@ -3093,6 +4220,34 @@ type StringFormulaPropertyValueResponse = {
 
 type StringRequest = string
 
+type SubtaskConfigRequest = {
+  // Relation property ID used for parent-child nesting.
+  property_id?: string
+  // How sub-items are displayed. "show" renders hierarchically with toggles, "hidden"
+  // shows parents with a count, "flattened" shows sub-items with a parent indicator,
+  // "disabled" turns off sub-item rendering.
+  display_mode?: "show" | "hidden" | "flattened" | "disabled"
+  // Which items are included when filtering. "parents" includes parent items only,
+  // "parents_and_subitems" includes both, "subitems" includes sub-items only.
+  filter_scope?: "parents" | "parents_and_subitems" | "subitems"
+  // Property ID of the column showing the sub-item expand/collapse toggle.
+  toggle_column_id?: string
+}
+
+type SubtaskConfigResponse = {
+  // Relation property ID used for parent-child nesting.
+  property_id?: string
+  // How sub-items are displayed. "show" renders hierarchically with toggles, "hidden"
+  // shows parents with a count, "flattened" shows sub-items with a parent indicator,
+  // "disabled" turns off sub-item rendering.
+  display_mode?: "show" | "hidden" | "flattened" | "disabled"
+  // Which items are included when filtering. "parents" includes parent items only,
+  // "parents_and_subitems" includes both, "subitems" includes sub-items only.
+  filter_scope?: "parents" | "parents_and_subitems" | "subitems"
+  // Property ID of the column showing the sub-item expand/collapse toggle.
+  toggle_column_id?: string
+}
+
 export type SyncedBlockBlockObjectResponse = {
   type: "synced_block"
   synced_block: {
@@ -3106,8 +4261,9 @@ export type SyncedBlockBlockObjectResponse = {
   last_edited_time: string
   last_edited_by: PartialUserObjectResponse
   has_children: boolean
-  archived: boolean
   in_trash: boolean
+  /** @deprecated Use `in_trash` instead. Present for backwards compatibility with API versions prior to 2026-03-11. */
+  archived: boolean
 }
 
 export type TableBlockObjectResponse = {
@@ -3121,8 +4277,9 @@ export type TableBlockObjectResponse = {
   last_edited_time: string
   last_edited_by: PartialUserObjectResponse
   has_children: boolean
-  archived: boolean
   in_trash: boolean
+  /** @deprecated Use `in_trash` instead. Present for backwards compatibility with API versions prior to 2026-03-11. */
+  archived: boolean
 }
 
 export type TableOfContentsBlockObjectResponse = {
@@ -3136,8 +4293,9 @@ export type TableOfContentsBlockObjectResponse = {
   last_edited_time: string
   last_edited_by: PartialUserObjectResponse
   has_children: boolean
-  archived: boolean
   in_trash: boolean
+  /** @deprecated Use `in_trash` instead. Present for backwards compatibility with API versions prior to 2026-03-11. */
+  archived: boolean
 }
 
 type TableRequestWithTableRowChildren = {
@@ -3158,14 +4316,51 @@ export type TableRowBlockObjectResponse = {
   last_edited_time: string
   last_edited_by: PartialUserObjectResponse
   has_children: boolean
-  archived: boolean
   in_trash: boolean
+  /** @deprecated Use `in_trash` instead. Present for backwards compatibility with API versions prior to 2026-03-11. */
+  archived: boolean
 }
 
 type TableRowRequest = {
   table_row: ContentWithTableRowRequest
   type?: "table_row"
   object?: "block"
+}
+
+type TableViewConfigRequest = {
+  // The view type. Must be "table".
+  type: "table"
+  // Property visibility and display configuration. Pass null to clear.
+  properties?: Array<ViewPropertyConfigRequest> | null
+  // Group-by configuration for the table. Pass null to remove grouping.
+  group_by?: GroupByConfigRequest | null
+  // Subtask (sub-item) configuration. Pass null to reset subtask config to defaults (which
+  // may show subtasks). Use `{ "display_mode": "disabled" }` to explicitly disable
+  // subtasks.
+  subtasks?: SubtaskConfigRequest | null
+  // Whether to wrap cell content in the table.
+  wrap_cells?: boolean
+  // Number of columns frozen from the left side of the table.
+  frozen_column_index?: number
+  // Whether to show vertical grid lines between columns.
+  show_vertical_lines?: boolean
+}
+
+type TableViewConfigResponse = {
+  // The view configuration type.
+  type: "table"
+  // Columns/properties visible in the table view.
+  properties?: Array<ViewPropertyConfigResponse>
+  // Vertical (row) grouping configuration.
+  group_by?: GroupByConfigResponse
+  // Sub-item (subtask) display configuration.
+  subtasks?: SubtaskConfigResponse
+  // Whether to wrap cell content by default.
+  wrap_cells?: boolean
+  // Index of the last frozen column. Columns up to and including this index are frozen.
+  frozen_column_index?: number
+  // Whether to show vertical lines between columns.
+  show_vertical_lines?: boolean
 }
 
 export type TemplateBlockObjectResponse = {
@@ -3179,8 +4374,9 @@ export type TemplateBlockObjectResponse = {
   last_edited_time: string
   last_edited_by: PartialUserObjectResponse
   has_children: boolean
-  archived: boolean
   in_trash: boolean
+  /** @deprecated Use `in_trash` instead. Present for backwards compatibility with API versions prior to 2026-03-11. */
+  archived: boolean
 }
 
 type TemplateMentionDateTemplateMentionRequest = {
@@ -3217,6 +4413,41 @@ type TemplateMentionUserTemplateMentionResponse = {
   type: "template_mention_user"
   // The user of the template mention.
   template_mention_user: "me"
+}
+
+/**
+ * IANA timezone to use when resolving template variables like @now and @today (e.g.
+ * 'America/New_York'). Defaults to the authorizing user's timezone for public
+ * integrations, or UTC for internal integrations.
+ */
+type TemplateTimezone = string
+
+type TextGroupByConfigRequest = {
+  // The property type for grouping.
+  type: "text" | "title" | "url" | "email" | "phone_number"
+  // Property ID to group by.
+  property_id: string
+  // How to group text values. "exact" = exact match, "alphabet_prefix" = first letter.
+  group_by: "exact" | "alphabet_prefix"
+  // Sort order for groups.
+  sort: GroupSortRequest
+  // Whether to hide groups that have no items.
+  hide_empty_groups?: boolean
+}
+
+type TextGroupByConfigResponse = {
+  // The property type for grouping.
+  type: "text" | "title" | "url" | "email" | "phone_number"
+  // Property ID to group by.
+  property_id: string
+  // How to group text values. "exact" = exact match, "alphabet_prefix" = first letter.
+  group_by: "exact" | "alphabet_prefix"
+  // Sort order for groups.
+  sort: GroupSortResponse
+  // Property name (convenience field).
+  property_name?: string
+  // Whether to hide groups that have no items.
+  hide_empty_groups?: boolean
 }
 
 type TextPropertyFilter =
@@ -3264,6 +4495,94 @@ export type TextRichTextItemResponse = {
 
 type TimeZoneRequest = string
 
+type TimelineArrowsByRequest = {
+  // Relation property ID used for dependency arrows, or null to disable arrows.
+  property_id?: string | null
+}
+
+type TimelineArrowsByResponse = {
+  // Relation property ID used for dependency arrows.
+  property_id?: string | null
+}
+
+type TimelinePreferenceRequest = {
+  // Zoom level for the timeline.
+  zoom_level:
+    | "hours"
+    | "day"
+    | "week"
+    | "bi_week"
+    | "month"
+    | "quarter"
+    | "year"
+    | "5_years"
+  // Timestamp (ms) to center the timeline view on.
+  center_timestamp?: number
+}
+
+type TimelinePreferenceResponse = {
+  // Zoom level for the timeline.
+  zoom_level:
+    | "hours"
+    | "day"
+    | "week"
+    | "bi_week"
+    | "month"
+    | "quarter"
+    | "year"
+    | "5_years"
+  // Center timestamp for the timeline view (Unix timestamp in ms).
+  center_timestamp?: number
+}
+
+type TimelineViewConfigRequest = {
+  // The view type. Must be "timeline".
+  type: "timeline"
+  // Property ID of the date property used for the start of timeline items.
+  date_property_id: string
+  // Property ID of the date property used for the end of timeline items. Pass null to
+  // clear.
+  end_date_property_id?: string | null
+  // Property visibility and display configuration on timeline items. Pass null to clear.
+  properties?: Array<ViewPropertyConfigRequest> | null
+  // Whether to show the table panel alongside the timeline. Pass null to clear.
+  show_table?: boolean | null
+  // Property configuration for the table panel (when show_table is true). Pass null to
+  // clear.
+  table_properties?: Array<ViewPropertyConfigRequest> | null
+  // Timeline display preferences (zoom level and center position). Pass null to clear.
+  preference?: TimelinePreferenceRequest | null
+  // Configuration for dependency arrows between timeline items. Pass null to clear.
+  arrows_by?: TimelineArrowsByRequest | null
+  // Whether to color timeline items by a property. Pass null to clear.
+  color_by?: boolean | null
+}
+
+type TimelineViewConfigResponse = {
+  // The view configuration type.
+  type: "timeline"
+  // Start date property - required.
+  date_property_id: string
+  // Start date property name (convenience field).
+  date_property_name?: string
+  // End date property (optional, for items that span a range).
+  end_date_property_id?: string
+  // End date property name (convenience field).
+  end_date_property_name?: string
+  // Properties to display on timeline items.
+  properties?: Array<ViewPropertyConfigResponse>
+  // Whether to show the table panel alongside the timeline.
+  show_table?: boolean
+  // Properties to display in the table panel (when show_table is true).
+  table_properties?: Array<ViewPropertyConfigResponse>
+  // Timeline zoom/preference state.
+  preference?: TimelinePreferenceResponse
+  // Dependency arrows configuration.
+  arrows_by?: TimelineArrowsByResponse
+  // Whether to color-code items by property.
+  color_by?: boolean
+}
+
 type TimestampCreatedTimeFilter = {
   created_time: DatePropertyFilter
   timestamp: "created_time"
@@ -3278,6 +4597,13 @@ type TimestampLastEditedTimeFilter = {
   last_edited_time: DatePropertyFilter
   timestamp: "last_edited_time"
   type?: "last_edited_time"
+}
+
+type TimestampSortResponse = {
+  // The timestamp to sort by.
+  timestamp: "created_time" | "last_edited_time"
+  // Sort direction.
+  direction: "ascending" | "descending"
 }
 
 type TitleArrayBasedPropertyValueResponse = {
@@ -3322,8 +4648,9 @@ export type ToDoBlockObjectResponse = {
   last_edited_time: string
   last_edited_by: PartialUserObjectResponse
   has_children: boolean
-  archived: boolean
   in_trash: boolean
+  /** @deprecated Use `in_trash` instead. Present for backwards compatibility with API versions prior to 2026-03-11. */
+  archived: boolean
 }
 
 export type ToggleBlockObjectResponse = {
@@ -3337,9 +4664,32 @@ export type ToggleBlockObjectResponse = {
   last_edited_time: string
   last_edited_by: PartialUserObjectResponse
   has_children: boolean
-  archived: boolean
   in_trash: boolean
+  /** @deprecated Use `in_trash` instead. Present for backwards compatibility with API versions prior to 2026-03-11. */
+  archived: boolean
 }
+
+type TranscriptionBlockResponse = {
+  title?: Array<RichTextItemResponse>
+  status?: ApiTranscriptionStatus
+  children?: TranscriptionChildrenResponse
+  calendar_event?: TranscriptionCalendarEventResponse
+  recording?: TranscriptionRecordingResponse
+}
+
+type TranscriptionCalendarEventResponse = {
+  start_time: string
+  end_time: string
+  attendees?: Array<IdRequest>
+}
+
+type TranscriptionChildrenResponse = {
+  summary_block_id?: IdRequest
+  notes_block_id?: IdRequest
+  transcript_block_id?: IdRequest
+}
+
+type TranscriptionRecordingResponse = { start_time?: string; end_time?: string }
 
 type UniqueIdDatabasePropertyConfigResponse = {
   // Always `unique_id`
@@ -3376,7 +4726,11 @@ type UniqueIdSimplePropertyValueResponse = {
 
 export type UnsupportedBlockObjectResponse = {
   type: "unsupported"
-  unsupported: EmptyObject
+  unsupported: {
+    // The underlying block type that is not currently supported by the Public API. Example
+    // values include: tab, form, button, drive.
+    block_type: string
+  }
   parent: ParentForBlockBasedObjectResponse
   object: "block"
   id: string
@@ -3385,8 +4739,9 @@ export type UnsupportedBlockObjectResponse = {
   last_edited_time: string
   last_edited_by: PartialUserObjectResponse
   has_children: boolean
-  archived: boolean
   in_trash: boolean
+  /** @deprecated Use `in_trash` instead. Present for backwards compatibility with API versions prior to 2026-03-11. */
+  archived: boolean
 }
 
 type UpdateMediaContentWithFileAndCaptionRequest = {
@@ -3405,6 +4760,25 @@ type UpdateMediaContentWithFileNameAndCaptionRequest = {
 type UpdateMediaContentWithUrlAndCaptionRequest = {
   url?: string
   caption?: Array<RichTextItemRequest>
+}
+
+type UpdateViewRequest = {
+  // New name for the view.
+  name?: string
+  // Filter to apply to the view. Uses the same format as the data source query filter.
+  // Pass null to clear the filter.
+  filter?: ViewFilterRequest | null
+  // Property sorts to apply to the view. Only property-based sorts are supported. Pass
+  // null to clear the sorts.
+  sorts?: ViewPropertySortsRequest | null
+  // Quick filters for the view's filter bar. Keys are property names or IDs. Set a key to
+  // a filter condition to add/update that quick filter. Set a key to null to remove it.
+  // Pass null for the entire field to clear all quick filters. Unmentioned quick filters
+  // are preserved.
+  quick_filters?: Record<string, QuickFilterConditionRequest | null> | null
+  // View presentation configuration. The type field must match the view type. Individual
+  // nullable fields within the configuration can be set to null to clear them.
+  configuration?: ViewConfigRequest
 }
 
 type UrlDatabasePropertyConfigResponse = {
@@ -3500,9 +4874,287 @@ export type VideoBlockObjectResponse = {
   last_edited_time: string
   last_edited_by: PartialUserObjectResponse
   has_children: boolean
-  archived: boolean
   in_trash: boolean
+  /** @deprecated Use `in_trash` instead. Present for backwards compatibility with API versions prior to 2026-03-11. */
+  archived: boolean
 }
+
+/**
+ * View configuration, discriminated by the type field.
+ */
+type ViewConfigRequest =
+  | TableViewConfigRequest
+  | BoardViewConfigRequest
+  | CalendarViewConfigRequest
+  | TimelineViewConfigRequest
+  | GalleryViewConfigRequest
+  | ListViewConfigRequest
+  | MapViewConfigRequest
+  | FormViewConfigRequest
+  | ChartViewConfigRequest
+
+/**
+ * View configuration, typed by view type (table, board, calendar, etc.).
+ */
+type ViewConfigResponse =
+  | TableViewConfigResponse
+  | BoardViewConfigResponse
+  | CalendarViewConfigResponse
+  | TimelineViewConfigResponse
+  | GalleryViewConfigResponse
+  | ListViewConfigResponse
+  | MapViewConfigResponse
+  | FormViewConfigResponse
+  | ChartViewConfigResponse
+  | DashboardViewConfigResponse
+
+/**
+ * Filter for the view. Uses the same format as the data source query filter (property
+ * filters, timestamp filters, or compound and/or filters). Simple property filters appear
+ * in the view's filter bar in the Notion UI. To filter by multiple values on a select or
+ * status property, use a compound "or" filter with separate "equals" conditions for each
+ * value.
+ */
+type ViewFilterRequest = Record<string, never>
+
+/**
+ * Filter for the view. Can be a property filter (filter by property value), timestamp
+ * filter (filter by created_time or last_edited_time), or compound filter (combine
+ * filters with and/or logic). Compound filters support up to 2 levels of nesting.
+ */
+type ViewFilterResponse =
+  | (Record<string, unknown> & {
+      // The name or ID of the property to filter on.
+      property: string
+    })
+  | (Record<string, unknown> & {
+      // The timestamp to filter on.
+      timestamp: "created_time" | "last_edited_time"
+    })
+  | {
+      // Filters combined with OR logic.
+      or?: Array<
+        | (Record<string, unknown> & {
+            // The name or ID of the property to filter on.
+            property: string
+          })
+        | (Record<string, unknown> & {
+            // The timestamp to filter on.
+            timestamp: "created_time" | "last_edited_time"
+          })
+        | {
+            // Filters combined with OR logic.
+            or?: Array<
+              | (Record<string, unknown> & {
+                  // The name or ID of the property to filter on.
+                  property: string
+                })
+              | (Record<string, unknown> & {
+                  // The timestamp to filter on.
+                  timestamp: "created_time" | "last_edited_time"
+                })
+            >
+            // Filters combined with AND logic.
+            and?: Array<
+              | (Record<string, unknown> & {
+                  // The name or ID of the property to filter on.
+                  property: string
+                })
+              | (Record<string, unknown> & {
+                  // The timestamp to filter on.
+                  timestamp: "created_time" | "last_edited_time"
+                })
+            >
+          }
+      >
+      // Filters combined with AND logic.
+      and?: Array<
+        | (Record<string, unknown> & {
+            // The name or ID of the property to filter on.
+            property: string
+          })
+        | (Record<string, unknown> & {
+            // The timestamp to filter on.
+            timestamp: "created_time" | "last_edited_time"
+          })
+        | {
+            // Filters combined with OR logic.
+            or?: Array<
+              | (Record<string, unknown> & {
+                  // The name or ID of the property to filter on.
+                  property: string
+                })
+              | (Record<string, unknown> & {
+                  // The timestamp to filter on.
+                  timestamp: "created_time" | "last_edited_time"
+                })
+            >
+            // Filters combined with AND logic.
+            and?: Array<
+              | (Record<string, unknown> & {
+                  // The name or ID of the property to filter on.
+                  property: string
+                })
+              | (Record<string, unknown> & {
+                  // The timestamp to filter on.
+                  timestamp: "created_time" | "last_edited_time"
+                })
+            >
+          }
+      >
+    }
+
+/**
+ * Position of the new view in the database's view tab bar.
+ */
+type ViewPositionRequest =
+  | {
+      // Position type. "start" places the view as the first tab.
+      type: "start"
+    }
+  | {
+      // Position type. "end" places the view as the last tab.
+      type: "end"
+    }
+  | {
+      // Position type. "after_view" places the new view immediately after the specified view.
+      type: "after_view"
+      // The ID of an existing view in the database. The new view will be placed after this
+      // view.
+      view_id: IdRequest
+    }
+
+type ViewPropertyConfigRequest = {
+  // Property ID (stable identifier).
+  property_id: string
+  // Whether this property is visible in the view.
+  visible?: boolean
+  // Width of the property column in pixels (table view only).
+  width?: number
+  // Whether to wrap content in this property cell/card.
+  wrap?: boolean
+  // How to display status properties (select dropdown or checkbox).
+  status_show_as?: "select" | "checkbox"
+  // Property width mode in compact card layouts (board/gallery).
+  card_property_width_mode?: "full_line" | "inline"
+  // Date display format (date properties only).
+  date_format?:
+    | "full"
+    | "short"
+    | "month_day_year"
+    | "day_month_year"
+    | "year_month_day"
+    | "relative"
+  // Time display format (date properties only).
+  time_format?: "12_hour" | "24_hour" | "hidden"
+}
+
+type ViewPropertyConfigResponse = {
+  // Property ID (stable identifier).
+  property_id: string
+  // Property name (convenience field, not stable across renames).
+  property_name?: string
+  // Whether this property is visible in the view.
+  visible?: boolean
+  // Width of the property column in pixels (table view only).
+  width?: number
+  // Whether to wrap content in this property cell/card.
+  wrap?: boolean
+  // How to display status properties (as select dropdown or checkbox).
+  status_show_as?: "select" | "checkbox"
+  // Property width mode in compact card layouts (board/gallery).
+  card_property_width_mode?: "full_line" | "inline"
+  // Date display format (date properties only). "full" = localized full date, "short" =
+  // month and day, "month_day_year" = MM/DD/YYYY, "day_month_year" = DD/MM/YYYY,
+  // "year_month_day" = YYYY/MM/DD, "relative" = relative dates.
+  date_format?:
+    | "full"
+    | "short"
+    | "month_day_year"
+    | "day_month_year"
+    | "year_month_day"
+    | "relative"
+  // Time display format (date properties only). "12_hour" = 12-hour clock with AM/PM,
+  // "24_hour" = 24-hour clock, "hidden" = hide time.
+  time_format?: "12_hour" | "24_hour" | "hidden"
+}
+
+type ViewPropertySortRequest = {
+  // Property name or ID to sort by.
+  property: string
+  // Sort direction.
+  direction: SortDirectionRequest
+}
+
+type ViewPropertySortsRequest = Array<ViewPropertySortRequest>
+
+export type ViewQueryResponse = {
+  // The object type.
+  object: "view_query"
+  // The query ID.
+  id: IdResponse
+  // The view this query was executed against.
+  view_id: IdResponse
+  // When the cached query results expire.
+  expires_at: string
+  // Total number of results in the query.
+  total_count: number
+  // The page results for this page.
+  results: Array<PageReferenceResponse>
+  // Cursor for the next page of results.
+  next_cursor: IdResponse | null
+  // Whether there are more results.
+  has_more: boolean
+}
+
+/**
+ * Sort for the view. Can be a property sort (with property and direction) or timestamp
+ * sort (with timestamp and direction).
+ */
+type ViewSortRequest = Record<string, never>
+
+/**
+ * Sort for the view. Can sort by property or timestamp.
+ */
+type ViewSortResponse = PropertySortResponse | TimestampSortResponse
+
+type ViewSortsRequest = Array<ViewSortRequest>
+
+/**
+ * One of: `table`, `board`, `list`, `calendar`, `timeline`, `gallery`, `form`, `chart`,
+ * `map`, `dashboard`
+ */
+type ViewTypeRequest =
+  | "table"
+  | "board"
+  | "list"
+  | "calendar"
+  | "timeline"
+  | "gallery"
+  | "form"
+  | "chart"
+  | "map"
+  | "dashboard"
+
+/**
+ * Where to place the new widget in the dashboard. "new_row" creates a new row,
+ * "existing_row" adds to an existing row side-by-side with other widgets.
+ */
+type WidgetPlacementRequest =
+  | {
+      // Placement type. "new_row" creates a new row containing the widget.
+      type: "new_row"
+      // The 0-based row position to insert the new row at. If omitted, the new row is appended
+      // at the end.
+      row_index?: number
+    }
+  | {
+      // Placement type. "existing_row" adds the widget to an existing row (side-by-side with
+      // other widgets).
+      type: "existing_row"
+      // The 0-based index of the existing row to add the widget to.
+      row_index: number
+    }
 
 type WorkspaceParentForBlockBasedObjectResponse = {
   // The parent type.
@@ -3669,10 +5321,17 @@ type CreatePageBodyParameters = {
   cover?: PageCoverRequest | null
   content?: Array<BlockObjectRequest>
   children?: Array<BlockObjectRequest>
+  // Page content as Notion-flavored Markdown. Mutually exclusive with content/children.
+  markdown?: string
   template?:
     | { type: "none" }
-    | { type: "default" }
-    | { type: "template_id"; template_id: IdRequest }
+    | { type: "default"; timezone?: TemplateTimezone }
+    | {
+        type: "template_id"
+        template_id: IdRequest
+        timezone?: TemplateTimezone
+      }
+  position?: PagePositionSchema
 }
 
 export type CreatePageParameters = CreatePageBodyParameters
@@ -3693,7 +5352,9 @@ export const createPage = {
     "cover",
     "content",
     "children",
+    "markdown",
     "template",
+    "position",
   ],
 
   path: (): string => `pages`,
@@ -3822,14 +5483,20 @@ type UpdatePageBodyParameters = {
   // the locked state will not be updated.
   is_locked?: boolean
   template?:
-    | { type: "default" }
-    | { type: "template_id"; template_id: IdRequest }
+    | { type: "default"; timezone?: TemplateTimezone }
+    | {
+        type: "template_id"
+        template_id: IdRequest
+        timezone?: TemplateTimezone
+      }
   // Whether to erase all existing content from the page. When used with a template, the
   // template content replaces the existing content. When used without a template, simply
   // clears the page content.
   erase_content?: boolean
-  archived?: boolean
   in_trash?: boolean
+  /** @deprecated Use `in_trash` instead. */
+  archived?: boolean
+  is_archived?: boolean
 }
 
 export type UpdatePageParameters = UpdatePagePathParameters &
@@ -3838,24 +5505,65 @@ export type UpdatePageParameters = UpdatePagePathParameters &
 export type UpdatePageResponse = PageObjectResponse | PartialPageObjectResponse
 
 /**
- * Update page properties
+ * Update page
  */
 export const updatePage = {
   method: "patch",
   pathParams: ["page_id"],
   queryParams: [],
   bodyParams: [
+    "archived",
     "properties",
     "icon",
     "cover",
     "is_locked",
     "template",
     "erase_content",
-    "archived",
     "in_trash",
+    "is_archived",
   ],
 
   path: (p: UpdatePagePathParameters): string => `pages/${p.page_id}`,
+} as const
+
+type MovePagePathParameters = {
+  // The ID of the page to move.
+  page_id: IdRequest
+}
+
+type MovePageBodyParameters = {
+  // The new parent of the page.
+  parent:
+    | {
+        // The ID of the parent page (with or without dashes), for example,
+        // 195de9221179449fab8075a27c979105
+        page_id: IdRequest
+        // Always `page_id`
+        type?: "page_id"
+      }
+    | {
+        // The ID of the parent data source (collection), with or without dashes. For example,
+        // f336d0bc-b841-465b-8045-024475c079dd
+        data_source_id: IdRequest
+        // Always `data_source_id`
+        type?: "data_source_id"
+      }
+}
+
+export type MovePageParameters = MovePagePathParameters & MovePageBodyParameters
+
+export type MovePageResponse = PartialPageObjectResponse | PageObjectResponse
+
+/**
+ * Move a page
+ */
+export const movePage = {
+  method: "post",
+  pathParams: ["page_id"],
+  queryParams: [],
+  bodyParams: ["parent"],
+
+  path: (p: MovePagePathParameters): string => `pages/${p.page_id}/move`,
 } as const
 
 type GetPagePropertyPathParameters = {
@@ -3888,6 +5596,128 @@ export const getPageProperty = {
     `pages/${p.page_id}/properties/${p.property_id}`,
 } as const
 
+type GetPageMarkdownPathParameters = {
+  // The ID of the page (or block) to retrieve as markdown. Non-navigable block IDs from
+  // truncated responses can be passed here to fetch their subtrees.
+  page_id: IdRequest
+}
+
+type GetPageMarkdownQueryParameters = {
+  // Whether to include meeting note transcripts. Defaults to false. When true, full
+  // transcripts are included; when false, a placeholder with the meeting note URL is shown
+  // instead.
+  include_transcript?: boolean
+}
+
+export type GetPageMarkdownParameters = GetPageMarkdownPathParameters &
+  GetPageMarkdownQueryParameters
+
+export type GetPageMarkdownResponse = PageMarkdownResponse
+
+/**
+ * Retrieve a page as markdown
+ */
+export const getPageMarkdown = {
+  method: "get",
+  pathParams: ["page_id"],
+  queryParams: ["include_transcript"],
+  bodyParams: [],
+
+  path: (p: GetPageMarkdownPathParameters): string =>
+    `pages/${p.page_id}/markdown`,
+} as const
+
+type UpdatePageMarkdownPathParameters = {
+  // The ID of the page to update.
+  page_id: IdRequest
+}
+
+type UpdatePageMarkdownBodyParameters =
+  | {
+      // Always `insert_content`
+      type: "insert_content"
+      // Insert new content into the page.
+      insert_content: {
+        // The enhanced markdown content to insert into the page.
+        content: string
+        // Selection of existing content to insert after, using the ellipsis format ("start
+        // text...end text"). Omit to append at the end of the page.
+        after?: string
+      }
+    }
+  | {
+      // Always `replace_content_range`
+      type: "replace_content_range"
+      // Replace a range of content in the page.
+      replace_content_range: {
+        // The new enhanced markdown content to replace the matched range.
+        content: string
+        // Selection of existing content to replace, using the ellipsis format ("start text...end
+        // text").
+        content_range: string
+        // Set to true to allow the operation to delete child pages or databases. Defaults to
+        // false.
+        allow_deleting_content?: boolean
+      }
+    }
+  | {
+      // Always `update_content`
+      type: "update_content"
+      // Update specific content using search-and-replace operations.
+      update_content: {
+        // An array of search-and-replace operations, each with old_str (content to find) and
+        // new_str (replacement content).
+        content_updates: Array<{
+          // The existing content string to find and replace. Must exactly match the page content.
+          old_str: string
+          // The new content string to replace old_str with.
+          new_str: string
+          // If true, replaces all occurrences of old_str. If false (default), the operation fails
+          // if there are multiple matches.
+          replace_all_matches?: boolean
+        }>
+        // Set to true to allow the operation to delete child pages or databases. Defaults to
+        // false.
+        allow_deleting_content?: boolean
+      }
+    }
+  | {
+      // Always `replace_content`
+      type: "replace_content"
+      // Replace the entire page content with new markdown.
+      replace_content: {
+        // The new enhanced markdown content to replace the entire page content.
+        new_str: string
+        // Set to true to allow the operation to delete child pages or databases. Defaults to
+        // false.
+        allow_deleting_content?: boolean
+      }
+    }
+
+export type UpdatePageMarkdownParameters = UpdatePageMarkdownPathParameters &
+  UpdatePageMarkdownBodyParameters
+
+export type UpdatePageMarkdownResponse = PageMarkdownResponse
+
+/**
+ * Update a page's content as markdown
+ */
+export const updatePageMarkdown = {
+  method: "patch",
+  pathParams: ["page_id"],
+  queryParams: [],
+  bodyParams: [
+    "type",
+    "insert_content",
+    "replace_content_range",
+    "update_content",
+    "replace_content",
+  ],
+
+  path: (p: UpdatePageMarkdownPathParameters): string =>
+    `pages/${p.page_id}/markdown`,
+} as const
+
 type GetBlockPathParameters = {
   block_id: IdRequest
 }
@@ -3916,44 +5746,51 @@ type UpdateBlockBodyParameters =
   | {
       embed: UpdateMediaContentWithUrlAndCaptionRequest
       type?: "embed"
-      archived?: boolean
       in_trash?: boolean
+      /** @deprecated Use `in_trash` instead. */
+      archived?: boolean
     }
   | {
       bookmark: UpdateMediaContentWithUrlAndCaptionRequest
       type?: "bookmark"
-      archived?: boolean
       in_trash?: boolean
+      /** @deprecated Use `in_trash` instead. */
+      archived?: boolean
     }
   | {
       image: UpdateMediaContentWithFileAndCaptionRequest
       type?: "image"
-      archived?: boolean
       in_trash?: boolean
+      /** @deprecated Use `in_trash` instead. */
+      archived?: boolean
     }
   | {
       video: UpdateMediaContentWithFileAndCaptionRequest
       type?: "video"
-      archived?: boolean
       in_trash?: boolean
+      /** @deprecated Use `in_trash` instead. */
+      archived?: boolean
     }
   | {
       pdf: UpdateMediaContentWithFileAndCaptionRequest
       type?: "pdf"
-      archived?: boolean
       in_trash?: boolean
+      /** @deprecated Use `in_trash` instead. */
+      archived?: boolean
     }
   | {
       file: UpdateMediaContentWithFileNameAndCaptionRequest
       type?: "file"
-      archived?: boolean
       in_trash?: boolean
+      /** @deprecated Use `in_trash` instead. */
+      archived?: boolean
     }
   | {
       audio: UpdateMediaContentWithFileAndCaptionRequest
       type?: "audio"
-      archived?: boolean
       in_trash?: boolean
+      /** @deprecated Use `in_trash` instead. */
+      archived?: boolean
     }
   | {
       code: {
@@ -3962,32 +5799,37 @@ type UpdateBlockBodyParameters =
         caption?: Array<RichTextItemRequest>
       }
       type?: "code"
-      archived?: boolean
       in_trash?: boolean
+      /** @deprecated Use `in_trash` instead. */
+      archived?: boolean
     }
   | {
       equation: ContentWithExpressionRequest
       type?: "equation"
-      archived?: boolean
       in_trash?: boolean
+      /** @deprecated Use `in_trash` instead. */
+      archived?: boolean
     }
   | {
       divider: EmptyObject
       type?: "divider"
-      archived?: boolean
       in_trash?: boolean
+      /** @deprecated Use `in_trash` instead. */
+      archived?: boolean
     }
   | {
       breadcrumb: EmptyObject
       type?: "breadcrumb"
-      archived?: boolean
       in_trash?: boolean
+      /** @deprecated Use `in_trash` instead. */
+      archived?: boolean
     }
   | {
       table_of_contents: { color?: ApiColor }
       type?: "table_of_contents"
-      archived?: boolean
       in_trash?: boolean
+      /** @deprecated Use `in_trash` instead. */
+      archived?: boolean
     }
   | {
       link_to_page:
@@ -3995,56 +5837,65 @@ type UpdateBlockBodyParameters =
         | { database_id: IdRequest; type?: "database_id" }
         | { comment_id: IdRequest; type?: "comment_id" }
       type?: "link_to_page"
-      archived?: boolean
       in_trash?: boolean
+      /** @deprecated Use `in_trash` instead. */
+      archived?: boolean
     }
   | {
       table_row: ContentWithTableRowRequest
       type?: "table_row"
-      archived?: boolean
       in_trash?: boolean
+      /** @deprecated Use `in_trash` instead. */
+      archived?: boolean
     }
   | {
       heading_1: HeaderContentWithRichTextAndColorRequest
       type?: "heading_1"
-      archived?: boolean
       in_trash?: boolean
+      /** @deprecated Use `in_trash` instead. */
+      archived?: boolean
     }
   | {
       heading_2: HeaderContentWithRichTextAndColorRequest
       type?: "heading_2"
-      archived?: boolean
       in_trash?: boolean
+      /** @deprecated Use `in_trash` instead. */
+      archived?: boolean
     }
   | {
       heading_3: HeaderContentWithRichTextAndColorRequest
       type?: "heading_3"
-      archived?: boolean
       in_trash?: boolean
+      /** @deprecated Use `in_trash` instead. */
+      archived?: boolean
     }
   | {
       paragraph: ContentWithRichTextAndColorRequest
       type?: "paragraph"
-      archived?: boolean
       in_trash?: boolean
+      /** @deprecated Use `in_trash` instead. */
+      archived?: boolean
     }
   | {
       bulleted_list_item: ContentWithRichTextAndColorRequest
       type?: "bulleted_list_item"
-      archived?: boolean
       in_trash?: boolean
+      /** @deprecated Use `in_trash` instead. */
+      archived?: boolean
     }
   | {
       numbered_list_item: ContentWithRichTextAndColorRequest
       type?: "numbered_list_item"
-      archived?: boolean
       in_trash?: boolean
+      /** @deprecated Use `in_trash` instead. */
+      archived?: boolean
     }
   | {
       quote: ContentWithRichTextAndColorRequest
       type?: "quote"
-      archived?: boolean
       in_trash?: boolean
+      /** @deprecated Use `in_trash` instead. */
+      archived?: boolean
     }
   | {
       to_do: {
@@ -4053,20 +5904,23 @@ type UpdateBlockBodyParameters =
         color?: ApiColor
       }
       type?: "to_do"
-      archived?: boolean
       in_trash?: boolean
+      /** @deprecated Use `in_trash` instead. */
+      archived?: boolean
     }
   | {
       toggle: ContentWithRichTextAndColorRequest
       type?: "toggle"
-      archived?: boolean
       in_trash?: boolean
+      /** @deprecated Use `in_trash` instead. */
+      archived?: boolean
     }
   | {
       template: ContentWithRichTextRequest
       type?: "template"
-      archived?: boolean
       in_trash?: boolean
+      /** @deprecated Use `in_trash` instead. */
+      archived?: boolean
     }
   | {
       callout: {
@@ -4075,22 +5929,25 @@ type UpdateBlockBodyParameters =
         color?: ApiColor
       }
       type?: "callout"
-      archived?: boolean
       in_trash?: boolean
+      /** @deprecated Use `in_trash` instead. */
+      archived?: boolean
     }
   | {
       synced_block: {
         synced_from: { block_id: IdRequest; type?: "block_id" } | null
       }
       type?: "synced_block"
-      archived?: boolean
       in_trash?: boolean
+      /** @deprecated Use `in_trash` instead. */
+      archived?: boolean
     }
   | {
       table: { has_column_header?: boolean; has_row_header?: boolean }
       type?: "table"
-      archived?: boolean
       in_trash?: boolean
+      /** @deprecated Use `in_trash` instead. */
+      archived?: boolean
     }
   | {
       column: {
@@ -4099,10 +5956,15 @@ type UpdateBlockBodyParameters =
         width_ratio?: number
       }
       type?: "column"
-      archived?: boolean
       in_trash?: boolean
+      /** @deprecated Use `in_trash` instead. */
+      archived?: boolean
     }
-  | { archived?: boolean; in_trash?: boolean }
+  | {
+      in_trash?: boolean
+      /** @deprecated Use `in_trash` instead. */
+      archived?: boolean
+    }
 
 export type UpdateBlockParameters = UpdateBlockPathParameters &
   UpdateBlockBodyParameters
@@ -4119,9 +5981,9 @@ export const updateBlock = {
   pathParams: ["block_id"],
   queryParams: [],
   bodyParams: [
+    "archived",
     "embed",
     "type",
-    "archived",
     "in_trash",
     "bookmark",
     "image",
@@ -4217,7 +6079,9 @@ type AppendBlockChildrenPathParameters = {
 
 type AppendBlockChildrenBodyParameters = {
   children: Array<BlockObjectRequest>
+  /** @deprecated Use `position` instead. */
   after?: IdRequest
+  position?: ContentPositionSchema
 }
 
 export type AppendBlockChildrenParameters = AppendBlockChildrenPathParameters &
@@ -4239,7 +6103,7 @@ export const appendBlockChildren = {
   method: "patch",
   pathParams: ["block_id"],
   queryParams: [],
-  bodyParams: ["children", "after"],
+  bodyParams: ["after", "children", "position"],
 
   path: (p: AppendBlockChildrenPathParameters): string =>
     `blocks/${p.block_id}/children`,
@@ -4326,7 +6190,7 @@ type UpdateDataSourceBodyParameters = {
         | {
             // Always `status`
             type?: "status"
-            status: EmptyObject
+            status: StatusPropertyConfigUpdateRequest
           }
         | {
             // Always `relation`
@@ -4445,8 +6309,7 @@ type UpdateDataSourceBodyParameters = {
   // Whether the database should be moved to or from the trash. If not provided, the trash
   // status will not be updated.
   in_trash?: boolean
-  // Whether the database should be moved to or from the trash. If not provided, the trash
-  // status will not be updated. Equivalent to `in_trash`.
+  /** @deprecated Use `in_trash` instead. */
   archived?: boolean
   // The parent of the data source, when moving it to a different database. If not
   // provided, the parent will not be updated.
@@ -4467,7 +6330,7 @@ export const updateDataSource = {
   method: "patch",
   pathParams: ["data_source_id"],
   queryParams: [],
-  bodyParams: ["title", "icon", "properties", "in_trash", "archived", "parent"],
+  bodyParams: ["archived", "title", "icon", "properties", "in_trash", "parent"],
 
   path: (p: UpdateDataSourcePathParameters): string =>
     `data_sources/${p.data_source_id}`,
@@ -4496,8 +6359,9 @@ type QueryDataSourceBodyParameters = {
     | TimestampFilter
   start_cursor?: string
   page_size?: number
-  archived?: boolean
   in_trash?: boolean
+  /** @deprecated Use `in_trash` instead. */
+  archived?: boolean
   // Optionally filter the results to only include pages or data sources. Regular, non-wiki
   // databases only support page children. The default behavior is no result type
   // filtering, in other words, returning both pages and data sources for wikis.
@@ -4530,11 +6394,11 @@ export const queryDataSource = {
   pathParams: ["data_source_id"],
   queryParams: ["filter_properties"],
   bodyParams: [
+    "archived",
     "sorts",
     "filter",
     "start_cursor",
     "page_size",
-    "archived",
     "in_trash",
     "result_type",
   ],
@@ -4684,6 +6548,8 @@ type UpdateDatabaseBodyParameters = {
   // Whether the database should be moved to or from the trash. If not provided, the trash
   // status will not be updated.
   in_trash?: boolean
+  /** @deprecated Use `in_trash` instead. */
+  archived?: boolean
   // Whether the database should be locked from editing in the Notion app UI. If not
   // provided, the locked state will not be updated.
   is_locked?: boolean
@@ -5100,6 +6966,226 @@ export const getFileUpload = {
     `file_uploads/${p.file_upload_id}`,
 } as const
 
+type ListDatabaseViewsQueryParameters = {
+  // ID of a Notion database (collection view block) to list views for. At least one of
+  // database_id or data_source_id is required.
+  database_id?: IdRequest
+  // ID of a data source (collection) to list all views for, including linked views across
+  // the workspace. At least one of database_id or data_source_id is required.
+  data_source_id?: IdRequest
+  // If supplied, this endpoint will return a page of results starting after the cursor
+  // provided. If not supplied, this endpoint will return the first page of results.
+  start_cursor?: string
+  // The number of items from the full list desired in the response. Maximum: 100
+  page_size?: number
+}
+
+export type ListDatabaseViewsParameters = ListDatabaseViewsQueryParameters
+
+export type ListDatabaseViewsResponse = {
+  // Always `list`
+  object: "list"
+  next_cursor: IdResponse | null
+  has_more: boolean
+  results: Array<DataSourceViewReferenceResponse>
+  // Always `view`
+  type: "view"
+  view: EmptyObject
+}
+
+/**
+ * List views
+ */
+export const listDatabaseViews = {
+  method: "get",
+  pathParams: [],
+  queryParams: ["database_id", "data_source_id", "start_cursor", "page_size"],
+  bodyParams: [],
+
+  path: (): string => `views`,
+} as const
+
+type CreateViewBodyParameters = CreateViewRequest
+
+export type CreateViewParameters = CreateViewBodyParameters
+
+export type CreateViewResponse =
+  | PartialDataSourceViewObjectResponse
+  | DataSourceViewObjectResponse
+
+/**
+ * Create a view
+ */
+export const createView = {
+  method: "post",
+  pathParams: [],
+  queryParams: [],
+  bodyParams: [],
+
+  path: (): string => `views`,
+} as const
+
+type GetViewPathParameters = {
+  // ID of a Notion view.
+  view_id: IdRequest
+}
+
+export type GetViewParameters = GetViewPathParameters
+
+export type GetViewResponse =
+  | PartialDataSourceViewObjectResponse
+  | DataSourceViewObjectResponse
+
+/**
+ * Retrieve a view
+ */
+export const getView = {
+  method: "get",
+  pathParams: ["view_id"],
+  queryParams: [],
+  bodyParams: [],
+
+  path: (p: GetViewPathParameters): string => `views/${p.view_id}`,
+} as const
+
+type UpdateViewPathParameters = {
+  // ID of a Notion view.
+  view_id: IdRequest
+}
+
+type UpdateViewBodyParameters = UpdateViewRequest
+
+export type UpdateViewParameters = UpdateViewPathParameters &
+  UpdateViewBodyParameters
+
+export type UpdateViewResponse =
+  | PartialDataSourceViewObjectResponse
+  | DataSourceViewObjectResponse
+
+/**
+ * Update a view
+ */
+export const updateView = {
+  method: "patch",
+  pathParams: ["view_id"],
+  queryParams: [],
+  bodyParams: [],
+
+  path: (p: UpdateViewPathParameters): string => `views/${p.view_id}`,
+} as const
+
+type DeleteViewPathParameters = {
+  // The ID of the view to delete.
+  view_id: IdRequest
+}
+
+export type DeleteViewParameters = DeleteViewPathParameters
+
+export type DeleteViewResponse = PartialDataSourceViewObjectResponse
+
+/**
+ * Delete a view
+ */
+export const deleteView = {
+  method: "delete",
+  pathParams: ["view_id"],
+  queryParams: [],
+  bodyParams: [],
+
+  path: (p: DeleteViewPathParameters): string => `views/${p.view_id}`,
+} as const
+
+type CreateViewQueryPathParameters = {
+  // The ID of the view.
+  view_id: IdRequest
+}
+
+type CreateViewQueryBodyParameters = CreateViewQueryRequest
+
+export type CreateViewQueryParameters = CreateViewQueryPathParameters &
+  CreateViewQueryBodyParameters
+
+export type CreateViewQueryResponse = ViewQueryResponse
+
+/**
+ * Create a view query
+ */
+export const createViewQuery = {
+  method: "post",
+  pathParams: ["view_id"],
+  queryParams: [],
+  bodyParams: [],
+
+  path: (p: CreateViewQueryPathParameters): string =>
+    `views/${p.view_id}/queries`,
+} as const
+
+type GetViewQueryResultsPathParameters = {
+  // The ID of the view.
+  view_id: IdRequest
+  // The ID of the query.
+  query_id: IdRequest
+}
+
+type GetViewQueryResultsQueryParameters = {
+  // If supplied, this endpoint will return a page of results starting after the cursor
+  // provided.
+  start_cursor?: string
+  // The number of results to return per page. Maximum: 100
+  page_size?: number
+}
+
+export type GetViewQueryResultsParameters = GetViewQueryResultsPathParameters &
+  GetViewQueryResultsQueryParameters
+
+export type GetViewQueryResultsResponse = {
+  // Always `list`
+  object: "list"
+  next_cursor: IdResponse | null
+  has_more: boolean
+  results: Array<PartialPageObjectResponse>
+  // Always `page`
+  type: "page"
+  page: EmptyObject
+}
+
+/**
+ * Get view query results
+ */
+export const getViewQueryResults = {
+  method: "get",
+  pathParams: ["view_id", "query_id"],
+  queryParams: ["start_cursor", "page_size"],
+  bodyParams: [],
+
+  path: (p: GetViewQueryResultsPathParameters): string =>
+    `views/${p.view_id}/queries/${p.query_id}`,
+} as const
+
+type DeleteViewQueryPathParameters = {
+  // The ID of the view.
+  view_id: IdRequest
+  // The ID of the query.
+  query_id: IdRequest
+}
+
+export type DeleteViewQueryParameters = DeleteViewQueryPathParameters
+
+export type DeleteViewQueryResponse = DeletedViewQueryResponse
+
+/**
+ * Delete a view query
+ */
+export const deleteViewQuery = {
+  method: "delete",
+  pathParams: ["view_id", "query_id"],
+  queryParams: [],
+  bodyParams: [],
+
+  path: (p: DeleteViewQueryPathParameters): string =>
+    `views/${p.view_id}/queries/${p.query_id}`,
+} as const
+
 type OauthTokenBodyParameters =
   | {
       grant_type: "authorization_code"
@@ -5195,44 +7281,4 @@ export const oauthIntrospect = {
   bodyParams: ["token"],
 
   path: (): string => `oauth/introspect`,
-} as const
-
-type MovePagePathParameters = {
-  // The ID of the page to move.
-  page_id: IdRequest
-}
-
-type MovePageBodyParameters = {
-  // The new parent of the page.
-  parent:
-    | {
-        // The ID of the parent page (with or without dashes), for example,
-        // 195de9221179449fab8075a27c979105
-        page_id: IdRequest
-        // Always `page_id`
-        type?: "page_id"
-      }
-    | {
-        // The ID of the parent data source (collection), with or without dashes. For example,
-        // f336d0bc-b841-465b-8045-024475c079dd
-        data_source_id: IdRequest
-        // Always `data_source_id`
-        type?: "data_source_id"
-      }
-}
-
-export type MovePageParameters = MovePagePathParameters & MovePageBodyParameters
-
-export type MovePageResponse = PartialPageObjectResponse | PageObjectResponse
-
-/**
- * Move a page
- */
-export const movePage = {
-  method: "post",
-  pathParams: ["page_id"],
-  queryParams: [],
-  bodyParams: ["parent"],
-
-  path: (p: MovePagePathParameters): string => `pages/${p.page_id}/move`,
 } as const
