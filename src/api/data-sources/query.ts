@@ -2,7 +2,7 @@ import { getApiKey } from '../../auth.js';
 import { NOTION_VERSION } from '../../constants.js';
 import {
   NotionError,
-  type NotionErrorResponse
+  type NotionErrorResponse,
 } from '../../internal/errors.js';
 import type { QueryOptions } from '../../naw-types.js';
 import type * as Notion from '../../notion-types.js';
@@ -32,7 +32,6 @@ export async function queryDataSource(
         (Array.isArray(options?.sort) ? options?.sort : [options?.sort]),
       page_size: options?.batchSize ?? DEFAULT_BATCH_SIZE,
       // in_trash: options?.includeTrashed,
-      // archived: options?.includeArchived,
     };
 
     const response = await fetch(

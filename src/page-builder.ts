@@ -75,7 +75,6 @@ export class PageBuilder {
   #data: Omit<Notion.CreatePageParameters, 'properties' | 'template'> & {
     properties: NonNullable<Notion.CreatePageParameters['properties']>;
     in_trash?: boolean;
-    archived?: boolean;
   };
   #notionToken: string;
   #notionVersion: string;
@@ -463,7 +462,6 @@ export class PageBuilder {
       this.#data.cover = metadata.cover;
     }
     this.#data.in_trash = metadata.in_trash;
-    this.#data.archived = metadata.archived;
   }
 
   #transformPropertiesResponseToRequest(

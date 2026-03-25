@@ -117,7 +117,6 @@ test('queryDataSource - prop options', async () => {
         objectType: true,
         icon: true,
         cover: true,
-        archived: true,
         parent: true,
         inTrash: true,
         customProps: ['ID'],
@@ -137,7 +136,6 @@ test('queryDataSource - prop options', async () => {
   expect(pageA.object).toBeUndefined();
   expect(pageA.icon).toBeUndefined();
   expect(pageA.cover).toBeUndefined();
-  expect(pageA.archived).toBeUndefined();
   expect(pageA.parent).toBeUndefined();
   expect(pageA.in_trash).toBeUndefined();
   expect(pageA.properties.ID).toBeUndefined();
@@ -159,7 +157,6 @@ test('queryDataSource - prop options', async () => {
         objectType: false,
         icon: false,
         cover: false,
-        archived: false,
         parent: false,
         inTrash: false,
         customProps: [],
@@ -179,7 +176,6 @@ test('queryDataSource - prop options', async () => {
   expect(pageB.object).toBeDefined();
   expect(pageB.icon).toBeDefined();
   expect(pageB.cover).toBeDefined();
-  expect(pageB.archived).toBeDefined();
   expect(pageB.parent).toBeDefined();
   expect(pageB.in_trash).toBeDefined();
   expect(pageB.properties.ID).toBeDefined();
