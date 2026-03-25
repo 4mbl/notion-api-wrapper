@@ -1,5 +1,13 @@
 # notion-api-wrapper
 
+## 6.1.0-beta.0
+
+### Minor Changes
+
+- dd3783f: Remove archived field in order to align with API version 2026-03-11. Use `in_trash` instead.
+- 1a724b0: Support page move API
+- e12f304: Sync Notion types
+
 ## 6.0.0-beta.7
 
 ### Minor Changes
