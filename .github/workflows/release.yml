@@ -4,17 +4,16 @@ on:
   push:
     branches: [main]
 
-permissions:
-  contents: write
-  pull-requests: write
-  id-token: write
-
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 
 jobs:
   release:
-    timeout-minutes: 30
     runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: write # for creating release PR
+      pull-requests: write # for creating release PR
+      id-token: write # for publishing to npm registry
     steps:
       - name: Checkout Repo
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
