@@ -1,5 +1,15 @@
 # notion-api-wrapper
 
+## 6.1.0-beta.1
+
+### Minor Changes
+
+- 3945766: Honor includeTrashed option in data source queries
+
+### Patch Changes
+
+- 11382f8: Fix empty icon breaking data source query
+
 ## 6.1.0-beta.0
 
 ### Minor Changes
