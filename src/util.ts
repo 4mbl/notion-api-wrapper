@@ -92,7 +92,7 @@ export function simplifyProps(data: any, options?: PropOptions) {
   for (const page of data.results) {
     if (options?.simpleIcon && page.icon) {
       const iconUrl = getIconUrl(page.icon).url;
-      page.icon = iconUrl ? iconUrl : null;
+      page.icon = iconUrl ?? null;
     }
 
     if (options.simplifyProps && page.properties) {
