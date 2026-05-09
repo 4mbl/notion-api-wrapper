@@ -31,7 +31,7 @@ export async function queryDataSource(
         options?.sort &&
         (Array.isArray(options?.sort) ? options?.sort : [options?.sort]),
       page_size: options?.batchSize ?? DEFAULT_BATCH_SIZE,
-      // in_trash: options?.includeTrashed,
+      in_trash: options?.includeTrashed,
     };
 
     const response = await fetch(
