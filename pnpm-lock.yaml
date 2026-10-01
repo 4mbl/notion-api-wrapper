@@ -1,3 +1,161 @@
+---
+lockfileVersion: '9.0'
+
+importers:
+
+  .:
+    configDependencies: {}
+    packageManagerDependencies:
+      pnpm:
+        specifier: 12.5.0
+        version: 12.5.0
+
+packages:
+
+  '@pnpm/exe.android-arm64@12.5.0':
+    resolution: {integrity: sha512-C4iLRWxzKsiCSpPPAd900l7WjS33i18NZtS4N5ipPoyoxa8mBDPqzCtotrVMgwLf0lg5JxFE0AclQeoElGxyqA==}
+    cpu: [arm64]
+    os: [android]
+
+  '@pnpm/exe.android-x64@12.5.0':
+    resolution: {integrity: sha512-RAIVixakgre9ZleT7+jM9yVmTyeTx9G4B4eFJpTyUWxwXYzlXQjqF8HEzZiQqSzqDrIK8wAN5M/pVBr4ir0Knw==}
+    cpu: [x64]
+    os: [android]
+
+  '@pnpm/exe.darwin-arm64@12.5.0':
+    resolution: {integrity: sha512-K8rNKO35WwekMWpXHZ6W1I/JVRj4E8eeH4WWNPHzrq5OeMncYYlonDqEe2gaq2moyB16ZZcl4M7H6O/ErdP5Fw==}
+    cpu: [arm64]
+    os: [darwin]
+
+  '@pnpm/exe.darwin-x64@12.5.0':
+    resolution: {integrity: sha512-+TiMTr/I8RVyihaXnqJAsB8Eucs9r8MAmijUfky5J2GJbA6Ohy+BoX3xN9gXtPx5SY44UfPec5Ce4/xpReNCJQ==}
+    cpu: [x64]
+    os: [darwin]
+
+  '@pnpm/exe.freebsd-x64@12.5.0':
+    resolution: {integrity: sha512-tFJ2Em8eEsWeiwOo86e7Z9tfD8zLyGZaz80936xYFlHE+P3JAr8HNcbP00aZP0+M8PTUzRL09aU/2wF68rG8Mg==}
+    cpu: [x64]
+    os: [freebsd]
+
+  '@pnpm/exe.linux-arm64-musl@12.5.0':
+    resolution: {integrity: sha512-WW0pfDwg3yw+b3NkFucdd3BPgFTTFOHOrouzAfDZYkrBP6RZO79ibEWYaHMCgiEGD5iv+VBq5MWc2kj2v5ZmdQ==}
+    cpu: [arm64]
+    os: [linux]
+    libc: [musl]
+
+  '@pnpm/exe.linux-arm64@12.5.0':
+    resolution: {integrity: sha512-nzslUiy7LAFke3niLKdSaHcUdFeIhSKI0101u3QKWu6Q4T/75gUwTUxcMPVz2svUUmctXAdAv6cnpkyfvK2Srg==}
+    cpu: [arm64]
+    os: [linux]
+    libc: [glibc]
+
+  '@pnpm/exe.linux-ppc64@12.5.0':
+    resolution: {integrity: sha512-+rAvHN7IUwrZlTSXUJre3WVWGcWg3U5KKiG6CGAKzo1mR/LVxTcluAKWX8CCcXfba0fbIKsnH6g5CKwMqQ/eKA==}
+    cpu: [ppc64]
+    os: [linux]
+    libc: [glibc]
+
+  '@pnpm/exe.linux-riscv64@12.5.0':
+    resolution: {integrity: sha512-Cw23dm6GfDmto3/W7fAmGY0+XHwwf6/5kCQxvmlXt89y7yOj+2W9bSFz35PkQbEHJg4gThzlKYuDsg3g6PGC9w==}
+    cpu: [riscv64]
+    os: [linux]
+    libc: [glibc]
+
+  '@pnpm/exe.linux-s390x@12.5.0':
+    resolution: {integrity: sha512-SETqRcig1q/LC09ABHwMsuFtMWa+M4whpkaUHNhCFUasHEQnQYgyqv/7VpnL/fIxhucF8MsWrfz2HVNlGDnIDg==}
+    cpu: [s390x]
+    os: [linux]
+    libc: [glibc]
+
+  '@pnpm/exe.linux-x64-musl@12.5.0':
+    resolution: {integrity: sha512-wk+OUvDXQBA/QigLcbqGf+dEA/K4EoC7Zur/UMMj4AgFW3gxCHsV8QOJgrEGMVdb4wp8c9MmQfMmrK4xvRiCaQ==}
+    cpu: [x64]
+    os: [linux]
+    libc: [musl]
+
+  '@pnpm/exe.linux-x64@12.5.0':
+    resolution: {integrity: sha512-8n0fXtmCWMq558AD1ZeW9dImG8TwQY6ws6jsYcoRV+2uBBcLEHJ5lfeXvBj990nofwS7XZihqZDvy1LBknKWBQ==}
+    cpu: [x64]
+    os: [linux]
+    libc: [glibc]
+
+  '@pnpm/exe.win32-arm64@12.5.0':
+    resolution: {integrity: sha512-jYf9X9YqucxQ8cuphUO1ZoiCMfWbC8K9Wgptk5+pqh0UDTSvL+aZBWZLvx7H3x2tlzLsWlfvSgnK7OLKBdSR+w==}
+    cpu: [arm64]
+    os: [win32]
+
+  '@pnpm/exe.win32-x64@12.5.0':
+    resolution: {integrity: sha512-j6W4tAVFsZrTxWlpzD13lMGR/dxDGpPiUAM6zssmHpU2Mkh4XE2DDHH6hs+k2o/c55gND7YyLkUShBFVBSkv4w==}
+    cpu: [x64]
+    os: [win32]
+
+  pnpm@12.5.0:
+    resolution: {integrity: sha512-nNuqNP+srhdoY1rA0j6U22IBx9Wb89ojayPWfI9reU0dqzI7zVvMUbVcjK+/bxmiTkqmHWq3dyqjtcyF4yXcTQ==}
+    engines: {node: '>=18.*'}
+    hasBin: true
+
+snapshots:
+
+  '@pnpm/exe.android-arm64@12.5.0':
+    optional: true
+
+  '@pnpm/exe.android-x64@12.5.0':
+    optional: true
+
+  '@pnpm/exe.darwin-arm64@12.5.0':
+    optional: true
+
+  '@pnpm/exe.darwin-x64@12.5.0':
+    optional: true
+
+  '@pnpm/exe.freebsd-x64@12.5.0':
+    optional: true
+
+  '@pnpm/exe.linux-arm64-musl@12.5.0':
+    optional: true
+
+  '@pnpm/exe.linux-arm64@12.5.0':
+    optional: true
+
+  '@pnpm/exe.linux-ppc64@12.5.0':
+    optional: true
+
+  '@pnpm/exe.linux-riscv64@12.5.0':
+    optional: true
+
+  '@pnpm/exe.linux-s390x@12.5.0':
+    optional: true
+
+  '@pnpm/exe.linux-x64-musl@12.5.0':
+    optional: true
+
+  '@pnpm/exe.linux-x64@12.5.0':
+    optional: true
+
+  '@pnpm/exe.win32-arm64@12.5.0':
+    optional: true
+
+  '@pnpm/exe.win32-x64@12.5.0':
+    optional: true
+
+  pnpm@12.5.0:
+    optionalDependencies:
+      '@pnpm/exe.android-arm64': 12.5.0
+      '@pnpm/exe.android-x64': 12.5.0
+      '@pnpm/exe.darwin-arm64': 12.5.0
+      '@pnpm/exe.darwin-x64': 12.5.0
+      '@pnpm/exe.freebsd-x64': 12.5.0
+      '@pnpm/exe.linux-arm64': 12.5.0
+      '@pnpm/exe.linux-arm64-musl': 12.5.0
+      '@pnpm/exe.linux-ppc64': 12.5.0
+      '@pnpm/exe.linux-riscv64': 12.5.0
+      '@pnpm/exe.linux-s390x': 12.5.0
+      '@pnpm/exe.linux-x64': 12.5.0
+      '@pnpm/exe.linux-x64-musl': 12.5.0
+      '@pnpm/exe.win32-arm64': 12.5.0
+      '@pnpm/exe.win32-x64': 12.5.0
+
+---
 lockfileVersion: '9.0'
 
 settings:
@@ -26,6 +184,9 @@ importers:
       globals:
         specifier: ^17.0.0
         version: 17.7.0
+      node:
+        specifier: runtime:24.x
+        version: runtime:24.21.0
       prettier:
         specifier: ^3.6.2
         version: 3.9.4
@@ -1079,6 +1240,138 @@ packages:
 
   natural-compare@1.4.0:
     resolution: {integrity: sha512-OWND8ei3VtNC9h7V60qff3SVobHr996CTwgxubgyQYEpg290h9J0buyECNNJexkFm5sOajh5G116RYA1c8ZMSw==}
+
+  node@runtime:24.21.0:
+    resolution:
+      type: variations
+      variants:
+        - resolution:
+            archive: tarball
+            bin:
+              node: bin/node
+            integrity: sha256-rseyRkr7mfB4wZywbSAdVDvTsxHLoHEoK84bF8l+WLs=
+            type: binary
+            url: https://nodejs.org/download/release/v24.21.0/node-v24.21.0-aix-ppc64.tar.gz
+          targets:
+            - cpu: ppc64
+              os: aix
+        - resolution:
+            archive: tarball
+            bin:
+              node: bin/node
+            integrity: sha256-vtfupTJeEQjzLOUijd1qXw8IpJnuQqp0Qq6lg3AvYFc=
+            type: binary
+            url: https://nodejs.org/download/release/v24.21.0/node-v24.21.0-darwin-arm64.tar.gz
+          targets:
+            - cpu: arm64
+              os: darwin
+        - resolution:
+            archive: tarball
+            bin:
+              node: bin/node
+            integrity: sha256-FGLLOzBGuBXPjqQ209pFDsGp8R2sflpGsK2lMF1+gJc=
+            type: binary
+            url: https://nodejs.org/download/release/v24.21.0/node-v24.21.0-darwin-x64.tar.gz
+          targets:
+            - cpu: x64
+              os: darwin
+        - resolution:
+            archive: tarball
+            bin:
+              node: bin/node
+            integrity: sha256-ckKCw7Q67JmKqVJzgEZbRdIp4CG1gDX19PYwleq/5dU=
+            type: binary
+            url: https://nodejs.org/download/release/v24.21.0/node-v24.21.0-linux-arm64.tar.gz
+          targets:
+            - cpu: arm64
+              os: linux
+        - resolution:
+            archive: tarball
+            bin:
+              node: bin/node
+            integrity: sha256-UcXVMGbukpILYXg7A7Buy5nzZhFg97Fcp36EdBFaZ7w=
+            type: binary
+            url: https://nodejs.org/download/release/v24.21.0/node-v24.21.0-linux-ppc64le.tar.gz
+          targets:
+            - cpu: ppc64le
+              os: linux
+        - resolution:
+            archive: tarball
+            bin:
+              node: bin/node
+            integrity: sha256-Xy+jdCLgx13jXBaG/lHXgyTywqj+LMI5pB2cAAop2Tg=
+            type: binary
+            url: https://nodejs.org/download/release/v24.21.0/node-v24.21.0-linux-s390x.tar.gz
+          targets:
+            - cpu: s390x
+              os: linux
+        - resolution:
+            archive: tarball
+            bin:
+              node: bin/node
+            integrity: sha256-PWNAX8ZaDS0pdsHwvC/Se7C9ByEkaecFqsPwOuWrTJw=
+            type: binary
+            url: https://nodejs.org/download/release/v24.21.0/node-v24.21.0-linux-x64-musl.tar.gz
+          targets:
+            - cpu: x64
+              os: linux
+              libc: musl
+        - resolution:
+            archive: tarball
+            bin:
+              node: bin/node
+            integrity: sha256-bh24fvWLiBnl1UAu/xU2SRsY7djre+5e94l4duiNxf8=
+            type: binary
+            url: https://nodejs.org/download/release/v24.21.0/node-v24.21.0-linux-x64.tar.gz
+          targets:
+            - cpu: x64
+              os: linux
+        - resolution:
+            archive: zip
+            bin:
+              node: node.exe
+            integrity: sha256-h3mxveHTn41CDjtXqmV7OYka9DTT3kSpGQRM7AZ4WSE=
+            prefix: node-v24.21.0-win-arm64
+            type: binary
+            url: https://nodejs.org/download/release/v24.21.0/node-v24.21.0-win-arm64.zip
+          targets:
+            - cpu: arm64
+              os: win32
+        - resolution:
+            archive: zip
+            bin:
+              node: node.exe
+            integrity: sha256-FY92hbRN5R9sDfHRU1JsvNPhvHOajfxgdyHO913p5UE=
+            prefix: node-v24.21.0-win-x64
+            type: binary
+            url: https://nodejs.org/download/release/v24.21.0/node-v24.21.0-win-x64.zip
+          targets:
+            - cpu: x64
+              os: win32
+        - resolution:
+            archive: tarball
+            bin:
+              node: bin/node
+            integrity: sha256-MEiwgR4VjKDYZytZyDmGF2PhREkpgNjSmzad/uRXR+Q=
+            type: binary
+            url: https://unofficial-builds.nodejs.org/download/release/v24.21.0/node-v24.21.0-linux-arm64-musl.tar.gz
+          targets:
+            - cpu: arm64
+              os: linux
+              libc: musl
+        - resolution:
+            archive: tarball
+            bin:
+              node: bin/node
+            integrity: sha256-AacT402pjntNKjGR7nyj+T3QOE0aLvI8N5shYe5uEzo=
+            type: binary
+            url: https://unofficial-builds.nodejs.org/download/release/v24.21.0/node-v24.21.0-linux-x64-musl.tar.gz
+          targets:
+            - cpu: x64
+              os: linux
+              libc: musl
+    version: 24.21.0
+    hasBin: true
 
   obug@2.2.1:
     resolution: {integrity: sha512-XrsrhT5sybtKI6wakr2SPOlGZWWYbUXZ7a0jT8/QOeAPau+1X/bSegNe5YR75oJmEZQbKningirmGOEJCIk61Q==}
@@ -2542,6 +2835,8 @@ snapshots:
   nanoid@3.3.19: {}
 
   natural-compare@1.4.0: {}
+
+  node@runtime:24.21.0: {}
 
   obug@2.2.1: {}
 

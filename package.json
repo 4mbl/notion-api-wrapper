@@ -53,8 +53,19 @@
     "unist-util-visit": "^5.0.0",
     "vitest": "^4.0.3"
   },
-  "packageManager": "pnpm@10.18.3",
   "engines": {
     "node": ">=20"
+  },
+  "devEngines": {
+    "runtime": {
+      "name": "node",
+      "version": "24.x",
+      "onFail": "download"
+    },
+    "packageManager": {
+      "name": "pnpm",
+      "version": "12.5.0",
+      "onFail": "download"
+    }
   }
 }
