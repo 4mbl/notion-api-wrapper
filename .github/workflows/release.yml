@@ -21,22 +21,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repo
-        uses: actions/checkout@v5
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
         with:
           ref: ${{ github.ref_name }}
           fetch-depth: 0
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v5
+      - uses: pnpm/setup@fbda4c85fc2e1e08721cd8763afea8f48d60f024 # v3.0.0
         with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
-
-      - name: Install Dependencies
-        run: pnpm install
+            cache: true
+            install: true
 
       - name: Build Package
         run: pnpm run build
@@ -44,7 +37,7 @@ jobs:
       - name: Create Release Pull Request or Publish to npm (beta)
         if: ${{ github.ref_name == 'main' }}
         id: changesets-beta
-        uses: changesets/action@v1
+        uses: changesets/action@a45c4d594aa4e2c509dc14a9f2b3b67ba3780d0d # v1.9.0
         with:
           publish: pnpm run publish:beta
           title: '[beta] Version Packages'
@@ -54,7 +47,7 @@ jobs:
       - name: Create Release Pull Request or Publish to npm (stable)
         if: ${{ github.ref_name != 'main' }}
         id: changesets-stable
-        uses: changesets/action@v1
+        uses: changesets/action@a45c4d594aa4e2c509dc14a9f2b3b67ba3780d0d # v1.9.0
         with:
           publish: pnpm run publish:stable
           title: ${{ format('[{0}] Version Packages', github.ref_name) }}
