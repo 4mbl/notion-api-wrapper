@@ -38,20 +38,20 @@
     "publish:stable": "pnpm run build && changeset publish"
   },
   "devDependencies": {
-    "@changesets/cli": "^2.29.7",
+    "@changesets/cli": "^3.0.3",
     "@eslint/js": "^10.0.1",
     "@types/node": "^24.2.0",
-    "dotenv": "^17.2.0",
+    "dotenv": "^18.0.4",
     "eslint": "^10.1.0",
     "globals": "^17.0.0",
     "prettier": "^3.6.2",
     "remark": "^15.0.1",
     "remark-parse": "^11.0.0",
-    "typescript": "^5.9.3",
+    "typescript": "^7.0.2",
     "typescript-eslint": "^8.38.0",
     "unified": "^11.0.5",
     "unist-util-visit": "^5.0.0",
-    "vitest": "^4.0.3"
+    "vitest": "^5.0.2"
   },
   "engines": {
     "node": ">=20"
